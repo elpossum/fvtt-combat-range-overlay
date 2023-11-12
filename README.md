@@ -1,3 +1,7 @@
+![](https://img.shields.io/endpoint?url=https%3A%2F%2Ffoundryshields.com%2Fversion%3Fstyle%3Dflat%26url%3Dhttps%3A%2F%2Fraw.githubusercontent.com%2Felpossum%2Ffvtt-combat-range-overlay%2Fmaster%2Fmodule.json)
+[![Version]][Version URL]
+![](https://img.shields.io/github/downloads/eelpossum/fvtt-combat-range-overlay/total?label=All%20Downloads)
+
 ## Summary
 
 This module is designed to quickly and efficiently answer questions such as "How far can I move this turn? What enemies can I reach in the fewest actions? How can I best navigate difficult terrain?" I wrote it because I (not to mention the rest of my group) was tired of my pulling out Rulers, Blasts, and other helpers to figure out "Can I do _this_? Hmm, no, but maybe if I do it _this_ way ... nope, that doesn't work either. What about ..."
