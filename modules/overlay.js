@@ -8,7 +8,7 @@ import {
 } from "./utility.js"
 
 import {GridTile} from "./gridTile.js";
-import {FEET_PER_TILE, FUDGE, MAX_DIST, MODULE_ID, PRESSED_KEYS} from "./constants.js"
+import {DEFAULT_DISTANCE_PER_TILE, FUDGE, MAX_DIST, MODULE_ID, PRESSED_KEYS} from "./constants.js"
 import {TokenInfo} from "./tokenInfo.js";
 import * as Settings from "./settings.js";
 import {mouse} from "./mouse.js";
@@ -89,10 +89,12 @@ export class Overlay {
     this.justActivated = false;
   }
 
+  DISTANCE_PER_TILE = Settings.getDistancePerTile();
+
   // Use Dijkstra's shortest path algorithm
   calculateMovementCosts() {
     // TODO Fix caching
-    const tilesPerAction = TokenInfo.current.speed / FEET_PER_TILE;
+    const tilesPerAction = TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     const maxTiles = tilesPerAction * globalThis.combatRangeOverlay.actionsToShow;
 
     const currentToken = getCurrentToken();
@@ -167,9 +169,10 @@ export class Overlay {
     return new Map([...tileMap].filter(kv => kv[1].distance !== MAX_DIST));
   }
 
-  calculateTargetRangeMap() {
+  async calculateTargetRangeMap() {
     const targetMap = new Map();
-    const weaponRangeInTiles = TokenInfo.current.weaponRangeColor.map(i => ({...i, range: i.range / FEET_PER_TILE}));
+    const currentWeaponRange = await TokenInfo.current.weaponRangeColor
+    const weaponRangeInTiles = currentWeaponRange.map(i => ({...i, range: i.range / this.DISTANCE_PER_TILE}));
 
     for (const targetToken of game.user.targets) {
       targetMap.set(targetToken.id, calculateTilesInRange(weaponRangeInTiles, targetToken));
@@ -177,7 +180,7 @@ export class Overlay {
     return targetMap;
   }
 
-  drawPotentialTargets(movementCosts) {
+  async drawPotentialTargets(movementCosts) {
     const currentToken = getCurrentToken();
     const colorByActions = globalThis.combatRangeOverlay.colorByActions;
 
@@ -185,8 +188,9 @@ export class Overlay {
       return;
     }
 
-    const tilesMovedPerAction = TokenInfo.current.speed / FEET_PER_TILE;
-    const weaponRangeInTiles = TokenInfo.current.weaponRangeColor.map(i => ({...i, range: i.range / FEET_PER_TILE}));
+    const tilesMovedPerAction = TokenInfo.current.speed / this.DISTANCE_PER_TILE;
+    const currentWeaponRange = await TokenInfo.current.weaponRangeColor
+    const weaponRangeInTiles = currentWeaponRange.map(i => ({...i, range: i.range / this.DISTANCE_PER_TILE}));
     const myDisposition = getCombatantTokenDisposition(currentToken);
     debugLog("drawPotentialTargets", "|", "Current disposition", myDisposition);
 
@@ -226,9 +230,9 @@ export class Overlay {
     }
   }
 
-  drawAll() {
+  async drawAll() {
     const movementCosts = this.calculateMovementCosts();
-    const targetRangeMap = this.calculateTargetRangeMap();
+    const targetRangeMap = await this.calculateTargetRangeMap();
 
     this.initializePersistentVariables();
     this.drawCosts(movementCosts, targetRangeMap);
@@ -238,12 +242,12 @@ export class Overlay {
       }
 
       if (Settings.isShowPotentialTargets()) {
-        this.drawPotentialTargets(movementCosts);
+        await this.drawPotentialTargets(movementCosts);
       }
     }
 
     if (Settings.isShowWeaponRange()) {
-      this.drawWeaponRange();
+      await this.drawWeaponRange();
     }
 
     if (Settings.isShowWalls()) {
@@ -263,18 +267,18 @@ export class Overlay {
   }
 
   // noinspection JSUnusedLocalSymbols
-  dragHandler(dragging) {
-    this.fullRefresh();
+  async dragHandler(dragging) {
+    await this.fullRefresh();
   }
 
   // noinspection JSUnusedLocalSymbols
-  altKeyHandler(event, state) {
+  async altKeyHandler(event, state) {
     if(!event.repeat) {
-      this.fullRefresh();
+      await this.fullRefresh();
     }
   }
 
-  fullRefresh() {
+  async fullRefresh() {
     this.clearAll();
 
     if (!Settings.isActive()) {
@@ -298,7 +302,7 @@ export class Overlay {
     }
 
     if (showOverlay) {
-      this.drawAll();
+      await this.drawAll();
     } else if (this.justActivated) {
       uiNotificationsInfo(game.i18n.localize(`${MODULE_ID}.activated-not-visible`));
     }
@@ -309,13 +313,13 @@ export class Overlay {
   //   this.fullRefresh();  // TODO Make this more efficient
   // }
 
-  renderApplicationHook() {
-    this.fullRefresh();
+  async renderApplicationHook() {
+    await this.fullRefresh();
   }
 
-  targetTokenHook() {
+  async targetTokenHook() {
     this.newTarget = true;
-    this.fullRefresh();
+    await this.fullRefresh();
   }
 
   canvasInitHook() {
@@ -323,15 +327,17 @@ export class Overlay {
     TokenInfo.resetMap();
   }
 
-  updateWallHook() {
-    this.fullRefresh();
+  async updateWallHook() {
+    await this.fullRefresh();
   }
 
   registerHooks() {
-    this.hookIDs.renderApplication = Hooks.on("renderApplication", () => this.renderApplicationHook());
-    this.hookIDs.targetToken = Hooks.on("targetToken", () => this.targetTokenHook());
+    this.hookIDs.renderApplication = Hooks.on("renderApplication", async (application) => {
+      if (application.id !== 'croQuickSettingsDialog') await this.renderApplicationHook()
+    });
+    this.hookIDs.targetToken = Hooks.on("targetToken", async () => await this.targetTokenHook());
     this.hookIDs.canvasInit = Hooks.on("canvasInit", () => this.canvasInitHook());
-    this.hookIDs.updateWall = Hooks.on("updateWall", () => this.updateWallHook());
+    this.hookIDs.updateWall = Hooks.on("updateWall", async () => await this.updateWallHook());
   }
 
   unregisterHooks() {
@@ -382,7 +388,7 @@ export class Overlay {
     this.overlays.wallsOverlay = new PIXI.Graphics();
   }
 
-  drawWeaponRange() {
+  async drawWeaponRange() {
     debugLog("drawWeaponRange");
     const currentToken = getCurrentToken();
     if (!currentToken.inCombat) {
@@ -390,7 +396,8 @@ export class Overlay {
     }
 
     const range = []
-    TokenInfo.current.weaponRangeColor.forEach((i) => {
+    const currentWeaponRange = await TokenInfo.current.weaponRangeColor
+    currentWeaponRange.forEach((i) => {
       if (!range.includes(i.range)) {
         range.push(i.range)
       }
@@ -468,7 +475,7 @@ export class Overlay {
       }
     }
 
-    const tilesMovedPerAction = TokenInfo.current.speed / FEET_PER_TILE;
+    const tilesMovedPerAction = TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     this.overlays.distanceTexts = [];
     this.overlays.pathOverlay.lineStyle(pathLineWidth, pathLineColor);
 

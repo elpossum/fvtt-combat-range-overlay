@@ -1,7 +1,7 @@
-import {DEFAULT_WEAPON_RANGE, FLAG_NAMES, MODULE_ID} from "./constants.js"
-import {canvasTokensGet, getCurrentToken, uiNotificationsWarn} from "./utility.js"
+import {DEFAULT_DEFAULT_WEAPON_RANGE, FLAG_NAMES, MODULE_ID} from "./constants.js"
+import {canvasTokensGet, getCurrentToken, uiNotificationsWarn, getWeaponRanges} from "./utility.js"
 import {debugLog} from "./debug.js"
-import {getSpeedAttrPath, updatePositionInCombat} from "./settings.js"
+import {getSpeedAttrPath, updatePositionInCombat, getWeaponRange} from "./settings.js"
 import {colorSettingNames} from "./colorPicker.js"
 
 export class TokenInfo {
@@ -68,34 +68,160 @@ export class TokenInfo {
   }
 
   get weaponRangeColor() {
-    if (this.getFlag(FLAG_NAMES.WEAPON_RANGE)) {
-      let range = [{
-        range: this.getFlag(FLAG_NAMES.WEAPON_RANGE),
-        color: globalThis.combatRangeOverlay.colors[0]
-      }];
-      return range
-    } else { 
-      const weapons = this.token.actor.items.filter(i => i.type == 'weapon' && i.isEquipped);
-      const baseReach = this.token.actor.system.attributes.reach.base
+    return (async () => {
+      const DEFAULT_WEAPON_RANGE = getWeaponRange();
       const colors = globalThis.combatRangeOverlay.colors;
-      let range = []
-      for (const [index, weapon] of weapons.entries()) {
-        let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
-        const hasReach = weapon.system.traits.value.includes('reach');
-        if (weapon.system.traits.value.includes('combination')) {
-          hasReach ? weaponObject.range = baseReach + DEFAULT_WEAPON_RANGE : weaponObject.range = DEFAULT_WEAPON_RANGE;
-          range.push(weaponObject);
-          range.push({range: weapon.rangeIncrement || weapon.system.range, color: colors[index], weapon: weapon.id});
-        } else if (weapon.isRanged || weapon.isThrown) {
-          weaponObject.range = weapon.rangeIncrement || weapon.system.range;
-          range.push(weaponObject);
-        } else {
-          hasReach ? weaponObject.range = baseReach + DEFAULT_WEAPON_RANGE : weaponObject.range = DEFAULT_WEAPON_RANGE;
-          range.push(weaponObject);
+      if (this.getFlag(FLAG_NAMES.WEAPON_RANGE)) {
+        let range = [{
+          range: this.getFlag(FLAG_NAMES.WEAPON_RANGE),
+          color: globalThis.combatRangeOverlay.colors[0]
+        }];
+        return range
+      } else switch (game.system.id) {
+        case 'pf2e': {
+          const weapons = this.token.actor.items.filter(i => i.type == 'weapon' && i.isEquipped);
+          const baseReach = this.token.actor.system.attributes.reach.base
+          let range = []
+          for (const [index, weapon] of weapons.entries()) {
+            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            const hasReach = weapon.system.traits.value.includes('reach');
+            if (weapon.system.traits.value.includes('combination')) {
+              hasReach ? weaponObject.range = baseReach + DEFAULT_WEAPON_RANGE : weaponObject.range = DEFAULT_WEAPON_RANGE;
+              range.push(weaponObject);
+              range.push({range: weapon.rangeIncrement || weapon.system.range, color: colors[index], weapon: weapon.id});
+            } else if (weapon.isRanged || weapon.isThrown) {
+              weaponObject.range = weapon.rangeIncrement || weapon.system.range;
+              range.push(weaponObject);
+            } else {
+              hasReach ? weaponObject.range = baseReach + DEFAULT_WEAPON_RANGE : weaponObject.range = baseReach;
+              range.push(weaponObject);
+            }
+          }
+          return range.sort((a, b) => {a.range - b.range});
+        }
+        case 'dnd5e': {
+          const weapons = this.token.actor.items.filter(i => i.type == 'weapon' && i.system.equipped);
+          const baseReach = 5
+          let range = []
+          for (const [index, weapon] of weapons.entries()) {
+            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            const hasReach = weapon.system.properties.rch;
+            if (weapon.system.range.value) {
+              weaponObject.range = weapon.system.range.value;
+              range.push(weaponObject);
+            } else {
+              hasReach ? weaponObject.range = baseReach + DEFAULT_WEAPON_RANGE : weaponObject.range = baseReach;
+              range.push(weaponObject);
+            }
+          }
+          return range.sort((a, b) => {a.range - b.range});
+        }
+        case 'D35E': {
+          const weapons = this.token.actor.items.filter(i => i.type == 'weapon' && i.system.equipped);
+          const baseReach = 5
+          let range = []
+          for (const [index, weapon] of weapons.entries()) {
+            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            const hasReach = weapon.system.properties.rch;
+            if (weapon.system.weaponData.range) {
+              weaponObject.range = weapon.system.weaponData.range;
+              range.push(weaponObject);
+            } else {
+              hasReach ? weaponObject.range = baseReach + DEFAULT_WEAPON_RANGE : weaponObject.range = baseReach;
+              range.push(weaponObject);
+            }
+          }
+          return range.sort((a, b) => {a.range - b.range});
+        }
+        case 'pf1': {
+          const weapons = this.token.actor.items.filter(i => i.type == 'weapon' && i.system.equipped);
+          const baseReach = 5
+          let range = []
+          for (const [index, weapon] of weapons.entries()) {
+            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            const hasReach = weapon.system.properties.rch;
+            const descRange = parseInt(weapon.system.description.value.match(/range<\/b> \d*/i)[0].replace(/[^0-9]/g, ''));
+            if (descRange) {
+              weaponObject.range = descRange;
+              range.push(weaponObject);
+            } else {
+              hasReach ? weaponObject.range = baseReach + DEFAULT_WEAPON_RANGE : weaponObject.range = baseReach;
+              range.push(weaponObject);
+            }
+          }
+          return range.sort((a, b) => {a.range - b.range});
+        }
+        case 'wfrp4e': {
+          const weapons = this.token.actor.itemCategories.weapon.filter(i => i.system.equipped == true);
+          let range = []
+          for (const [index, weapon] of weapons.entries()) {
+            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            if (weapon.system.range.value) {
+              weaponObject.range = parseInt(weapon.system.range.value);
+              range.push(weaponObject);
+            } else {
+              range.push(weaponObject);
+            }
+          }
+          return range.sort((a, b) => {a.range - b.range});
+        }
+        case 'swade': {
+          const weapons = this.token.actor.items.filter(i => i.type == 'weapon' && i.system.equipStatus > 1);
+          let range = []
+          for (const [index, weapon] of weapons.entries()) {
+            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            let reach;
+            if (weapon.system.notes.toLowerCase().includes("reach")) {
+              reach = parseInt(weapon.system.notes.match(/reach\W*\d?/i)[0].replace(/[^0-9]/g, ''))
+            };
+            if (weapon.system.range) {
+              weaponObject.range = parseInt(weapon.system.range.match(/\d*/));
+              range.push(weaponObject);
+            } else {
+              reach ? weaponObject.range = reach + DEFAULT_WEAPON_RANGE : weaponObject.range = DEFAULT_WEAPON_RANGE;
+              range.push(weaponObject);
+            }
+          }
+          return range.sort((a, b) => {a.range - b.range});
+        }
+        default: {
+          const buttons = Object.fromEntries(getWeaponRanges().map((i) => [i, {label: i, callback: async (html) => {
+            const updateActor = html.find("[name=update-actor]")[0]?.checked;
+            await this.setWeaponRange(i, updateActor);
+          }}]));
+          const submitButton = {
+            icon: '<i class="fas fa-check"></i>', 
+            callback: async (html) => {
+              const updateActor = html.find("[name=update-actor]")[0]?.checked;
+              const weaponRange = html.find("[name=weapon-range]")[0]?.value;
+              await this.setWeaponRange(weaponRange, updateActor);
+            }
+          };
+          buttons.submit = submitButton;
+          const content = []
+          if (game.user.isGM) {
+            content.push(`<p>${game.i18n.localize(`${MODULE_ID}.quick-settings.update-actor-checkbox`)}</p> <input name="update-actor" type="checkbox"/>`);
+          };
+          let inputWeaponRange;
+          if (!this.getFlag(FLAG_NAMES.WEAPON_RANGE)) {
+            inputWeaponRange = ''
+          } else {
+            inputWeaponRange = this.getFlag(FLAG_NAMES.WEAPON_RANGE)
+          };
+          content.push(`<p>${game.i18n.localize(`${MODULE_ID}.quick-settings.weapon-range-header`)} <input name="weapon-range" type="text" value="${inputWeaponRange}" size="3" style="width: 40px" maxlength="3"/></p>`);
+          await Dialog.wait({
+            title: game.i18n.localize(`${MODULE_ID}.quick-settings.title`),
+            content: content.join('\n'),
+            buttons
+          }, {id: "croQuickSettingsDialog"});
+          let range = [{
+            range: this.getFlag(FLAG_NAMES.WEAPON_RANGE),
+            color: globalThis.combatRangeOverlay.colors[0]
+          }];
+          return range;
         }
       }
-      return range.sort((a, b) => {a.range - b.range});
-    }
+    })();
   }
 
   get speedOverride() {
@@ -158,14 +284,53 @@ export class TokenInfo {
 
     let speed = 0;
     let otherSpeeds = [];
-    if (game.system.id === "pf1" || game.system.id === "D35E") {
-      otherSpeeds = Object.entries(otherSpeeds = actorAttrs.speed).map(s => s[1].total);
-    } else if (game.system.id === "pf2e") {
-      speed = actorAttrs.speed.total;
-      // noinspection JSUnresolvedVariable
-      otherSpeeds = actorAttrs.speed.otherSpeeds.map(s => s.total);
-    } else if (game.system.id === "dnd5e") {
-      otherSpeeds = Object.entries(actorAttrs.movement).filter(s => typeof(s[1]) === "number").map(s => s[1]);
+    switch (game.system.id) {
+      case 'pf1':
+      case 'D35E': {
+        otherSpeeds = Object.entries(otherSpeeds = actorAttrs.speed).map(s => s[1].total);
+        break;
+      }
+      case 'pf2e': {
+        speed = actorAttrs.speed.total;
+        // noinspection JSUnresolvedVariable
+        otherSpeeds = actorAttrs.speed.otherSpeeds.map(s => s.total);
+        break;
+      }
+      case 'dnd5e': {
+        otherSpeeds = Object.entries(actorAttrs.movement).filter(s => typeof(s[1]) === "number").map(s => s[1]);
+        break;
+      }
+      case 'swade': {
+        speed = actor.system.stats.speed.value;
+        break;
+      }
+      case 'wfrp4e': {
+        speed = actor.system.details.move.value;
+        break;
+      }
+      default: {
+        const inputSpeedOverride = this.speedOverride ?? "";
+        const content = [];
+        if (game.user.isGM) {
+          content.push(`<p>${game.i18n.localize(`${MODULE_ID}.quick-settings.update-actor-checkbox`)}</p> <input name="update-actor" type="checkbox"/>`);
+        };
+        content.push(`<p>${game.i18n.localize(`${MODULE_ID}.quick-settings.speed-override`)} <input name="speed-override" type="text" value="${inputSpeedOverride}" size="3" style="width: 40px" maxlength="3"/>`);
+        let d = Dialog.wait({
+          title: game.i18n.localize(`${MODULE_ID}.quick-settings.title`),
+          content: content.join('\n'),
+          buttons: {
+            one: {
+              icon: '<i class="fas fa-check"></i>',
+              callback: async (html) => {
+                const updateActor = html.find("[name=update-actor]")[0]?.checked;
+                const speedOverride = html.find("[name=speed-override]")[0]?.value;
+                await this.setSpeedOverride(speedOverride, updateActor);
+              }
+            }
+          }
+        }, {id: "croQuickSettingsDialog"});
+        return this.speedOverride;
+      }
     }
 
     otherSpeeds.forEach(otherSpeed => {

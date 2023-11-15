@@ -1,6 +1,6 @@
 export const MODULE_ID = "combat-range-overlay";
 
-export const DEFAULT_WEAPON_RANGE = 5;
+export const DEFAULT_DEFAULT_WEAPON_RANGE = 5;
 export const DEFAULT_WEAPON_RANGES = "5,10,30,60,120";
 
 export const FLAG_NAMES = {
@@ -10,7 +10,7 @@ export const FLAG_NAMES = {
 };
 
 export const MAX_DIST = 999;
-export const FEET_PER_TILE = 5;
+export const DEFAULT_DISTANCE_PER_TILE = 5;
 export const FUDGE = .1; // floating point fudge
 
 export const PRESSED_KEYS = {
