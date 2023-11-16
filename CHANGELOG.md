@@ -1,5 +1,11 @@
 # Changelog
-## 2.4.5 -2023/09/11
+## 3.0.0 - 2023/11/16
+### Added
+- Add compatibility for Pathfinder 1e, DnD3.5e, SWADE, WFRP4e and DnD5e
+- Add speed and range prompt for unsupported systems
+### Changed
+- **Breaking** Make getWeaponRangeColor() async
+## 2.4.5 - 2023/09/11
 ### Fixed
 - Fix range for ranged weapons
 ## 2.4.4 - 2023/07/01
