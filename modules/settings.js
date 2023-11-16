@@ -1,4 +1,4 @@
-import {DEFAULT_WEAPON_RANGES, MODULE_ID, PRESSED_KEYS, DEFAULT_DISTANCE_PER_TILE, DEFAULT_DEFAULT_WEAPON_RANGE} from "./constants.js"
+import {DEFAULT_WEAPON_RANGES, MODULE_ID, PRESSED_KEYS, DEFAULT_DEFAULT_WEAPON_RANGE} from "./constants.js"
 import ModuleInfoApp from "./moduleInfo.js"
 
 export const overlayVisibility = {
@@ -26,7 +26,6 @@ const settingNames = {
   RANGES: 'ranges',
   DIAGONALS: 'diagonals',
   DEFAULT_WEAPON_RANGE: 'default-weapon-range',
-  DISTANCE_PER_TILE: 'distance-per-tile',
   SHOW_WEAPON_RANGE: "show-weapon-range",
   SPEED_ATTR_PATH: "speed-attr-path",
   INFO_BUTTON: "info-button",
@@ -36,7 +35,7 @@ const settingNames = {
 };
 const hiddenSettings = [settingNames.IS_ACTIVE, settingNames.SHOWN_NOTIFICATION];
 const defaultFalse = [settingNames.IS_ACTIVE, settingNames.SHOW_DIFFICULT_TERRAIN, settingNames.SHOW_WALLS, settingNames.IGNORE_DIFFICULT_TERRAIN, settingNames.SHOWN_NOTIFICATION];
-const ignore = [settingNames.MOVEMENT_ALPHA, settingNames.IC_VISIBILITY, settingNames.OOC_VISIBILITY, settingNames.RANGES, settingNames.DIAGONALS, settingNames.DEFAULT_WEAPON_RANGE, settingNames.DISTANCE_PER_TILE, settingNames.SPEED_ATTR_PATH, settingNames.INFO_BUTTON, settingNames.ACTIONS_SHOWN];
+const ignore = [settingNames.MOVEMENT_ALPHA, settingNames.IC_VISIBILITY, settingNames.OOC_VISIBILITY, settingNames.RANGES, settingNames.DIAGONALS, settingNames.DEFAULT_WEAPON_RANGE, settingNames.SPEED_ATTR_PATH, settingNames.INFO_BUTTON, settingNames.ACTIONS_SHOWN];
 
 Hooks.once("init", () => {
   game.settings.registerMenu(MODULE_ID, settingNames.INFO_BUTTON, {
@@ -142,17 +141,6 @@ Hooks.once("init", () => {
     config: true,
     type: Number,
     default: DEFAULT_DEFAULT_WEAPON_RANGE,
-    onChange: () => { globalThis.combatRangeOverlay.instance.fullRefresh()}
-  });
-
-  game.settings.register(MODULE_ID, settingNames.DISTANCE_PER_TILE, {
-    name: `${MODULE_ID}.${settingNames.DISTANCE_PER_TILE}`,
-    hint: `${MODULE_ID}.${settingNames.DISTANCE_PER_TILE}-hint`,
-    scope: 'world',
-    config: true,
-    requiresReload: true,
-    type: Number,
-    default: DEFAULT_DISTANCE_PER_TILE,
     onChange: () => { globalThis.combatRangeOverlay.instance.fullRefresh()}
   });
 

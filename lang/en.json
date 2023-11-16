@@ -35,8 +35,6 @@
     },
     "default-weapon-range": "Default weapon range",
     "default-weapon-range-hint": "What is the default weapon range?",
-    "distance-per-tile": "Grid scale",
-    "distance-per-tile-hint": "How long is one side of a square?",
     "quick-settings": {
       "title": "Combat Range Overlay Quick Settings",
       "weapon-range-header": "Weapon Range:",

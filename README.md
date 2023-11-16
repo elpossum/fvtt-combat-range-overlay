@@ -9,7 +9,7 @@ This module is designed to quickly and efficiently answer questions such as "How
 
 ## Basic Usage
 
-Click ![the button](https://i.imgur.com/Q3baWqE.png) to toggle the Overlay on and off. Once the Overlay is enabled, it should Just Work™ with little to no interaction from you. By default, it assumes your weapon has a range of 5 feet; shift-click the button to change it for your currently selected token. Normally the overlay will reread your position at the end of your combat turn; control-click the button to force the Overlay to reposition. Display preferences are available in the module's Settings page.
+Click ![the button](https://i.imgur.com/Q3baWqE.png) to toggle the Overlay on and off. Once the Overlay is enabled, it should Just Work™ with little to no interaction from you. If you are using a supported system, it should auto-detect the range of your equipped weapons; shift-click the button to change it for your currently selected token. Normally the overlay will reread your position at the end of your combat turn; control-click the button to force the Overlay to reposition. Display preferences are available in the module's Settings page.
 
 ## Compatibility
 Maps: This module relies on square tiles; I have no idea what would happen if you tried to use it on a map with hex tiles, but I don't think it would go well.
@@ -101,6 +101,6 @@ the module settings. Here's how to do it:
 1) Type in `_token.actor` and press Enter
 1) Expand the result, then keep expanding children until you find the movement speed. Take note of each child
 you expand
-    * For instance, with Pathfinder 2E, you expand `system`, `attributes`, `speed`, and find the speed in `total` ![](https://i.imgur.com/BYoh4kr.png)
+    * For instance, with Pathfinder 2E, you expand `system`, `attributes`, `speed`, and find the speed in `total` ![](attrPath.png)
 1) Join these names with periods to come up with your attribute path
     * For Pathfinder 2E, this would be `system.attributes.speed.total`

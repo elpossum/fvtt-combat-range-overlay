@@ -8,7 +8,7 @@ import {
 } from "./utility.js"
 
 import {GridTile} from "./gridTile.js";
-import {DEFAULT_DISTANCE_PER_TILE, FUDGE, MAX_DIST, MODULE_ID, PRESSED_KEYS} from "./constants.js"
+import {FUDGE, MAX_DIST, MODULE_ID, PRESSED_KEYS} from "./constants.js"
 import {TokenInfo} from "./tokenInfo.js";
 import * as Settings from "./settings.js";
 import {mouse} from "./mouse.js";
@@ -87,9 +87,8 @@ export class Overlay {
     this.hookIDs = {};
     this.newTarget = false;
     this.justActivated = false;
+    this.DISTANCE_PER_TILE = 0;
   }
-
-  DISTANCE_PER_TILE = Settings.getDistancePerTile();
 
   // Use Dijkstra's shortest path algorithm
   calculateMovementCosts() {
@@ -322,9 +321,10 @@ export class Overlay {
     await this.fullRefresh();
   }
 
-  canvasInitHook() {
+  canvasReadyHook() {
     this.clearAll();
     TokenInfo.resetMap();
+    this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
   }
 
   async updateWallHook() {
@@ -336,7 +336,7 @@ export class Overlay {
       if (application.id !== 'croQuickSettingsDialog') await this.renderApplicationHook()
     });
     this.hookIDs.targetToken = Hooks.on("targetToken", async () => await this.targetTokenHook());
-    this.hookIDs.canvasInit = Hooks.on("canvasInit", () => this.canvasInitHook());
+    this.hookIDs.canvasInit = Hooks.on("canvasReady", () => this.canvasReadyHook());
     this.hookIDs.updateWall = Hooks.on("updateWall", async () => await this.updateWallHook());
   }
 

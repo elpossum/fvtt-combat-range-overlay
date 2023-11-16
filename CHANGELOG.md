@@ -3,6 +3,7 @@
 ### Added
 - Add compatibility for Pathfinder 1e, DnD3.5e, SWADE, WFRP4e and DnD5e
 - Add speed and range prompt for unsupported systems
+- Add grid scale autodetection
 ### Changed
 - **Breaking** Make getWeaponRangeColor() async
 ## 2.4.5 - 2023/09/11

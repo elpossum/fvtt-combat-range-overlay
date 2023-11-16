@@ -14,6 +14,10 @@
     "modules/main.js"
   ],
   "url": "https://github.com/elpossum/fvtt-combat-range-overlay",
+  "license": "https://raw.github.com/elpossum/fvtt-combat-range-overlay/master/LICENSE",
+  "readme": "https://raw.github.com/elpossum/fvtt-combat-range-overlay/master.README.MD",
+  "bugs": "https://github.com/elpossum/fvtt-combat-range-overlay/issues",
+  "changelog": "https://raw.github.com/elpossum/fvtt-combat-range-overlay/master/CHANGELOG.md",
   "manifest": "replace me",
   "download": "replace me",
   "id": "combat-range-overlay",
@@ -47,6 +51,6 @@
   },
   "compatibility": {
     "minimum": "10",
-    "verified": "11.302"
+    "verified": "11.315"
   }
 }

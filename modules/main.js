@@ -30,6 +30,7 @@ Hooks.on("ready", function() {
     colorByActions: [],
     colors: []
   };
+  instance.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
   instance.registerHooks();
   globalThis.combatRangeOverlay.actionsToShow = game.settings.get(MODULE_ID, 'actions-shown');
   for (let i = 0; i < 5; i++) {
