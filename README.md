@@ -1,7 +1,7 @@
 ![](https://img.shields.io/endpoint?url=https%3A%2F%2Ffoundryshields.com%2Fversion%3Fstyle%3Dflat%26url%3Dhttps%3A%2F%2Fraw.githubusercontent.com%2Felpossum%2Ffvtt-combat-range-overlay%2Fmaster%2Fmodule.json)
 ![Github release (latestSemVer)](https://img.shields.io/github/v/release/elpossum/fvtt-combat-range-overlay)
-![Github All Releases](https://img.shields.io/github/downloads/elpossum/fvtt-combat-range-overlay/module.json?label=All%20Downloads)
-![Github release (latest by SemVer and asset)](https://img.shields.io/github/downloads/elpossum/fvtt-combat-range-overlay/latest/module.json)
+![Github All Releases](https://img.shields.io/github/downloads/elpossum/fvtt-combat-range-overlay/total?label=All%20Downloads)
+![Github Releases](https://img.shields.io/github/downloads/elpossum/fvtt-combat-range-overlay/latest/total)
 
 ## Summary
 
@@ -14,13 +14,14 @@ Click ![the button](https://i.imgur.com/Q3baWqE.png) to toggle the Overlay on an
 ## Compatibility
 Maps: This module relies on square tiles; I have no idea what would happen if you tried to use it on a map with hex tiles, but I don't think it would go well.
 
-Systems: My table plays Pathfinder 2E, and that's all I've tested it with.
+Systems: My table plays Pathfinder 2E, but it has been tested to some degree on PF1e, DnD3.5e, SWADE, WFRP4e and DnD5e.
 It turns out that every system stores its token/actor move speeds in a different spot,
-so out of the box speed autodetection will only work with Pathfinder 2E but may work with Pathfinder 1E, DND3.5,
-and DND5E. If you're playing with a different system, you'll need to do some
-[extra configuration](#advanced-setting-the-speed-attribute-path). Also, I believe other systems
+so out of the box speed autodetection will only work with Pathfinder 2e, Pathfinder 1e, DnD3.5e, SWADE, WFRP4e
+and DnD5e. If you're playing with a different system, you'll be prompted to set a speed on token control. You can also [set the autodetect path](#advanced-setting-the-speed-attribute-path). Also, I believe other systems
 treat diagonals differently, so there's a (GM-only) setting telling the module how to count
-diagonal movement.
+diagonal movement. 
+Weapon range is more complex so the path cannot be manually set for unsupported systems. Pathfinder 2e, Pathfinder 1e, DnD3.5e, SWADE, WFRP4e
+and DnD5e are all supported to the best of my knowledge of the systems. If you are using an unsupported system, you will be prompted weapon range when you try to bring up the overlay.
 
 Modules: This module requires lib-wrapper and supports the Enhanced Terrain Layer.
 
@@ -96,8 +97,8 @@ Or you can use the Overlay to see who's close to you _and_ going before your tea
 If you're using an unsupported System, you'll need to set the speed attribute path in 
 the module settings. Here's how to do it:
 1) Select a token
-1) Open your browser's dev tools and switch to the Javascript console
-1) Type in `canvas.tokens.controlled[0].actor` and press Enter
+1) Open your browser's dev tools (often F12) and switch to the Javascript console
+1) Type in `_token.actor` and press Enter
 1) Expand the result, then keep expanding children until you find the movement speed. Take note of each child
 you expand
     * For instance, with Pathfinder 2E, you expand `system`, `attributes`, `speed`, and find the speed in `total` ![](https://i.imgur.com/BYoh4kr.png)
