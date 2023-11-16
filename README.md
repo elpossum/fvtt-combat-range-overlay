@@ -1,7 +1,7 @@
 ![](https://img.shields.io/endpoint?url=https%3A%2F%2Ffoundryshields.com%2Fversion%3Fstyle%3Dflat%26url%3Dhttps%3A%2F%2Fraw.githubusercontent.com%2Felpossum%2Ffvtt-combat-range-overlay%2Fmaster%2Fmodule.json)
 ![Github release (latestSemVer)](https://img.shields.io/github/v/release/elpossum/fvtt-combat-range-overlay)
-![Github All Releases](https://img.shields.io/github/downloads/elpossum/fvtt-combat-range-overlay/total?label=All%20Downloads)
-![Github Releases](https://img.shields.io/github/downloads/elpossum/fvtt-combat-range-overlay/latest/total)
+![Github All Releases](https://img.shields.io/github/downloads/elpossum/fvtt-combat-range-overlay/module.json?label=All%20Downloads)
+![Github Releases](https://img.shields.io/github/downloads/elpossum/fvtt-combat-range-overlay/latest/module.json)
 
 ## Summary
 
