@@ -1,13 +1,14 @@
-import {mouse} from "./mouse.js";
+import { mouse } from "./mouse.js";
 
 import './debug.js';
 import './settings.js';
 import './controls.js';
 import './tokenInfo.js';
-import {Overlay} from "./overlay.js"
-import {debugLog} from "./debug.js"
-import {MODULE_ID} from "./constants.js"
-import {colorSettingNames} from "./colorPicker.js"
+import { TerrainHelper } from "./terrainHelper.js"
+import { Overlay } from "./overlay.js"
+import { debugLog } from "./debug.js"
+import { MODULE_ID } from "./constants.js"
+import { colorSettingNames } from "./colorPicker.js"
 
 /* Tasks
  * Basic functionality:
@@ -19,7 +20,7 @@ import {colorSettingNames} from "./colorPicker.js"
  * - Honor visibility selection
  */
 
-Hooks.on("ready", function() {
+Hooks.on("ready", function () {
   const instance = new Overlay()
   globalThis.combatRangeOverlay = {
     instance,
@@ -30,8 +31,11 @@ Hooks.on("ready", function() {
     colorByActions: [],
     colors: []
   };
-  instance.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
+  if (game.modules.get('terrainmapper')?.active) {
+    globalThis.combatRangeOverlay.terrainGraphics = new class FullCanvasContainer extends FullCanvasObjectMixin(PIXI.Container) { };
+  }
   instance.registerHooks();
+  instance.canvasReadyHook();
   globalThis.combatRangeOverlay.actionsToShow = game.settings.get(MODULE_ID, 'actions-shown');
   for (let i = 0; i < 5; i++) {
     globalThis.combatRangeOverlay.colorByActions.push(parseInt(game.settings.get(MODULE_ID, colorSettingNames[i]).slice(0, -2).replace("#", "0x"), 16))
@@ -48,10 +52,8 @@ Hooks.on("ready", function() {
   };
 });
 
-Hooks.on("hoverToken", (token, hovering) =>{
+Hooks.on("hoverToken", (token, hovering) => {
   if (hovering) {
     debugLog("Hovering over", token.id, token.x, token.y);
   }
 })
-
-

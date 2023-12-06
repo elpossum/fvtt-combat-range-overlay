@@ -7,13 +7,14 @@ import {
   safeDestroy, uiNotificationsInfo, uiNotificationsWarn
 } from "./utility.js"
 
-import {GridTile} from "./gridTile.js";
-import {FUDGE, MAX_DIST, MODULE_ID, PRESSED_KEYS} from "./constants.js"
-import {TokenInfo} from "./tokenInfo.js";
+import { GridTile } from "./gridTile.js";
+import { FUDGE, MAX_DIST, MODULE_ID, PRESSED_KEYS } from "./constants.js"
+import { TokenInfo } from "./tokenInfo.js";
 import * as Settings from "./settings.js";
-import {mouse} from "./mouse.js";
-import {debugLog} from "./debug.js"
-import {colorSettingNames} from "./colorPicker.js"
+import { mouse } from "./mouse.js";
+import { debugLog } from "./debug.js"
+import { colorSettingNames } from "./colorPicker.js"
+import { TerrainHelper } from "./terrainHelper.js"
 
 // Colors
 const highlightLineColor = 0xffffff; // white
@@ -91,9 +92,9 @@ export class Overlay {
   }
 
   // Use Dijkstra's shortest path algorithm
-  calculateMovementCosts() {
+  async calculateMovementCosts() {
     // TODO Fix caching
-    const tilesPerAction = TokenInfo.current.speed / this.DISTANCE_PER_TILE;
+    const tilesPerAction = await TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     const maxTiles = tilesPerAction * globalThis.combatRangeOverlay.actionsToShow;
 
     const currentToken = getCurrentToken();
@@ -140,10 +141,15 @@ export class Overlay {
         }
 
         const ray = new Ray(neighbor.centerPt, current.centerPt);
-        if (checkCollision(ray, {type: "move", blockMovement: true, blockSenses: false, mode: 'any'})) {
+        if (checkCollision(ray, { type: "move", blockMovement: true, blockSenses: false, mode: 'any' })) {
           // Blocked, do nothing
         } else {
-          let newDistance = current.distance + neighbor.cost;
+          let newDistance;
+          if (game.modules.get('terrainmapper')?.active) {
+            newDistance = current.distance + GridTile.costTerrainMapper(currentToken, current, neighbor);
+          } else {
+            newDistance = current.distance + neighbor.cost;
+          };
 
           let diagonalDelta = getDiagonalDelta();
 
@@ -171,7 +177,7 @@ export class Overlay {
   async calculateTargetRangeMap() {
     const targetMap = new Map();
     const currentWeaponRange = await TokenInfo.current.weaponRangeColor
-    const weaponRangeInTiles = currentWeaponRange.map(i => ({...i, range: i.range / this.DISTANCE_PER_TILE}));
+    const weaponRangeInTiles = currentWeaponRange.map(i => ({ ...i, range: i.range / this.DISTANCE_PER_TILE }));
 
     for (const targetToken of game.user.targets) {
       targetMap.set(targetToken.id, calculateTilesInRange(weaponRangeInTiles, targetToken));
@@ -187,9 +193,9 @@ export class Overlay {
       return;
     }
 
-    const tilesMovedPerAction = TokenInfo.current.speed / this.DISTANCE_PER_TILE;
+    const tilesMovedPerAction = await TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     const currentWeaponRange = await TokenInfo.current.weaponRangeColor
-    const weaponRangeInTiles = currentWeaponRange.map(i => ({...i, range: i.range / this.DISTANCE_PER_TILE}));
+    const weaponRangeInTiles = currentWeaponRange.map(i => ({ ...i, range: i.range / this.DISTANCE_PER_TILE }));
     const myDisposition = getCombatantTokenDisposition(currentToken);
     debugLog("drawPotentialTargets", "|", "Current disposition", myDisposition);
 
@@ -212,15 +218,15 @@ export class Overlay {
             }
           }
 
-          const colorIndex = Math.min(Math.ceil(diagonalDistance(bestCost) / tilesMovedPerAction), colorByActions.length-1);
+          const colorIndex = Math.min(Math.ceil(diagonalDistance(bestCost) / tilesMovedPerAction), colorByActions.length - 1);
           let color = colorByActions[colorIndex];
 
           const tokenOverlay = new PIXI.Graphics();
           tokenOverlay.lineStyle(potentialTargetLineWidth, color)
           tokenOverlay.drawCircle(
-            combatantToken.hitArea.width/2,
-            combatantToken.hitArea.height/2,
-            Math.pow(Math.pow(combatantToken.hitArea.width/2, 2) + Math.pow(combatantToken.hitArea.height/2, 2), .5)
+            combatantToken.hitArea.width / 2,
+            combatantToken.hitArea.height / 2,
+            Math.pow(Math.pow(combatantToken.hitArea.width / 2, 2) + Math.pow(combatantToken.hitArea.height / 2, 2), .5)
           );
           combatantToken.addChild(tokenOverlay);
           this.overlays.tokenOverlays.push(tokenOverlay);
@@ -230,11 +236,11 @@ export class Overlay {
   }
 
   async drawAll() {
-    const movementCosts = this.calculateMovementCosts();
+    const movementCosts = await this.calculateMovementCosts();
     const targetRangeMap = await this.calculateTargetRangeMap();
 
     this.initializePersistentVariables();
-    this.drawCosts(movementCosts, targetRangeMap);
+    await this.drawCosts(movementCosts, targetRangeMap);
     if (game.user.targets.size === 0) {
       if (Settings.isShowTurnOrder()) {
         this.drawTurnOrder();
@@ -257,6 +263,7 @@ export class Overlay {
     if (Settings.isShowDifficultTerrain() && canvas.terrain) {
       try {
         // noinspection JSUnresolvedVariable
+        canvas.drawings.addChild(globalThis.combatRangeOverlay.terrainGraphics);
         canvas.terrain._tokenDrag = true;
         canvas.terrain.refreshVisibility();
       } catch {
@@ -267,12 +274,18 @@ export class Overlay {
 
   // noinspection JSUnusedLocalSymbols
   async dragHandler(dragging) {
-    await this.fullRefresh();
+    const currentToken = getCurrentToken();
+    const visibilitySetting = currentToken?.inCombat ? Settings.getICVisibility() : Settings.getOOCVisibility();
+    if (visibilitySetting !== Settings.overlayVisibility.ALWAYS) {
+      await this.fullRefresh();
+    }
   }
 
   // noinspection JSUnusedLocalSymbols
   async altKeyHandler(event, state) {
-    if(!event.repeat) {
+    const currentToken = getCurrentToken();
+    const visibilitySetting = currentToken?.inCombat ? Settings.getICVisibility() : Settings.getOOCVisibility();
+    if (!event.repeat && visibilitySetting !== Settings.overlayVisibility.ALWAYS) {
       await this.fullRefresh();
     }
   }
@@ -288,14 +301,23 @@ export class Overlay {
     const currentToken = getCurrentToken();
     if (currentToken) {
       let hotkeys = false;
-      if (PRESSED_KEYS.showOverlay || mouse.isLeftDrag()) {
+      if (PRESSED_KEYS.showOverlay) {
         hotkeys = true;
+      }
+
+      let drag = false;
+      if (mouse.isLeftDrag()) {
+        drag = true;
       }
 
       const visibilitySetting = currentToken.inCombat ? Settings.getICVisibility() : Settings.getOOCVisibility();
       if (visibilitySetting === Settings.overlayVisibility.ALWAYS) {
         showOverlay = true;
+      } else if (visibilitySetting === Settings.overlayVisibility.BOTH && (hotkeys || drag)) {
+        showOverlay = true;
       } else if (visibilitySetting === Settings.overlayVisibility.HOTKEYS && hotkeys) {
+        showOverlay = true;
+      } else if (visibilitySetting === Settings.overlayVisibility.DRAG && drag) {
         showOverlay = true;
       }
     }
@@ -325,6 +347,7 @@ export class Overlay {
     this.clearAll();
     TokenInfo.resetMap();
     this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
+    if (game.modules.get('terrainmapper')?.active) setTimeout(() => TerrainHelper.sceneUpdate(), 1000)
   }
 
   async updateWallHook() {
@@ -336,23 +359,24 @@ export class Overlay {
       if (application.id !== 'croQuickSettingsDialog') await this.renderApplicationHook()
     });
     this.hookIDs.targetToken = Hooks.on("targetToken", async () => await this.targetTokenHook());
-    this.hookIDs.canvasInit = Hooks.on("canvasReady", () => this.canvasReadyHook());
+    this.hookIDs.canvasReady = Hooks.on("canvasReady", () => this.canvasReadyHook());
+    this.hookIDs.sceneUpdate = Hooks.on("updateScene", () => this.canvasReadyHook());
     this.hookIDs.updateWall = Hooks.on("updateWall", async () => await this.updateWallHook());
   }
 
   unregisterHooks() {
     Hooks.off("renderApplication", this.hookIDs.renderApplication);
     Hooks.off("targetToken", this.hookIDs.targetToken);
-    Hooks.off("canvasInit", this.hookIDs.canvasInit);
+    Hooks.off("canvasReady", this.hookIDs.canvasReady);
     this.hookIDs.renderApplication = undefined;
     this.hookIDs.targetToken = undefined;
-    this.hookIDs.sceneChange = undefined;
+    this.hookIDs.canvasReady = undefined;
   }
 
   clearAll() {
-    this.overlays.distanceTexts?.forEach(t => {safeDestroy(t)});
-    this.overlays.turnOrderTexts?.forEach(t => {safeDestroy(t)});
-    this.overlays.tokenOverlays?.forEach(o => {safeDestroy(o)});
+    this.overlays.distanceTexts?.forEach(t => { safeDestroy(t) });
+    this.overlays.turnOrderTexts?.forEach(t => { safeDestroy(t) });
+    this.overlays.tokenOverlays?.forEach(o => { safeDestroy(o) });
     safeDestroy(this.overlays.distanceOverlay);
     safeDestroy(this.overlays.pathOverlay);
     safeDestroy(this.overlays.potentialTargetOverlay);
@@ -369,6 +393,7 @@ export class Overlay {
     if (Settings.isShowDifficultTerrain()) {
       try {
         // noinspection JSUnresolvedVariable
+        canvas.drawings.removeChild(globalThis.combatRangeOverlay.terrainGraphics);
         canvas.terrain._tokenDrag = false;
         canvas.terrain.refreshVisibility();
       } catch {
@@ -462,7 +487,7 @@ export class Overlay {
     }
   }
 
-  drawCosts(movementCostMap, targetRangeMap) {
+  async drawCosts(movementCostMap, targetRangeMap) {
     const rangeMap = buildRangeMap(targetRangeMap);
     const idealTileMap = calculateIdealTileMap(movementCostMap, targetRangeMap, rangeMap);
     const colorByActions = globalThis.combatRangeOverlay.colorByActions;
@@ -475,7 +500,7 @@ export class Overlay {
       }
     }
 
-    const tilesMovedPerAction = TokenInfo.current.speed / this.DISTANCE_PER_TILE;
+    const tilesMovedPerAction = await TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     this.overlays.distanceTexts = [];
     this.overlays.pathOverlay.lineStyle(pathLineWidth, pathLineColor);
 
@@ -516,7 +541,7 @@ export class Overlay {
         }
 
         // Color tile based on number of actions to reach it
-        const colorIndex = Math.min(Math.ceil(diagonalDistance(tile.distance) / tilesMovedPerAction), colorByActions.length-1);
+        const colorIndex = Math.min(Math.ceil(diagonalDistance(tile.distance) / tilesMovedPerAction), colorByActions.length - 1);
         let color = colorByActions[colorIndex];
         let cornerPt = tile.pt;
         if (idealTileMap.has(tile.key)) {
@@ -543,7 +568,7 @@ export class Overlay {
     for (const obj of canvas.walls.quadtree.objects) {
       const wall = obj.t;
       if (wall.document.door || !wall.document.move) {
-         continue;
+        continue;
       }
       const c = wall.document.c;
       this.overlays.wallsOverlay.moveTo(c[0], c[1]);
@@ -560,7 +585,7 @@ function buildRangeMap(targetMap) {
       const tileKey = tile.key;
       let count = rangeMap.get(tileKey) ?? 0;
       count++;
-      rangeMap.set(tileKey, {count: count, color: tile.color});
+      rangeMap.set(tileKey, { count: count, color: tile.color });
     }
   }
   return rangeMap;
@@ -571,7 +596,7 @@ function calculateIdealTileMap(movementTileMap, targetMap, rangeMap) {
   for (const tile of movementTileMap.values()) {
     if (rangeMap.get(tile.key)) {
       if (rangeMap.get(tile.key).count === targetMap.size) { // Every target is reachable from here
-        idealTileMap.set(tile.key, {tile: tile, color: rangeMap.get(tile.key).color});
+        idealTileMap.set(tile.key, { tile: tile, color: rangeMap.get(tile.key).color });
       }
     }
   }
@@ -590,13 +615,13 @@ function calculateTilesInRange(rangeInTiles, targetToken) {
   for (const rangeInTilesElement of rangeInTiles) {
     const weaponColor = rangeInTilesElement.color;
     // Loop over X and Y deltas, computing distance for only a single quadrant
-    for(let gridXDelta = 0; gridXDelta <= rangeInTilesElement.range; gridXDelta++) {
-      for(let gridYDelta = 0; gridYDelta <= rangeInTilesElement.range; gridYDelta++) {
+    for (let gridXDelta = 0; gridXDelta <= rangeInTilesElement.range; gridXDelta++) {
+      for (let gridYDelta = 0; gridYDelta <= rangeInTilesElement.range; gridYDelta++) {
         if (gridXDelta === 0 && gridYDelta === 0) {
           continue;
         }
 
-        const shotDistance = calculateGridDistance({x: 0, y: 0}, {x: gridXDelta, y: gridYDelta});
+        const shotDistance = calculateGridDistance({ x: 0, y: 0 }, { x: gridXDelta, y: gridYDelta });
         if (shotDistance < rangeInTilesElement.range + FUDGE) { // We're within range
           // We need to test visibility for all 4 quadrants
           // Use sets so we don't have to explicitly test for "on the same row/column as"
@@ -637,7 +662,7 @@ function checkCollision(ray, opts) {
   if (parseInt(game.version) < 11) {
     return canvas.walls.checkCollision(ray, opts);
   } else {
-  return CONFIG.Canvas.polygonBackends[opts.type].testCollision(ray.A, ray.B, opts);
+    return CONFIG.Canvas.polygonBackends[opts.type].testCollision(ray.A, ray.B, opts);
   }
 }
 
@@ -656,13 +681,13 @@ function combatantComparator(a, b) {
 
 function checkTileToTokenVisibility(tile, token) {
   const t = Math.min(token.h, token.w) / 4;
-  const offsets = t > 0 ? [[0, 0],[-t,0],[t,0],[0,-t],[0,t],[-t,-t],[-t,t],[t,t],[t,-t]] : [[0,0]];
+  const offsets = t > 0 ? [[0, 0], [-t, 0], [t, 0], [0, -t], [0, t], [-t, -t], [-t, t], [t, t], [t, -t]] : [[0, 0]];
   const points = offsets.map(o => new PIXI.Point(token.center.x + o[0], token.center.y + o[1]));
   const tileCenterPt = tile.centerPt
 
   for (const point of points) {
     const ray = new Ray(tileCenterPt, point);
-    if (!checkCollision(ray, {type: "sight", mode: 'any'})) {
+    if (!checkCollision(ray, { type: "sight", mode: 'any' })) {
       return true;
     }
   }

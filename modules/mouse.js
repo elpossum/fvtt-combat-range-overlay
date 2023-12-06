@@ -1,5 +1,5 @@
-import {MODULE_ID} from "./constants.js"
-import {debugLog} from "./debug.js"
+import { MODULE_ID } from "./constants.js"
+import { debugLog } from "./debug.js"
 
 /*
 const states = {
@@ -15,7 +15,7 @@ class Mouse {
   }
 
   addHook(func) {
-      this._hooks.push(func);
+    this._hooks.push(func);
   }
 
   clearHooks() {

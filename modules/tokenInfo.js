@@ -1,8 +1,9 @@
-import {DEFAULT_DEFAULT_WEAPON_RANGE, FLAG_NAMES, MODULE_ID} from "./constants.js"
-import {canvasTokensGet, getCurrentToken, uiNotificationsWarn, getWeaponRanges} from "./utility.js"
-import {debugLog} from "./debug.js"
-import {getSpeedAttrPath, updatePositionInCombat, getWeaponRange} from "./settings.js"
-import {colorSettingNames} from "./colorPicker.js"
+import { DEFAULT_DEFAULT_WEAPON_RANGE, FLAG_NAMES, MODULE_ID } from "./constants.js"
+import { canvasTokensGet, getCurrentToken, uiNotificationsWarn, getWeaponRanges } from "./utility.js"
+import { debugLog } from "./debug.js"
+import { getSpeedAttrPath, updatePositionInCombat, getWeaponRange } from "./settings.js"
+import { colorSettingNames } from "./colorPicker.js"
+import { GridTile } from "./gridTile.js"
 
 export class TokenInfo {
   static _tokenInfoMap = new Map();
@@ -19,14 +20,14 @@ export class TokenInfo {
 
     this.updateLocation();
     this.updateMeasureFrom();
-    
+
     this.colors = [];
 
     TokenInfo._tokenInfoMap.set(tokenId, this);
   }
 
   updateLocation(updateData) {
-    this.location  = {
+    this.location = {
       x: updateData?.x ?? this.token.x,
       y: updateData?.y ?? this.token.y
     };
@@ -56,7 +57,7 @@ export class TokenInfo {
     return ti;
   }
 
-  getFlag(flagName, dflt=undefined) {
+  getFlag(flagName, dflt = undefined) {
     // Somehow unlinked tokens get their own copies of actors (they even share IDs) but which have their own flags
     const baseActor = game.actors.get(this.token.actor.id);
 
@@ -83,12 +84,12 @@ export class TokenInfo {
           const baseReach = this.token.actor.system.attributes.reach.base
           let range = []
           for (const [index, weapon] of weapons.entries()) {
-            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            let weaponObject = { range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id };
             const hasReach = weapon.system.traits.value.includes('reach');
             if (weapon.system.traits.value.includes('combination')) {
               hasReach ? weaponObject.range = baseReach + DEFAULT_WEAPON_RANGE : weaponObject.range = DEFAULT_WEAPON_RANGE;
               range.push(weaponObject);
-              range.push({range: weapon.rangeIncrement || weapon.system.range, color: colors[index], weapon: weapon.id});
+              range.push({ range: weapon.rangeIncrement || weapon.system.range, color: colors[index], weapon: weapon.id });
             } else if (weapon.isRanged || weapon.isThrown) {
               weaponObject.range = weapon.rangeIncrement || weapon.system.range;
               range.push(weaponObject);
@@ -97,14 +98,14 @@ export class TokenInfo {
               range.push(weaponObject);
             }
           }
-          return range.sort((a, b) => {a.range - b.range});
+          return range.sort((a, b) => { a.range - b.range });
         }
         case 'dnd5e': {
           const weapons = this.token.actor.items.filter(i => i.type == 'weapon' && i.system.equipped);
           const baseReach = 5
           let range = []
           for (const [index, weapon] of weapons.entries()) {
-            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            let weaponObject = { range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id };
             const hasReach = weapon.system.properties.rch;
             if (weapon.system.range.value) {
               weaponObject.range = weapon.system.range.value;
@@ -114,14 +115,14 @@ export class TokenInfo {
               range.push(weaponObject);
             }
           }
-          return range.sort((a, b) => {a.range - b.range});
+          return range.sort((a, b) => { a.range - b.range });
         }
         case 'D35E': {
           const weapons = this.token.actor.items.filter(i => i.type == 'weapon' && i.system.equipped);
           const baseReach = 5
           let range = []
           for (const [index, weapon] of weapons.entries()) {
-            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            let weaponObject = { range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id };
             const hasReach = weapon.system.properties.rch;
             if (weapon.system.weaponData.range) {
               weaponObject.range = weapon.system.weaponData.range;
@@ -131,14 +132,14 @@ export class TokenInfo {
               range.push(weaponObject);
             }
           }
-          return range.sort((a, b) => {a.range - b.range});
+          return range.sort((a, b) => { a.range - b.range });
         }
         case 'pf1': {
           const weapons = this.token.actor.items.filter(i => i.type == 'weapon' && i.system.equipped);
           const baseReach = 5
           let range = []
           for (const [index, weapon] of weapons.entries()) {
-            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            let weaponObject = { range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id };
             const hasReach = weapon.system.properties.rch;
             const descRange = parseInt(weapon.system.description.value.match(/range<\/b> \d*/i)[0].replace(/[^0-9]/g, ''));
             if (descRange) {
@@ -149,13 +150,13 @@ export class TokenInfo {
               range.push(weaponObject);
             }
           }
-          return range.sort((a, b) => {a.range - b.range});
+          return range.sort((a, b) => { a.range - b.range });
         }
         case 'wfrp4e': {
           const weapons = this.token.actor.itemCategories.weapon.filter(i => i.system.equipped == true);
           let range = []
           for (const [index, weapon] of weapons.entries()) {
-            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            let weaponObject = { range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id };
             if (weapon.system.range.value) {
               weaponObject.range = parseInt(weapon.system.range.value);
               range.push(weaponObject);
@@ -163,13 +164,13 @@ export class TokenInfo {
               range.push(weaponObject);
             }
           }
-          return range.sort((a, b) => {a.range - b.range});
+          return range.sort((a, b) => { a.range - b.range });
         }
         case 'swade': {
           const weapons = this.token.actor.items.filter(i => i.type == 'weapon' && i.system.equipStatus > 1);
           let range = []
           for (const [index, weapon] of weapons.entries()) {
-            let weaponObject = {range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id};
+            let weaponObject = { range: DEFAULT_WEAPON_RANGE, color: colors[index], weapon: weapon.id };
             let reach;
             if (weapon.system.notes.toLowerCase().includes("reach")) {
               reach = parseInt(weapon.system.notes.match(/reach\W*\d?/i)[0].replace(/[^0-9]/g, ''))
@@ -182,15 +183,17 @@ export class TokenInfo {
               range.push(weaponObject);
             }
           }
-          return range.sort((a, b) => {a.range - b.range});
+          return range.sort((a, b) => { a.range - b.range });
         }
         default: {
-          const buttons = Object.fromEntries(getWeaponRanges().map((i) => [i, {label: i, callback: async (html) => {
-            const updateActor = html.find("[name=update-actor]")[0]?.checked;
-            await this.setWeaponRange(i, updateActor);
-          }}]));
+          const buttons = Object.fromEntries(getWeaponRanges().map((i) => [i, {
+            label: i, callback: async (html) => {
+              const updateActor = html.find("[name=update-actor]")[0]?.checked;
+              await this.setWeaponRange(i, updateActor);
+            }
+          }]));
           const submitButton = {
-            icon: '<i class="fas fa-check"></i>', 
+            icon: '<i class="fas fa-check"></i>',
             callback: async (html) => {
               const updateActor = html.find("[name=update-actor]")[0]?.checked;
               const weaponRange = html.find("[name=weapon-range]")[0]?.value;
@@ -213,7 +216,7 @@ export class TokenInfo {
             title: game.i18n.localize(`${MODULE_ID}.quick-settings.title`),
             content: content.join('\n'),
             buttons
-          }, {id: "croQuickSettingsDialog"});
+          }, { id: "croQuickSettingsDialog" });
           let range = [{
             range: this.getFlag(FLAG_NAMES.WEAPON_RANGE),
             color: globalThis.combatRangeOverlay.colors[0]
@@ -250,32 +253,62 @@ export class TokenInfo {
     }
   }
 
-  async setWeaponRange(range, updateActor=false) {
+  async setWeaponRange(range, updateActor = false) {
     await this.setFlag(FLAG_NAMES.WEAPON_RANGE, range, updateActor);
   }
 
-  async setSpeedOverride(speed, updateActor=false) {
+  async setSpeedOverride(speed, updateActor = false) {
     await this.setFlag(FLAG_NAMES.SPEED_OVERRIDE, speed, updateActor);
   }
 
-  async setIgnoreDifficultTerrain(isIgnore, updateActor=false) {
+  async setIgnoreDifficultTerrain(isIgnore, updateActor = false) {
     await this.setFlag(FLAG_NAMES.IGNORE_DIFFICULT_TERRAIN, isIgnore, updateActor);
   }
 
-  get speed() {
-    const actor = this.token.actor;
-    if (!actor) {
-      throw("Tried to call getSpeed with an undefined actor");
-    }
+  async setUnmodifiedSpeed(speed, updateActor = false) {
+    await this.setFlag(FLAG_NAMES.UNMODIFIED_SPEED, speed, updateActor);
+  }
 
+  get unmodifiedSpeed() {
+    return this.getFlag(FLAG_NAMES.UNMODIFIED_SPEED);
+  }
+
+  get ignoreSetSpeed() {
+    return this.getFlag(FLAG_NAMES.IGNORE_SET_SPEED);
+  }
+
+  async setIgnoreSetSpeed(ignore, updateActor = false) {
+    await this.setFlag(FLAG_NAMES.IGNORE_SET_SPEED, ignore, updateActor)
+  }
+
+  getSpeed(token) {
     if (this.speedOverride) {
       return this.speedOverride;
     } else if (getSpeedAttrPath()) {
       // noinspection JSCheckFunctionSignatures,JSUnresolvedVariable
-      return foundry.utils.getProperty(actor.data, getSpeedAttrPath());
+      return foundry.utils.getProperty(token.actor, getSpeedAttrPath());
     } else {
       return this.getSpeedFromAttributes()
     }
+  }
+
+  get speed() {
+    return (async () => {
+      const actor = this.token.actor;
+      if (!actor) {
+        throw ("Tried to call speed getter with an undefined actor");
+      }
+
+      if (game.modules.get('terrainmapper')?.active) {
+        if (this.getSpeed(this.token) === 0) {
+          return 0
+        } else {
+          return this.unmodifiedSpeed
+        }
+      } else {
+        return this.getSpeed(this.token)
+      }
+    })()
   }
 
   getSpeedFromAttributes() {
@@ -291,13 +324,13 @@ export class TokenInfo {
         break;
       }
       case 'pf2e': {
-        speed = actorAttrs.speed.total;
+        speed = actorAttrs.speed?.total;
         // noinspection JSUnresolvedVariable
-        otherSpeeds = actorAttrs.speed.otherSpeeds.map(s => s.total);
+        otherSpeeds = actorAttrs.speed?.otherSpeeds?.map(s => s.total);
         break;
       }
       case 'dnd5e': {
-        otherSpeeds = Object.entries(actorAttrs.movement).filter(s => typeof(s[1]) === "number").map(s => s[1]);
+        otherSpeeds = Object.entries(actorAttrs.movement).filter(s => typeof (s[1]) === "number").map(s => s[1]);
         break;
       }
       case 'swade': {
@@ -309,6 +342,7 @@ export class TokenInfo {
         break;
       }
       default: {
+        if (this.ignoreSetSpeed) return;
         const inputSpeedOverride = this.speedOverride ?? "";
         const content = [];
         if (game.user.isGM) {
@@ -321,14 +355,23 @@ export class TokenInfo {
           buttons: {
             one: {
               icon: '<i class="fas fa-check"></i>',
+              label: "Submit",
               callback: async (html) => {
                 const updateActor = html.find("[name=update-actor]")[0]?.checked;
                 const speedOverride = html.find("[name=speed-override]")[0]?.value;
                 await this.setSpeedOverride(speedOverride, updateActor);
               }
+            },
+            two: {
+              icon: '<i class="fas fa-times"></i>',
+              label: "Don't ask again",
+              callback: async (html) => {
+                const updateActor = html.find("[name=update-actor]")[0]?.checked;
+                await this.setIgnoreSetSpeed(true, updateActor);
+              }
             }
           }
-        }, {id: "croQuickSettingsDialog"});
+        }, { id: "croQuickSettingsDialog" });
         return this.speedOverride;
       }
     }
@@ -358,46 +401,78 @@ function updateLocation(token, updateData) {
 }
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("createCombatant", (combatant, options, someId) => {
+Hooks.on("createCombatant", async (combatant, options, someId) => {
   const token = canvasTokensGet(combatant.token.id);
   updateMeasureFrom(token);
-  globalThis.combatRangeOverlay.instance.fullRefresh();
+  await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("deleteCombatant", (combatant, options, someId) => {
-  const token = canvasTokensGet(combatant.token.id);
+Hooks.on("deleteCombatant", async (combatant, options, someId) => {
+  const token = canvasTokensGet(combatant.token?.id);
   updateMeasureFrom(token);
-  globalThis.combatRangeOverlay.instance.fullRefresh();
+  await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("updateCombat", (combat, turnInfo, diff, someId) => {
+Hooks.on("updateCombat", async (combat, turnInfo, diff, someId) => {
   if (combat?.previous?.tokenId) {
     const token = canvasTokensGet(combat.previous.tokenId);
     updateMeasureFrom(token);
   }
-  globalThis.combatRangeOverlay.instance.fullRefresh();
+  await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("updateToken", (tokenDocument, updateData, options, someId) => {
+Hooks.on("updateToken", async (tokenDocument, updateData, options, someId) => {
   const tokenId = tokenDocument.id;
   const realToken = canvasTokensGet(tokenId); // Get the real token
   updateLocation(realToken, updateData);
   if (!realToken.inCombat || updatePositionInCombat()) {
     updateMeasureFrom(realToken, updateData);
   }
-  globalThis.combatRangeOverlay.instance.fullRefresh();
+  await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
-Hooks.on("controlToken", (token, boolFlag) => {
-  if (boolFlag && TokenInfo.current.speed === 0 && TokenInfo.current.getSpeedFromAttributes() === 0) {
+async function updateUnmodifiedSpeed(token) {
+  let speed;
+  try {
+    speed = GridTile.costTerrainMapper(token, { x: token.x, y: token.y }, token.center) * TokenInfo.current.getSpeed(token);
+  } catch {
+    return
+  }
+  if (speed === TokenInfo.current.unmodifiedSpeed) {
+    // Speed has not been changed since last set
+  } else {
+    await TokenInfo.current.setUnmodifiedSpeed(speed)
+  }
+}
+
+Hooks.on("controlToken", async (token, boolFlag) => {
+  const speed = await TokenInfo.current?.speed
+  if (boolFlag && !speed && TokenInfo.current?.getSpeedFromAttributes() === undefined && TokenInfo.current.ignoreSetSpeed !== true) {
     if (game.user.isGM) {
       uiNotificationsWarn(game.i18n.localize(`${MODULE_ID}.token-speed-warning-gm`));
     } else {
       uiNotificationsWarn(game.i18n.localize(`${MODULE_ID}.token-speed-warning-player`));
     }
   }
+  await updateUnmodifiedSpeed(token);
+  switch (token.controlled) {
+    case false: {
+      globalThis.combatRangeOverlay.instance.clearAll();
+      break
+    }
+    case true: {
+      await globalThis.combatRangeOverlay.instance.fullRefresh();
+      break
+    }
+  }
+})
+
+Hooks.on("updateActor", async (actor) => {
+  const token = canvas.tokens.controlled.filter((token) => token.actor === actor)[0];
+  if (!game.modules.get('terrainmapper')?.active) return
+  await updateUnmodifiedSpeed(token)
 })

@@ -1,7 +1,7 @@
-import {MODULE_ID} from "./constants.js"
+import { MODULE_ID } from "./constants.js"
 
 export default class ModuleInfoApp extends FormApplication {
-  constructor(options={}) {
+  constructor(options = {}) {
     super(options);
   }
 
@@ -20,7 +20,7 @@ export default class ModuleInfoApp extends FormApplication {
   // noinspection JSCheckFunctionSignatures
   getData() {
     return {
-      version: game.modules.get(MODULE_ID).data.version
+      version: game.modules.get(MODULE_ID).version
     }
   }
 

@@ -8,7 +8,7 @@
     "show-turn-order-hint": "Show combatant turn orders relative to the active token",
     "show-potential-targets": "Indicate potential targets?",
     "show-potential-targets-hint": "Circle potential targets; color indicates how many actions of movement to reach target",
-    "show-difficult-terrain": "Show difficult terrain?",
+    "show-difficult-terrain": "Show difficult terrain? (Only works for GM currently)",
     "show-difficult-terrain-hint": "Draw an overlay on top of difficult terrain",
     "show-walls": "Show walls?",
     "show-walls-hint": "Draw an overlay on top of all walls",
@@ -20,8 +20,17 @@
     "ooc_visibility-hint": "When should the overlay be visible out of combat?",
     "visibilities": {
       "always": "Always",
-      "hotkeys": "Only with hotkey or token drag",
+      "drag": "Only on mouse drag",
+      "hotkeys": "Only with hotkeys",
+      "both": "With either drag or hotkeys",
       "never": "Never"
+    },
+    "terrain-measure": "Terrain Measure",
+    "terrain-measure-hint": "How is the terrain of a square is determined?",
+    "terrain-measure-types": {
+      "center-point": "Center point determines terrain",
+      "five-point": "Majority of five points determine terrain",
+      "area": "Majority area determines terrain"
     },
     "ranges": "Available weapon ranges",
     "ranges-hint": "Comma-separated list of ranges to choose from in the quick settings dialog",

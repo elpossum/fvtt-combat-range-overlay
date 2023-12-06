@@ -1,8 +1,8 @@
-import {getCurrentToken, getWeaponRanges, uiNotificationsWarn} from "./utility.js"
-import {TokenInfo} from "./tokenInfo.js";
+import { getCurrentToken, getWeaponRanges, uiNotificationsWarn } from "./utility.js"
+import { TokenInfo } from "./tokenInfo.js";
 import * as Settings from "./settings.js";
-import {MODULE_ID, PRESSED_KEYS} from "./constants.js"
-import {debugLog} from "./debug.js"
+import { MODULE_ID, PRESSED_KEYS } from "./constants.js"
+import { debugLog } from "./debug.js"
 
 const TOGGLE_BUTTON = "combatRangeOverlayButton";
 
@@ -18,8 +18,8 @@ async function _submitDialog(i, html) {
 }
 
 function _showRangeDialog() {
-  const buttons = Object.fromEntries(getWeaponRanges().map((i) => [i, {label: i, callback: (html) => _submitDialog(i, html)}]));
-  const resetButton = {icon: '<i class="fas fa-arrow-rotate-left"></i>', label: "Reset", callback: () => _token.document.unsetFlag("combat-range-overlay", "weaponRange")}
+  const buttons = Object.fromEntries(getWeaponRanges().map((i) => [i, { label: i, callback: (html) => _submitDialog(i, html) }]));
+  const resetButton = { icon: '<i class="fas fa-arrow-rotate-left"></i>', label: "Reset", callback: () => _token.document.unsetFlag("combat-range-overlay", "weaponRange") }
   buttons.reset = resetButton;
 
   const speedOverride = TokenInfo.current.speedOverride ?? "";
@@ -36,7 +36,7 @@ function _showRangeDialog() {
     title: game.i18n.localize(`${MODULE_ID}.quick-settings.title`),
     content: content.join("\n"),
     buttons
-  }, {id: "croQuickSettingsDialog"});
+  }, { id: "croQuickSettingsDialog" });
   d.render(true);
 }
 
@@ -60,7 +60,7 @@ async function _toggleButtonClick(toggled, controls) {
       uiNotificationsWarn(game.i18n.localize(`${MODULE_ID}.controls.cant-reset-no-token`));
     } else {
       TokenInfo.current.updateMeasureFrom();
-      globalThis.combatRangeOverlay.instance.fullRefresh();
+      await globalThis.combatRangeOverlay.instance.fullRefresh();
     }
   } else {
     isActive = toggled;

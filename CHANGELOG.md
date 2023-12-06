@@ -1,4 +1,11 @@
 # Changelog
+## 4.0.0 - 2023/12/05
+### Added
+- Add compatibility for Terrain Mapper (GM only at the moment), closes [elpossum/fvtt-combat-range-overlay#7](https://github.com/elpossum/fvtt-combat-range-overlay/issues/7)
+### Changed
+- **Breaking** Make drawCosts() and calculateMovementCosts() async
+### Fixed
+- Fix overlays staying rendered, closes [elpossum/fvtt-combat-range-overlay#8](https://github.com/elpossum/fvtt-combat-range-overlay/issues/8)
 ## 3.0.0 - 2023/11/16
 ### Added
 - Add compatibility for Pathfinder 1e, DnD3.5e, SWADE, WFRP4e and DnD5e

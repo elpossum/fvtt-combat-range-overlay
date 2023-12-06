@@ -1,4 +1,4 @@
-import {MODULE_ID} from "./constants.js"
+import { MODULE_ID } from "./constants.js"
 
 Hooks.once('devModeReady', ({ registerPackageDebugFlag }) => {
   registerPackageDebugFlag(MODULE_ID);
@@ -18,5 +18,5 @@ export function debugLog(...args) {
     if (isDebugging()) {
       consoleLog(...args)
     }
-  } catch (e) {}
+  } catch (e) { }
 }

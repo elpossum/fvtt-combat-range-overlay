@@ -8,7 +8,7 @@ This module is designed to quickly and efficiently answer questions such as "How
 
 ## Basic Usage
 
-Click ![the button](https://i.imgur.com/Q3baWqE.png) to toggle the Overlay on and off. Once the Overlay is enabled, it should Just Work™ with little to no interaction from you. If you are using a supported system, it should auto-detect the range of your equipped weapons; shift-click the button to change it for your currently selected token. Normally the overlay will reread your position at the end of your combat turn; control-click the button to force the Overlay to reposition. Display preferences are available in the module's Settings page.
+Click ![the button](https://i.imgur.com/Q3baWqE.png) to toggle the Overlay on and off. Once the Overlay is enabled, it should Just Work™ with little to no interaction from you. If you are using a supported system, it should auto-detect the range of your equipped weapons; shift-click the button to change it for your currently selected token. Normally the overlay will reread your position at the end of a move; control-click the button to force the Overlay to reposition. Display preferences are available in the module's Settings page.
 
 ## Compatibility
 Maps: This module relies on square tiles; I have no idea what would happen if you tried to use it on a map with hex tiles, but I don't think it would go well.
@@ -22,7 +22,7 @@ diagonal movement.
 Weapon range is more complex so the path cannot be manually set for unsupported systems. Pathfinder 2e, Pathfinder 1e, DnD3.5e, SWADE, WFRP4e
 and DnD5e are all supported to the best of my knowledge of the systems. If you are using an unsupported system, you will be prompted weapon range when you try to bring up the overlay.
 
-Modules: This module requires lib-wrapper and supports the Enhanced Terrain Layer.
+Modules: This module requires lib-wrapper and supports the Enhanced Terrain Layer and Terrain Mapper.
 
 ## Understanding the Overlay
 

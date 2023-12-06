@@ -1,9 +1,11 @@
-import {DEFAULT_WEAPON_RANGES, MODULE_ID, PRESSED_KEYS, DEFAULT_DEFAULT_WEAPON_RANGE} from "./constants.js"
+import { DEFAULT_WEAPON_RANGES, MODULE_ID, PRESSED_KEYS, DEFAULT_DEFAULT_WEAPON_RANGE } from "./constants.js"
 import ModuleInfoApp from "./moduleInfo.js"
 
 export const overlayVisibility = {
   ALWAYS: 'always',
+  DRAG: 'drag',
   HOTKEYS: 'hotkeys',
+  BOTH: 'both',
   NEVER: 'never'
 };
 
@@ -12,6 +14,12 @@ export const diagonals = {
   TEN_FIVE_TEN: "tenFiveTen",
   FIVE: "five",
   TEN: "ten"
+}
+
+const terrainMeasureTypes = {
+  CENTER_POINT: "center-point",
+  FIVE_POINT: "five-point",
+  AREA: "area"
 }
 
 const settingNames = {
@@ -31,11 +39,12 @@ const settingNames = {
   INFO_BUTTON: "info-button",
   UPDATE_POSITION_IN_COMBAT: "update-position-in-combat",
   ACTIONS_SHOWN: "actions-shown",
-  SHOWN_NOTIFICATION: "shown-notification"
+  SHOWN_NOTIFICATION: "shown-notification",
+  TERRAIN_MEASURE: "terrain-measure"
 };
 const hiddenSettings = [settingNames.IS_ACTIVE, settingNames.SHOWN_NOTIFICATION];
 const defaultFalse = [settingNames.IS_ACTIVE, settingNames.SHOW_DIFFICULT_TERRAIN, settingNames.SHOW_WALLS, settingNames.IGNORE_DIFFICULT_TERRAIN, settingNames.SHOWN_NOTIFICATION];
-const ignore = [settingNames.MOVEMENT_ALPHA, settingNames.IC_VISIBILITY, settingNames.OOC_VISIBILITY, settingNames.RANGES, settingNames.DIAGONALS, settingNames.DEFAULT_WEAPON_RANGE, settingNames.SPEED_ATTR_PATH, settingNames.INFO_BUTTON, settingNames.ACTIONS_SHOWN];
+const ignore = [settingNames.MOVEMENT_ALPHA, settingNames.IC_VISIBILITY, settingNames.OOC_VISIBILITY, settingNames.RANGES, settingNames.DIAGONALS, settingNames.DEFAULT_WEAPON_RANGE, settingNames.SPEED_ATTR_PATH, settingNames.INFO_BUTTON, settingNames.ACTIONS_SHOWN, settingNames.TERRAIN_MEASURE];
 
 Hooks.once("init", () => {
   game.settings.registerMenu(MODULE_ID, settingNames.INFO_BUTTON, {
@@ -56,7 +65,7 @@ Hooks.once("init", () => {
         config: !hiddenSettings.includes(settingName),
         type: Boolean,
         default: !defaultFalse.includes(settingName),
-        onChange: () => { globalThis.combatRangeOverlay.instance.fullRefresh()}
+        onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
       });
     }
   }
@@ -73,9 +82,9 @@ Hooks.once("init", () => {
       max: 4,
       step: 1
     },
-    onChange: () => {
+    onChange: async () => {
       globalThis.combatRangeOverlay.actionsToShow = game.settings.get(MODULE_ID, 'actions-shown');
-      globalThis.combatRangeOverlay.instance.fullRefresh()
+      await globalThis.combatRangeOverlay.instance.fullRefresh()
     }
   });
 
@@ -91,7 +100,7 @@ Hooks.once("init", () => {
       max: 1,
       step: .05
     },
-    onChange: () => { globalThis.combatRangeOverlay.instance.fullRefresh()}
+    onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
   });
 
   game.settings.register(MODULE_ID, settingNames.IC_VISIBILITY, {
@@ -103,10 +112,12 @@ Hooks.once("init", () => {
     default: overlayVisibility.ALWAYS,
     choices: {
       always: `${MODULE_ID}.visibilities.${overlayVisibility.ALWAYS}`,
+      drag: `${MODULE_ID}.visibilities.${overlayVisibility.DRAG}`,
       hotkeys: `${MODULE_ID}.visibilities.${overlayVisibility.HOTKEYS}`,
-      never: `${MODULE_ID}.visibilities.${overlayVisibility.NEVER}`,
+      both: `${MODULE_ID}.visibilities.${overlayVisibility.BOTH}`,
+      never: `${MODULE_ID}.visibilities.${overlayVisibility.NEVER}`
     },
-    onChange: () => { globalThis.combatRangeOverlay.instance.fullRefresh()}
+    onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
   });
 
   game.settings.register(MODULE_ID, settingNames.OOC_VISIBILITY, {
@@ -118,11 +129,30 @@ Hooks.once("init", () => {
     default: overlayVisibility.NEVER,
     choices: {
       always: `${MODULE_ID}.visibilities.${overlayVisibility.ALWAYS}`,
+      drag: `${MODULE_ID}.visibilities.${overlayVisibility.DRAG}`,
       hotkeys: `${MODULE_ID}.visibilities.${overlayVisibility.HOTKEYS}`,
-      never: `${MODULE_ID}.visibilities.${overlayVisibility.NEVER}`,
+      both: `${MODULE_ID}.visibilities.${overlayVisibility.BOTH}`,
+      never: `${MODULE_ID}.visibilities.${overlayVisibility.NEVER}`
     },
-    onChange: () => { globalThis.combatRangeOverlay.instance.fullRefresh()}
+    onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
   });
+
+  if (game.modules.get('terrainmapper')?.active) {
+    game.settings.register(MODULE_ID, settingNames.TERRAIN_MEASURE, {
+      name: `${MODULE_ID}.${settingNames.TERRAIN_MEASURE}`,
+      hint: `${MODULE_ID}.${settingNames.TERRAIN_MEASURE}-hint`,
+      scope: 'world',
+      config: true,
+      type: String,
+      default: terrainMeasureTypes.CENTER_POINT,
+      choices: {
+        centerPoint: `${MODULE_ID}.terrain-measure-types.${terrainMeasureTypes.CENTER_POINT}`,
+        fivePoint: `${MODULE_ID}.terrain-measure-types.${terrainMeasureTypes.FIVE_POINT}`,
+        area: `${MODULE_ID}.terrain-measure-types.${terrainMeasureTypes.AREA}`
+      },
+      onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
+    })
+  }
 
   game.settings.register(MODULE_ID, settingNames.RANGES, {
     name: `${MODULE_ID}.${settingNames.RANGES}`,
@@ -131,7 +161,7 @@ Hooks.once("init", () => {
     config: true,
     type: String,
     default: DEFAULT_WEAPON_RANGES,
-    onChange: () => { globalThis.combatRangeOverlay.instance.fullRefresh()}
+    onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
   });
 
   game.settings.register(MODULE_ID, settingNames.DEFAULT_WEAPON_RANGE, {
@@ -141,7 +171,7 @@ Hooks.once("init", () => {
     config: true,
     type: Number,
     default: DEFAULT_DEFAULT_WEAPON_RANGE,
-    onChange: () => { globalThis.combatRangeOverlay.instance.fullRefresh()}
+    onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
   });
 
   game.settings.register(MODULE_ID, settingNames.DIAGONALS, {
@@ -157,7 +187,7 @@ Hooks.once("init", () => {
       five: `${MODULE_ID}.${settingNames.DIAGONALS}.${diagonals.FIVE}`,
       ten: `${MODULE_ID}.${settingNames.DIAGONALS}.${diagonals.TEN}`,
     },
-    onChange: () => { globalThis.combatRangeOverlay.instance.fullRefresh()}
+    onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
   });
 
   game.settings.register(MODULE_ID, settingNames.SPEED_ATTR_PATH, {
@@ -278,10 +308,10 @@ export function updatePositionInCombat() {
   return game.settings.get(MODULE_ID, settingNames.UPDATE_POSITION_IN_COMBAT);
 }
 
-export function getDistancePerTile() {
-  return game.settings.get(MODULE_ID, settingNames.DISTANCE_PER_TILE);
-}
-
 export function getWeaponRange() {
   return game.settings.get(MODULE_ID, settingNames.DEFAULT_WEAPON_RANGE);
+}
+
+export function getTerrainMeasure() {
+  return game.settings.get(MODULE_ID, settingNames.TERRAIN_MEASURE)
 }
