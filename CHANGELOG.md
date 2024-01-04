@@ -1,4 +1,7 @@
 # Changelog
+## 4.0.1 - 2024/01/04
+### Fixed
+- Fix all terrains being considered impassable
 ## 4.0.0 - 2023/12/05
 ### Added
 - Add compatibility for Terrain Mapper (GM only at the moment), closes [elpossum/fvtt-combat-range-overlay#7](https://github.com/elpossum/fvtt-combat-range-overlay/issues/7)

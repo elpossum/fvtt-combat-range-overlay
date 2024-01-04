@@ -14,13 +14,9 @@ if (await srcExists("/modules/terrainmapper/module.json")) {
       if (!(origin instanceof PIXI.Point)) origin = new PIXI.Point(origin.x, origin.y);
 
       const activeTerrains = canvas.terrain.activeTerrainsAt(origin, token.elevationE)
-      const tChangeFn = (markerT, activeTerrains) => {
-        const percentAdded = activeTerrains.map(t => {
-          (t.movementSpeedForToken(token) ?? 1) / TokenInfo.current.getSpeed(token)
-        }).reduce((acc, curr) => acc * curr, 1);
-        return percentAdded;
-      };
-      const percent = tChangeFn(1, activeTerrains);
+      const percent = activeTerrains.map(t =>
+        (t.movementSpeedForToken(token) ?? 1) / TokenInfo.current.getSpeed(token)
+      ).reduce((acc, curr) => acc * curr, 1);
       return percent;
     }
 
