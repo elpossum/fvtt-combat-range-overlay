@@ -81,9 +81,8 @@ export class GridTile {
         }
       } else {
         const noTerrain = api.Terrain.percentMovementForTokenAlongPath(token, { x: 0, y: 0 }, { x: 50, y: 50 });
-        const percent = api.Terrain.percentMovementForTokenAlongPath(token, current, neighbor);
-        if (!isFinite(noTerrain)) return 0
-        else return noTerrain / percent
+        if (isNewerVersion(game.modules.get('terrainmapper').version, '0.1.1')) return 1 / noTerrain
+        else return noTerrain
       }
     }
   }

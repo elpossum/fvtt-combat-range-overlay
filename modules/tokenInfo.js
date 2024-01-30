@@ -442,8 +442,8 @@ async function updateUnmodifiedSpeed(token) {
   } catch {
     return
   }
-  if (speed === TokenInfo.current.unmodifiedSpeed) {
-    // Speed has not been changed since last set
+  if (speed === TokenInfo.current.unmodifiedSpeed || isNaN(speed)) {
+    // Speed has not been changed since last set or the token is in an impassable space
   } else {
     await TokenInfo.current.setUnmodifiedSpeed(speed)
   }

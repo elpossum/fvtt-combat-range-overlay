@@ -1,4 +1,7 @@
 # Changelog
+## 4.1.0 - 2024/01/30
+### Changed
+- Update for Terrain Mapper v0.1.2
 ## 4.0.1 - 2024/01/04
 ### Fixed
 - Fix all terrains being considered impassable
