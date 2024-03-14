@@ -1,4 +1,9 @@
 # Changelog
+## 4.1.1 - 2024/03/14
+### Added
+- Add setting so the overlay only shows if the controlled token is the active combatant
+### Fixed
+- Fix incorrect default colors
 ## 4.1.0 - 2024/01/30
 ### Changed
 - Update for Terrain Mapper v0.1.2

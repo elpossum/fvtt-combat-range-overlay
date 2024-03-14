@@ -3,6 +3,7 @@ import ModuleInfoApp from "./moduleInfo.js"
 
 export const overlayVisibility = {
   ALWAYS: 'always',
+  ACTIVE_COMBATANT: 'activeCombatant',
   DRAG: 'drag',
   HOTKEYS: 'hotkeys',
   BOTH: 'both',
@@ -112,6 +113,7 @@ Hooks.once("init", () => {
     default: overlayVisibility.ALWAYS,
     choices: {
       always: `${MODULE_ID}.visibilities.${overlayVisibility.ALWAYS}`,
+      activeCombatant: `${MODULE_ID}.visibilities.${overlayVisibility.ACTIVE_COMBATANT}`,
       drag: `${MODULE_ID}.visibilities.${overlayVisibility.DRAG}`,
       hotkeys: `${MODULE_ID}.visibilities.${overlayVisibility.HOTKEYS}`,
       both: `${MODULE_ID}.visibilities.${overlayVisibility.BOTH}`,

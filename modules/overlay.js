@@ -311,15 +311,34 @@ export class Overlay {
       }
 
       const visibilitySetting = currentToken.inCombat ? Settings.getICVisibility() : Settings.getOOCVisibility();
-      if (visibilitySetting === Settings.overlayVisibility.ALWAYS) {
-        showOverlay = true;
-      } else if (visibilitySetting === Settings.overlayVisibility.BOTH && (hotkeys || drag)) {
-        showOverlay = true;
-      } else if (visibilitySetting === Settings.overlayVisibility.HOTKEYS && hotkeys) {
-        showOverlay = true;
-      } else if (visibilitySetting === Settings.overlayVisibility.DRAG && drag) {
-        showOverlay = true;
-      }
+      switch (visibilitySetting) {
+        case Settings.overlayVisibility.ALWAYS:
+          showOverlay = true;
+          break;
+        case Settings.overlayVisibility.ACTIVE_COMBATANT:
+          if (currentToken.id === game.combat.current.tokenId) {
+            showOverlay = true;
+          }
+          break;
+        case Settings.overlayVisibility.BOTH:
+          if (hotkeys || drag) {
+            showOverlay = true;
+          }
+          break;
+        case Settings.overlayVisibility.HOTKEYS:
+          if (hotkeys) {
+            showOverlay = true;
+          }
+          break;
+        case Settings.overlayVisibility.DRAG:
+          if (drag) {
+            showOverlay = true;
+          }
+          break;
+        default:
+          showOverlay = false;
+          break;
+      }      
     }
 
     if (showOverlay) {

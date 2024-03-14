@@ -20,6 +20,7 @@
     "ooc_visibility-hint": "When should the overlay be visible out of combat?",
     "visibilities": {
       "always": "Always",
+      "activeCombatant": "Only when active combatant",
       "drag": "Only on mouse drag",
       "hotkeys": "Only with hotkeys",
       "both": "With either drag or hotkeys",

@@ -11,7 +11,7 @@ export const colorSettingNames = [
   'weapon-three'
 ]
 
-const defaultColors = ["#ffffff", "#0000ff", "#ffff00", "#ff0000", "#800080", "#ffffff", "#0000ff", "#ffff00"]
+const defaultColors = ["#ffffffff", "#0000ffff", "#ffff00ff", "#ff0000ff", "#800080ff", "#ffffffff", "#0000ffff", "#ffff00ff"]
 
 Hooks.once("init", () => {
   if (game.modules.get('colorsettings') && game.modules.get('colorsettings')?.active) {
