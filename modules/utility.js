@@ -2,7 +2,7 @@ import * as Settings from "./settings.js";
 import { DEFAULT_WEAPON_RANGES } from "./constants.js"
 
 export function getCurrentToken() {
-  if (canvasTokensControlled().length > 0) {
+  if (canvasTokensControlled().length === 1) {
     return canvasTokensControlled()[0];
   } else {
     const activeTokens = game.user?.character?.getActiveTokens();
