@@ -286,15 +286,6 @@ export class Overlay {
     }
   }
 
-  // noinspection JSUnusedLocalSymbols
-  async altKeyHandler(event, state) {
-    const currentToken = getCurrentToken();
-    const visibilitySetting = currentToken?.inCombat ? Settings.getICVisibility() : Settings.getOOCVisibility();
-    if (!event.repeat && visibilitySetting !== Settings.overlayVisibility.ALWAYS) {
-      await this.fullRefresh();
-    }
-  }
-
   async fullRefresh() {
     this.clearAll();
 

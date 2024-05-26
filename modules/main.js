@@ -4,7 +4,6 @@ import './debug.js';
 import './settings.js';
 import './controls.js';
 import './tokenInfo.js';
-import { TerrainHelper } from "./terrainHelper.js"
 import { Overlay } from "./overlay.js"
 import { debugLog } from "./debug.js"
 import { MODULE_ID } from "./constants.js"
@@ -44,8 +43,6 @@ Hooks.on("ready", function () {
     globalThis.combatRangeOverlay.colors.push(parseInt(game.settings.get(MODULE_ID, colorSettingNames[i]).slice(0, -2).replace("#", "0x"), 16))
   }
   mouse.addHook(instance.dragHandler.bind(instance))
-  window.addEventListener("keydown", instance.altKeyHandler.bind(instance));
-  window.addEventListener("keyup", instance.altKeyHandler.bind(instance));
   if (!game.settings.get(MODULE_ID, "shown-notification") && !game.modules.get('colorsettings').active) {
     ui.notifications.warn(game.i18n.localize(`${MODULE_ID}.no-color-settings`));
     game.settings.set(MODULE_ID, "shown-notification", true)
