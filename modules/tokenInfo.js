@@ -298,7 +298,7 @@ export class TokenInfo {
         throw ("Tried to call speed getter with an undefined actor");
       }
 
-      if (game.modules.get('terrainmapper')?.active) {
+      if (game.modules.get('terrainmapper')?.active && parseInt(game.version) < 12) {
         if (this.getSpeed(this.token) === 0) {
           return 0
         } else {
@@ -437,7 +437,7 @@ Hooks.on("updateToken", async (tokenDocument, updateData) => {
 async function updateUnmodifiedSpeed(token) {
   let speed;
   try {
-    speed = GridTile.costTerrainMapper(token, { x: token.x, y: token.y }, token.center) * TokenInfo.current.getSpeed(token);
+    speed = GridTile.costTerrainMapper(token, token.center) * TokenInfo.current.getSpeed(token);
   } catch {
     return
   }
@@ -473,6 +473,6 @@ Hooks.on("controlToken", async (token, boolFlag) => {
 
 Hooks.on("updateActor", async (actor) => {
   const token = canvas.tokens.controlled.filter((token) => token.actor === actor)[0];
-  if (!game.modules.get('terrainmapper')?.active) return
+  if (!game.modules.get('terrainmapper')?.active || parseInt(game.version) > 11) return
   await updateUnmodifiedSpeed(token)
 })
