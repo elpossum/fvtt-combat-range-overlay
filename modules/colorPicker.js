@@ -43,7 +43,9 @@ Hooks.once("init", () => {
         hint: `${MODULE_ID}.color-picker.${colorSettingName}.hint`,
         label: `${MODULE_ID}.color-picker.label`,
         restricted: false,
-        defaultColor: `${defaultColors[index]}`,
+        type: String,
+        config: true,
+        default: `${defaultColors[index]}`,
         scope: "client",
         onChange: async () => {
           globalThis.combatRangeOverlay.colorByActions = [];
