@@ -16,13 +16,23 @@ export class GridTile {
   }
 
   get centerPt() {
-    const pixels = canvas.grid.grid.getPixelsFromGridPosition(this.gx, this.gy);
+    let pixels;
+    if (parseInt(game.version) > 11) {
+      pixels = Object.values(canvas.grid.getTopLeftPoint({ i: this.gx, j: this.gy }));
+    } else {
+      pixels = canvas.grid.grid.getPixelsFromGridPosition(this.gx, this.gy);
+    }
     // noinspection JSUnresolvedVariable
     return { x: pixels[0] + canvas.grid.size / 2, y: pixels[1] + canvas.grid.size / 2 };
   }
 
   get pt() {
-    const pixels = canvas.grid.grid.getPixelsFromGridPosition(this.gx, this.gy);
+    let pixels;
+    if (parseInt(game.version) > 11) {
+      pixels = Object.values(canvas.grid.getTopLeftPoint({ i: this.gx, j: this.gy }));
+    } else {
+      pixels = canvas.grid.grid.getPixelsFromGridPosition(this.gx, this.gy);
+    }
     return { x: pixels[0], y: pixels[1] };
   }
 
@@ -103,7 +113,12 @@ export class GridTile {
   }
 
   static fromPixels(x, y) {
-    const [gx, gy] = canvas.grid.grid.getGridPositionFromPixels(x, y);
+    let [gx, gy] = [];
+    if (parseInt(game.version) > 11) {
+      [gx, gy] = Object.values(canvas.grid.getOffset({ x: x, y: y }));
+    } else {
+      [gx, gy] = canvas.grid.grid.getGridPositionFromPixels(x, y);
+    }
     return new GridTile(gx, gy);
   }
 

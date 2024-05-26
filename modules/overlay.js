@@ -127,7 +127,12 @@ export class Overlay {
       }
       current.visited = true;
 
-      const neighborGridXYs = canvas.grid.grid.getNeighbors(current.gx, current.gy);
+      let neighborGridXYs;
+      if (parseInt(game.version) > 11) {
+        neighborGridXYs = canvas.grid.getAdjacentOffsets({ i: current.gx, j: current.gy }).map(({ i, j }) => [i, j])
+      } else {
+        neighborGridXYs = canvas.grid.grid.getNeighbors(current.gx, current.gy)
+      };
       for (const neighborGridXY of neighborGridXYs) {
         let neighbor = new GridTile(neighborGridXY[0], neighborGridXY[1]);
         if (tileMap.has(neighbor.key)) {
