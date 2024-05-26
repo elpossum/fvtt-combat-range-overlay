@@ -44,7 +44,14 @@
         "id": "colorsettings",
         "type": "module",
         "manifest": "https://raw.githubusercontent.com/ardittristan/VTTColorSettings/master/module.json",
-        "reason": "Allows colours to be customised",
+        "reason": "Allows colours to be customised with a picker. Only one of these two is needed for this functionality.",
+        "compatibility": {}
+      },
+      {
+        "id": "color-picker",
+        "type": "module",
+        "manifest": "https://github.com/Larkinabout/fvtt-color-picker/releases/latest/download/module.json",
+        "reason": "Allows colours to be customised with a picker. Only one of these two is needed for this functionality.",
         "compatibility": {}
       }
     ]
