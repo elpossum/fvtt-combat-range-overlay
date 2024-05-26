@@ -49,7 +49,7 @@ export class GridTile {
     }
   }
 
-  static costTerrainMapper(token, current, neighbor) {
+  static costTerrainMapper(token, neighbor) {
     if (TokenInfo.current.isIgnoreDifficultTerrain) {
       return 1;
     } else {

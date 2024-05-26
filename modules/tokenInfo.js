@@ -1,8 +1,7 @@
-import { DEFAULT_DEFAULT_WEAPON_RANGE, FLAG_NAMES, MODULE_ID } from "./constants.js"
+import { FLAG_NAMES, MODULE_ID } from "./constants.js"
 import { canvasTokensGet, getCurrentToken, uiNotificationsWarn, getWeaponRanges } from "./utility.js"
 import { debugLog } from "./debug.js"
 import { getSpeedAttrPath, updatePositionInCombat, getWeaponRange } from "./settings.js"
-import { colorSettingNames } from "./colorPicker.js"
 import { GridTile } from "./gridTile.js"
 
 export class TokenInfo {
@@ -401,14 +400,14 @@ function updateLocation(token, updateData) {
 }
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("createCombatant", async (combatant, options, someId) => {
+Hooks.on("createCombatant", async (combatant) => {
   const token = canvasTokensGet(combatant.token.id);
   updateMeasureFrom(token);
   await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("deleteCombatant", async (combatant, options, someId) => {
+Hooks.on("deleteCombatant", async (combatant) => {
   const token = canvasTokensGet(combatant.token?.id);
   updateMeasureFrom(token);
   await globalThis.combatRangeOverlay.instance.fullRefresh();
@@ -416,7 +415,7 @@ Hooks.on("deleteCombatant", async (combatant, options, someId) => {
 
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("updateCombat", async (combat, turnInfo, diff, someId) => {
+Hooks.on("updateCombat", async (combat) => {
   if (combat?.previous?.tokenId) {
     const token = canvasTokensGet(combat.previous.tokenId);
     updateMeasureFrom(token);
@@ -425,7 +424,7 @@ Hooks.on("updateCombat", async (combat, turnInfo, diff, someId) => {
 });
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("updateToken", async (tokenDocument, updateData, options, someId) => {
+Hooks.on("updateToken", async (tokenDocument, updateData) => {
   const tokenId = tokenDocument.id;
   const realToken = canvasTokensGet(tokenId); // Get the real token
   updateLocation(realToken, updateData);

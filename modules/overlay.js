@@ -13,11 +13,9 @@ import { TokenInfo } from "./tokenInfo.js";
 import * as Settings from "./settings.js";
 import { mouse } from "./mouse.js";
 import { debugLog } from "./debug.js"
-import { colorSettingNames } from "./colorPicker.js"
 import { TerrainHelper } from "./terrainHelper.js"
 
 // Colors
-const highlightLineColor = 0xffffff; // white
 const pathLineColor = 0x0000ff; // blue
 const wallLineColor = 0x40e0d0; // turquoise
 
@@ -151,7 +149,7 @@ export class Overlay {
         } else {
           let newDistance;
           if (game.modules.get('terrainmapper')?.active) {
-            newDistance = current.distance + GridTile.costTerrainMapper(currentToken, current, neighbor);
+            newDistance = current.distance + GridTile.costTerrainMapper(currentToken, neighbor);
           } else {
             newDistance = current.distance + neighbor.cost;
           };
