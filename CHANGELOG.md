@@ -1,5 +1,22 @@
 # Changelog
 
+## 4.2.0 - 2024/06/01
+
+### Added
+
+- Add Foundry v12 compatibility
+- Add another color picker
+
+### Changed
+
+- Allow colors to be changed without a picker
+- Change keyboard listeners to be handled by Foundry
+- Block Terrain Mapper on v12 as not yet compatible
+
+### Fixed
+
+- Allow overlay to show only if a single token is controlled
+
 ## 4.1.1 - 2024/03/14
 
 ### Added
