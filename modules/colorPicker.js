@@ -13,8 +13,20 @@ export const colorSettingNames = [
 
 const defaultColors = ["#ffffffff", "#0000ffff", "#ffff00ff", "#ff0000ff", "#800080ff", "#ffffffff", "#0000ffff", "#ffff00ff"]
 
+async function updateSettings() {
+  globalThis.combatRangeOverlay.colorByActions = [];
+  globalThis.combatRangeOverlay.colors = [];
+  for (let i = 0; i < 5; i++) {
+    globalThis.combatRangeOverlay.colorByActions.push(parseInt(game.settings.get(MODULE_ID, colorSettingNames[i]).slice(0, -2).replace("#", "0x"), 16))
+  };
+  for (let i = 5; i < 8; i++) {
+    globalThis.combatRangeOverlay.colors.push(parseInt(game.settings.get(MODULE_ID, colorSettingNames[i]).slice(0, -2).replace("#", "0x"), 16))
+  };
+  await globalThis.combatRangeOverlay.instance.fullRefresh()
+}
+
 Hooks.once("init", () => {
-  if (game.modules.get('colorsettings') && game.modules.get('colorsettings')?.active) {
+  if (game.modules.get('colorsettings')?.active) {
     for (const [index, colorSettingName] of colorSettingNames.entries()) {
       new window.Ardittristan.ColorSetting(MODULE_ID, colorSettingName, {
         name: `${MODULE_ID}.color-picker.${colorSettingName}.name`,
@@ -23,18 +35,20 @@ Hooks.once("init", () => {
         restricted: false,
         defaultColor: `${defaultColors[index]}`,
         scope: "client",
-        onChange: async () => {
-          globalThis.combatRangeOverlay.colorByActions = [];
-          globalThis.combatRangeOverlay.colors = [];
-          for (let i = 0; i < 5; i++) {
-            globalThis.combatRangeOverlay.colorByActions.push(parseInt(game.settings.get(MODULE_ID, colorSettingNames[i]).slice(0, -2).replace("#", "0x"), 16))
-          };
-          for (let i = 5; i < 8; i++) {
-            globalThis.combatRangeOverlay.colors.push(parseInt(game.settings.get(MODULE_ID, colorSettingNames[i]).slice(0, -2).replace("#", "0x"), 16))
-          };
-          await globalThis.combatRangeOverlay.instance.fullRefresh()
-        }
+        onChange: updateSettings
       })
+    }
+  } else if (game.modules.get('color-picker')?.active) {
+    for (const [index, colorSettingName] of colorSettingNames.entries()) {
+      ColorPicker.register(MODULE_ID, colorSettingName, {
+        name: `${MODULE_ID}.color-picker.${colorSettingName}.name`,
+        hint: `${MODULE_ID}.color-picker.${colorSettingName}.hint`,
+        label: `${MODULE_ID}.color-picker.label`,
+        restricted: false,
+        default: `${defaultColors[index]}`,
+        scope: "client",
+        onChange: updateSettings
+      }, { format: 'hexa' })
     }
   } else {
     for (const [index, colorSettingName] of colorSettingNames.entries()) {
@@ -43,19 +57,11 @@ Hooks.once("init", () => {
         hint: `${MODULE_ID}.color-picker.${colorSettingName}.hint`,
         label: `${MODULE_ID}.color-picker.label`,
         restricted: false,
-        defaultColor: `${defaultColors[index]}`,
+        type: String,
+        config: true,
+        default: `${defaultColors[index]}`,
         scope: "client",
-        onChange: async () => {
-          globalThis.combatRangeOverlay.colorByActions = [];
-          globalThis.combatRangeOverlay.colors = [];
-          for (let i = 0; i < 5; i++) {
-            globalThis.combatRangeOverlay.colorByActions.push(parseInt(game.settings.get(MODULE_ID, colorSettingNames[i]).slice(0, -2).replace("#", "0x"), 16))
-          };
-          for (let i = 5; i < 8; i++) {
-            globalThis.combatRangeOverlay.colors.push(parseInt(game.settings.get(MODULE_ID, colorSettingNames[i]).slice(0, -2).replace("#", "0x"), 16))
-          };
-          await globalThis.combatRangeOverlay.instance.fullRefresh()
-        }
+        onChange: updateSettings
       })
     }
   }

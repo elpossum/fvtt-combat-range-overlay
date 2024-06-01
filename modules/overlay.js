@@ -13,11 +13,9 @@ import { TokenInfo } from "./tokenInfo.js";
 import * as Settings from "./settings.js";
 import { mouse } from "./mouse.js";
 import { debugLog } from "./debug.js"
-import { colorSettingNames } from "./colorPicker.js"
 import { TerrainHelper } from "./terrainHelper.js"
 
 // Colors
-const highlightLineColor = 0xffffff; // white
 const pathLineColor = 0x0000ff; // blue
 const wallLineColor = 0x40e0d0; // turquoise
 
@@ -127,7 +125,12 @@ export class Overlay {
       }
       current.visited = true;
 
-      const neighborGridXYs = canvas.grid.grid.getNeighbors(current.gx, current.gy);
+      let neighborGridXYs;
+      if (parseInt(game.version) > 11) {
+        neighborGridXYs = canvas.grid.getAdjacentOffsets({ i: current.gx, j: current.gy }).map(({ i, j }) => [i, j])
+      } else {
+        neighborGridXYs = canvas.grid.grid.getNeighbors(current.gx, current.gy)
+      };
       for (const neighborGridXY of neighborGridXYs) {
         let neighbor = new GridTile(neighborGridXY[0], neighborGridXY[1]);
         if (tileMap.has(neighbor.key)) {
@@ -145,8 +148,8 @@ export class Overlay {
           // Blocked, do nothing
         } else {
           let newDistance;
-          if (game.modules.get('terrainmapper')?.active) {
-            newDistance = current.distance + GridTile.costTerrainMapper(currentToken, current, neighbor);
+          if (game.modules.get('terrainmapper')?.active && parseInt(game.version) < 12) {
+            newDistance = current.distance + GridTile.costTerrainMapper(currentToken, neighbor);
           } else {
             newDistance = current.distance + neighbor.cost;
           };
@@ -281,15 +284,6 @@ export class Overlay {
     }
   }
 
-  // noinspection JSUnusedLocalSymbols
-  async altKeyHandler(event, state) {
-    const currentToken = getCurrentToken();
-    const visibilitySetting = currentToken?.inCombat ? Settings.getICVisibility() : Settings.getOOCVisibility();
-    if (!event.repeat && visibilitySetting !== Settings.overlayVisibility.ALWAYS) {
-      await this.fullRefresh();
-    }
-  }
-
   async fullRefresh() {
     this.clearAll();
 
@@ -338,7 +332,7 @@ export class Overlay {
         default:
           showOverlay = false;
           break;
-      }      
+      }
     }
 
     if (showOverlay) {
@@ -366,7 +360,7 @@ export class Overlay {
     this.clearAll();
     TokenInfo.resetMap();
     this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
-    if (game.modules.get('terrainmapper')?.active) setTimeout(() => TerrainHelper.sceneUpdate(), 1000)
+    if (game.modules.get('terrainmapper')?.active && parseInt(game.version) < 12) setTimeout(() => TerrainHelper.sceneUpdate(), 1000)
   }
 
   async updateWallHook() {

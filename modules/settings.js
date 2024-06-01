@@ -209,11 +209,13 @@ Hooks.once("init", () => {
         key: 'AltLeft'
       }
     ],
-    onDown: () => {
+    onDown: async () => {
       PRESSED_KEYS.showOverlay = true;
+      await globalThis.combatRangeOverlay.instance.fullRefresh()
     },
-    onUp: () => {
+    onUp: async () => {
       PRESSED_KEYS.showOverlay = false;
+      await globalThis.combatRangeOverlay.instance.fullRefresh()
     }
   })
 

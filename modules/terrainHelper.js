@@ -32,7 +32,7 @@ if (await srcExists("/modules/terrainmapper/module.json")) {
   }
 } else {
   Hooks.on("ready", () => {
-    if (game.modules.get('terrainmapper').active) {
+    if (game.modules.get('terrainmapper')?.active) {
       ui.notifications.warn('Terrain Mapper in unexpected location')
     }
   })

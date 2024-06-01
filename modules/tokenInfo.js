@@ -1,8 +1,7 @@
-import { DEFAULT_DEFAULT_WEAPON_RANGE, FLAG_NAMES, MODULE_ID } from "./constants.js"
+import { FLAG_NAMES, MODULE_ID } from "./constants.js"
 import { canvasTokensGet, getCurrentToken, uiNotificationsWarn, getWeaponRanges } from "./utility.js"
 import { debugLog } from "./debug.js"
 import { getSpeedAttrPath, updatePositionInCombat, getWeaponRange } from "./settings.js"
-import { colorSettingNames } from "./colorPicker.js"
 import { GridTile } from "./gridTile.js"
 
 export class TokenInfo {
@@ -299,7 +298,7 @@ export class TokenInfo {
         throw ("Tried to call speed getter with an undefined actor");
       }
 
-      if (game.modules.get('terrainmapper')?.active) {
+      if (game.modules.get('terrainmapper')?.active && parseInt(game.version) < 12) {
         if (this.getSpeed(this.token) === 0) {
           return 0
         } else {
@@ -401,14 +400,14 @@ function updateLocation(token, updateData) {
 }
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("createCombatant", async (combatant, options, someId) => {
+Hooks.on("createCombatant", async (combatant) => {
   const token = canvasTokensGet(combatant.token.id);
   updateMeasureFrom(token);
   await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("deleteCombatant", async (combatant, options, someId) => {
+Hooks.on("deleteCombatant", async (combatant) => {
   const token = canvasTokensGet(combatant.token?.id);
   updateMeasureFrom(token);
   await globalThis.combatRangeOverlay.instance.fullRefresh();
@@ -416,7 +415,7 @@ Hooks.on("deleteCombatant", async (combatant, options, someId) => {
 
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("updateCombat", async (combat, turnInfo, diff, someId) => {
+Hooks.on("updateCombat", async (combat) => {
   if (combat?.previous?.tokenId) {
     const token = canvasTokensGet(combat.previous.tokenId);
     updateMeasureFrom(token);
@@ -425,7 +424,7 @@ Hooks.on("updateCombat", async (combat, turnInfo, diff, someId) => {
 });
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("updateToken", async (tokenDocument, updateData, options, someId) => {
+Hooks.on("updateToken", async (tokenDocument, updateData) => {
   const tokenId = tokenDocument.id;
   const realToken = canvasTokensGet(tokenId); // Get the real token
   updateLocation(realToken, updateData);
@@ -438,7 +437,7 @@ Hooks.on("updateToken", async (tokenDocument, updateData, options, someId) => {
 async function updateUnmodifiedSpeed(token) {
   let speed;
   try {
-    speed = GridTile.costTerrainMapper(token, { x: token.x, y: token.y }, token.center) * TokenInfo.current.getSpeed(token);
+    speed = GridTile.costTerrainMapper(token, token.center) * TokenInfo.current.getSpeed(token);
   } catch {
     return
   }
@@ -474,6 +473,6 @@ Hooks.on("controlToken", async (token, boolFlag) => {
 
 Hooks.on("updateActor", async (actor) => {
   const token = canvas.tokens.controlled.filter((token) => token.actor === actor)[0];
-  if (!game.modules.get('terrainmapper')?.active) return
+  if (!game.modules.get('terrainmapper')?.active || parseInt(game.version) > 11) return
   await updateUnmodifiedSpeed(token)
 })
