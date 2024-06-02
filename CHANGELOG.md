@@ -16,6 +16,7 @@
 ### Fixed
 
 - Allow overlay to show only if a single token is controlled
+- Fix overlay not showing if multiple tokens targeted
 
 ## 4.1.1 - 2024/03/14
 

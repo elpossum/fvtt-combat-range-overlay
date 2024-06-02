@@ -596,7 +596,7 @@ function buildRangeMap(targetMap) {
   for (const tileSet of targetMap.values()) {
     for (const tile of tileSet) {
       const tileKey = tile.key;
-      let count = rangeMap.get(tileKey) ?? 0;
+      let count = rangeMap.get(tileKey)?.count ?? 0;
       count++;
       rangeMap.set(tileKey, { count: count, color: tile.color });
     }
