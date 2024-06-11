@@ -68,5 +68,5 @@ jobs:
         curl -s \
         -H 'Content-Type: application/json' \
         -H 'Authorization: ${{ secrets.FVTT_API_TOKEN }}' \
-        --json ${{ steps.get_body.outputs.body }} \
+        -d '${{ steps.get_body.outputs.body }}' \
         | jq .
