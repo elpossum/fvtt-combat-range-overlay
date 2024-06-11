@@ -148,7 +148,7 @@ export class Overlay {
           // Blocked, do nothing
         } else {
           let newDistance;
-          if (game.modules.get('terrainmapper')?.active && parseInt(game.version) < 12) {
+          if (game.modules.get('terrainmapper')?.active) {
             newDistance = current.distance + GridTile.costTerrainMapper(currentToken, neighbor);
           } else {
             newDistance = current.distance + neighbor.cost;
@@ -360,7 +360,7 @@ export class Overlay {
     this.clearAll();
     TokenInfo.resetMap();
     this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
-    if (game.modules.get('terrainmapper')?.active && parseInt(game.version) < 12) setTimeout(() => TerrainHelper.sceneUpdate(), 1000)
+    if (game.modules.get('terrainmapper')?.active) setTimeout(() => TerrainHelper.sceneUpdate(), 1000)
   }
 
   async updateWallHook() {
