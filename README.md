@@ -26,7 +26,7 @@ diagonal movement.
 Weapon range is more complex so the path cannot be manually set for unsupported systems. Pathfinder 2e, Pathfinder 1e, DnD3.5e, SWADE, WFRP4e
 and DnD5e are all supported to the best of my knowledge of the systems. If you are using an unsupported system, you will be prompted for weapon range when you try to bring up the overlay.
 
-**Modules**: This module requires lib-wrapper and supports the Enhanced Terrain Layer (not updated for Foundry v11 though may have some functionality) and Terrain Mapper (not yet updated for Foundry v12 and doesn't work with PF2E) modules. Can use lib-ColorSettings or Color Picker to choose overlay colors (alpha currently not working).
+**Modules**: This module requires lib-wrapper and supports the Enhanced Terrain Layer (not updated for Foundry v11 though may have some functionality) and Terrain Mapper (doesn't work with PF2E) modules. Can use lib-ColorSettings or Color Picker to choose overlay colors (alpha currently not working).
 
 ## Understanding the Overlay
 
