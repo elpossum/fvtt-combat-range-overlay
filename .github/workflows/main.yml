@@ -38,3 +38,35 @@ jobs:
         artifacts: './module.json, ./module.zip'
         tag: ${{ github.event.release.tag_name }}
         body: ${{ github.event.release.body }}
+
+    # Minify manifest and write to output
+    - name: Get manifest
+      id: get_manifest
+      run: echo "manifest=$(cat module.json | jq -c .)" >> $GITHUB_OUTPUT
+
+    # Substitute values in apiRequest.json
+    - name: Substitute values in API request
+      id: sub_values_api
+      uses: microsoft/variable-substitution@v1
+      with:
+        files: 'apiRequest.json'
+      env:
+        release.version: ${{github.event.release.tag_name}}
+        release.manifest: https://github.com/${{github.repository}}/releases/download/${{github.event.release.tag_name}}/module.json
+        release.compatibility.minimum: ${{ fromJson(steps.get_manifest.outputs.manifest).compatibility.minimum }}
+        release.compatibility.verified: ${{ fromJson(steps.get_manifest.outputs.manifest).compatibility.verified }}
+
+    # Minify API request and write to output
+    - name: Get API body
+      id: get_body
+      run: echo "body=$(cat apiRequest.json | jq -c .)" >> $GITHUB_OUTPUT
+
+    # Make API request
+    - name: Make API request
+      id: api_request
+      run: |
+        curl -s \
+        -H 'Content-Type: application/json' \
+        -H 'Authorization: ${{ secrets.FVTT_API_TOKEN }}' \
+        --json ${{ steps.get_body.outputs.body }} \
+        | jq .

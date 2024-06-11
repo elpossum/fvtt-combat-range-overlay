@@ -1,0 +1,12 @@
+{
+  "id": "combat-range-overlay",
+  "release": {
+    "version": "replace me",
+    "manifest": "replace me",
+    "notes": "https://raw.github.com/elpossum/fvtt-combat-range-overlay/master/CHANGELOG.md",
+    "compatibility": {
+      "minimum": "replace me",
+      "verified": "replace me"
+    }
+  }
+}
