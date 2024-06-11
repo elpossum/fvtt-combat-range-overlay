@@ -22,11 +22,12 @@ if (await srcExists("/modules/terrainmapper/module.json")) {
     static sceneUpdate() {
       globalThis.combatRangeOverlay.terrainGraphics.removeChildren();
       const nLayers = canvas.terrain.constructor.MAX_LAYERS;
+      const blendMode = game.version < 12 ? 2 : 1
       for (let i = 0; i < nLayers; i += 1) {
         const shader = terrainLayerShader.TerrainLayerShader.create();
         const m = globalThis.combatRangeOverlay.terrainGraphics.addChild(new terrainQuadMesh.TerrainQuadMesh(canvas.dimensions.sceneRect, shader));
         m.shader.uniforms.uTerrainLayer = i;
-        m.blendMode = 2;
+        m.blendMode = blendMode;
       }
     }
   }
