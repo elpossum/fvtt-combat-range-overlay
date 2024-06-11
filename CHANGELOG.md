@@ -1,5 +1,11 @@
 # Changelog
 
+## 4.2.1 - 2024/06/11
+
+### Fixed
+
+- Re-enable Terrain Mapper compatibility in Foundry v12
+
 ## 4.2.0 - 2024/06/01
 
 ### Added
