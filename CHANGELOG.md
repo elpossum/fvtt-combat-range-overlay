@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.3.0 - 2024/06/16
+
+### Fixed
+
+- Prevent overlay stacking by checking if an overlay is already being drawn before starting to draw another closes [elpossum/fvtt-combat-range-overlay#9](https://github.com/elpossum/fvtt-combat-range-overlay/issues/9)
+
+### Added
+
+- Add an initialized property (`combatRangeOverlay.initialized`) and hook (`combat-range-overlay.ready`) that triggers when the module is ready
+
 ## 4.2.1 - 2024/06/11
 
 ### Fixed
