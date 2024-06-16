@@ -377,7 +377,7 @@ export class Overlay {
 
   registerHooks() {
     this.hookIDs.renderApplication = Hooks.on("renderApplication", async (application) => {
-      if (application.id !== 'croQuickSettingsDialog') await this.renderApplicationHook()
+      if (!['croQuickSettingsDialog', 'token-hud', 'navigation', 'controls'].includes(application.id)) await this.renderApplicationHook()
     });
     this.hookIDs.targetToken = Hooks.on("targetToken", async () => await this.targetTokenHook());
     this.hookIDs.canvasReady = Hooks.on("canvasReady", () => this.canvasReadyHook());

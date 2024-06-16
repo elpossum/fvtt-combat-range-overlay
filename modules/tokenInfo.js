@@ -465,7 +465,7 @@ Hooks.on("controlToken", async (token, boolFlag) => {
       break
     }
     case true: {
-      await globalThis.combatRangeOverlay.instance.fullRefresh();
+      if (game.ready) await globalThis.combatRangeOverlay.instance.fullRefresh();
       break
     }
   }
