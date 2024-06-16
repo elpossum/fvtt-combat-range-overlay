@@ -87,6 +87,7 @@ export class Overlay {
     this.newTarget = false;
     this.justActivated = false;
     this.DISTANCE_PER_TILE = 0;
+    this.drawing = false;
   }
 
   // Use Dijkstra's shortest path algorithm
@@ -285,6 +286,11 @@ export class Overlay {
   }
 
   async fullRefresh() {
+    if (this.drawing) {
+      Hooks.once(`${MODULE_ID}.done`, async () => await this.fullRefresh());
+      return;
+    }
+    this.drawing = true;
     this.clearAll();
 
     if (!Settings.isActive()) {
@@ -341,6 +347,8 @@ export class Overlay {
       uiNotificationsInfo(game.i18n.localize(`${MODULE_ID}.activated-not-visible`));
     }
     this.justActivated = false;
+    this.drawing = false;
+    Hooks.callAll(`${MODULE_ID}.done`);
   }
 
   // partialRefresh() {
