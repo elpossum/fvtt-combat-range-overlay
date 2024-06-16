@@ -449,7 +449,10 @@ async function updateUnmodifiedSpeed(token) {
 }
 
 Hooks.on("controlToken", async (token, boolFlag) => {
-  if (!TokenInfo.current) return;
+  if (!TokenInfo.current) {
+    globalThis.combatRangeOverlay.instance.clearAll();
+    return;
+  }
   const speed = await TokenInfo.current?.speed
   if (boolFlag && !speed && TokenInfo.current?.getSpeedFromAttributes() === undefined && TokenInfo.current.ignoreSetSpeed !== true) {
     if (game.user.isGM) {
