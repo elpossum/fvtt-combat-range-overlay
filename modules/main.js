@@ -28,11 +28,12 @@ Hooks.on("ready", function () {
     roundNumericMovementCost: true,
     actionsToShow: 2,
     colorByActions: [],
-    colors: []
+    colors: [],
+    initialized: false
   };
   if (game.modules.get('terrainmapper')?.active) {
     globalThis.combatRangeOverlay.terrainGraphics = new class FullCanvasContainer extends FullCanvasObjectMixin(PIXI.Container) { };
-  }
+  };
   instance.registerHooks();
   instance.canvasReadyHook();
   globalThis.combatRangeOverlay.actionsToShow = game.settings.get(MODULE_ID, 'actions-shown');
@@ -43,6 +44,8 @@ Hooks.on("ready", function () {
     globalThis.combatRangeOverlay.colors.push(parseInt(game.settings.get(MODULE_ID, colorSettingNames[i]).slice(0, -2).replace("#", "0x"), 16))
   };
   mouse.addHook(instance.dragHandler.bind(instance));
+  globalThis.combatRangeOverlay.initialized = true;
+  Hooks.callAll(`${ MODULE_ID }.ready`);
   if (!game.settings.get(MODULE_ID, "shown-notification") && !game.modules.get('colorsettings')?.active && !game.modules.get('color-picker')?.active) {
     ui.notifications.warn(game.i18n.localize(`${MODULE_ID}.no-color-settings`));
     game.settings.set(MODULE_ID, "shown-notification", true)
