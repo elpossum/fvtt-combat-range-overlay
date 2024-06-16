@@ -69,4 +69,5 @@ jobs:
         -H 'Content-Type: application/json' \
         -H 'Authorization: ${{ secrets.FVTT_API_TOKEN }}' \
         -d '${{ steps.get_body.outputs.body }}' \
+        ${{ secrets.FVTT_API_ENDPOINT }} \
         | jq .
