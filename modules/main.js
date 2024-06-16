@@ -41,9 +41,9 @@ Hooks.on("ready", function () {
   };
   for (let i = 5; i < 8; i++) {
     globalThis.combatRangeOverlay.colors.push(parseInt(game.settings.get(MODULE_ID, colorSettingNames[i]).slice(0, -2).replace("#", "0x"), 16))
-  }
-  mouse.addHook(instance.dragHandler.bind(instance))
-  if (!game.settings.get(MODULE_ID, "shown-notification") && !game.modules.get('colorsettings').active) {
+  };
+  mouse.addHook(instance.dragHandler.bind(instance));
+  if (!game.settings.get(MODULE_ID, "shown-notification") && !game.modules.get('colorsettings')?.active && !game.modules.get('color-picker')?.active) {
     ui.notifications.warn(game.i18n.localize(`${MODULE_ID}.no-color-settings`));
     game.settings.set(MODULE_ID, "shown-notification", true)
   };
