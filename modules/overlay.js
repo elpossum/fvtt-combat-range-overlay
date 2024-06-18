@@ -197,8 +197,10 @@ export class Overlay {
       return;
     }
 
-    const tilesMovedPerAction = await TokenInfo.current.speed / this.DISTANCE_PER_TILE;
-    const currentWeaponRange = await TokenInfo.current.weaponRangeColor
+    const tilesMovedPerActionPromise = TokenInfo.current.speed / this.DISTANCE_PER_TILE;
+    const currentWeaponRangePromise = TokenInfo.current.weaponRangeColor
+    const [tilesMovedPerAction, currentWeaponRange] = await Promise.all([tilesMovedPerActionPromise, currentWeaponRangePromise])
+    
     const weaponRangeInTiles = currentWeaponRange.map(i => ({ ...i, range: i.range / this.DISTANCE_PER_TILE }));
     const myDisposition = getCombatantTokenDisposition(currentToken);
     debugLog("drawPotentialTargets", "|", "Current disposition", myDisposition);
@@ -240,23 +242,27 @@ export class Overlay {
   }
 
   async drawAll() {
-    const movementCosts = await this.calculateMovementCosts();
-    const targetRangeMap = await this.calculateTargetRangeMap();
+    const movementCostsPromise = this.calculateMovementCosts();
+    const targetRangeMapPromise = this.calculateTargetRangeMap();
+    const [movementCosts, targetRangeMap] = await Promise.all([movementCostsPromise, targetRangeMapPromise]);
 
     this.initializePersistentVariables();
-    await this.drawCosts(movementCosts, targetRangeMap);
+
+    const promises = [];
+    promises.push(this.drawCosts(movementCosts, targetRangeMap));
+    
     if (game.user.targets.size === 0) {
       if (Settings.isShowTurnOrder()) {
         this.drawTurnOrder();
       }
 
       if (Settings.isShowPotentialTargets()) {
-        await this.drawPotentialTargets(movementCosts);
+        promises.push(this.drawPotentialTargets(movementCosts));
       }
     }
 
     if (Settings.isShowWeaponRange()) {
-      await this.drawWeaponRange();
+      promises.push(this.drawWeaponRange());
     }
 
     if (Settings.isShowWalls()) {
@@ -274,6 +280,7 @@ export class Overlay {
         // Ignore
       }
     }
+    await Promise.all(promises)
   }
 
   // noinspection JSUnusedLocalSymbols
