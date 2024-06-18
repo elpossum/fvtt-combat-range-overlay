@@ -409,7 +409,7 @@ Hooks.on("createCombatant", async (combatant) => {
 // noinspection JSUnusedLocalSymbols
 Hooks.on("deleteCombatant", async (combatant) => {
   const token = canvasTokensGet(combatant.token?.id);
-  updateMeasureFrom(token);
+  if (token) updateMeasureFrom(token);
   await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
