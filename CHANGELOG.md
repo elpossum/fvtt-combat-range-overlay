@@ -1,5 +1,13 @@
 # Changelog
 
+## 4.3.1 - 2024/06/19
+
+### Fixed
+
+- Fix error if token deleted while in combat
+- Optimize some async code
+- Fix some conflict with other keybinds
+
 ## 4.3.0 - 2024/06/16
 
 ### Fixed
