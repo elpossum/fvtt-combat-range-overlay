@@ -20,3 +20,9 @@ export function debugLog(...args) {
     }
   } catch (e) { }
 }
+
+Hooks.on("hoverToken", (token, hovering) => {
+  if (hovering) {
+    debugLog("Hovering over", token.id, token.x, token.y);
+  }
+});
