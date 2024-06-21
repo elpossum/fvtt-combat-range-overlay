@@ -11,8 +11,8 @@
 	// Use 'forwardPorts' to make a list of ports inside the container available locally.
 	// "forwardPorts": [],
 
-	// Use 'postCreateCommand' to run commands after the container is created.
-	"postCreateCommand": "node /home/foundryApp/resources/app/main.js --dataPath=/home/foundryData",
+	// Use 'postStartCommand' to run commands after the container is started.
+	"postStartCommand": "node /home/foundryApp/resources/app/main.js --dataPath=/home/foundryData",
 
 	// Configure tool-specific properties.
 	// "customizations": {},
