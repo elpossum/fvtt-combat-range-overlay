@@ -453,12 +453,12 @@ async function updateUnmodifiedSpeed(token) {
 }
 
 Hooks.on("controlToken", async (token, boolFlag) => {
-  if (!TokenInfo.current) {
+  if (!TokenInfo.current || !boolFlag) {
     globalThis.combatRangeOverlay.instance.clearAll();
     return;
   }
   const speed = await TokenInfo.current?.speed
-  if (boolFlag && !speed && TokenInfo.current?.getSpeedFromAttributes() === undefined && TokenInfo.current.ignoreSetSpeed !== true) {
+  if (!speed && TokenInfo.current?.getSpeedFromAttributes() === undefined && TokenInfo.current.ignoreSetSpeed !== true) {
     if (game.user.isGM) {
       uiNotificationsWarn(game.i18n.localize(`${MODULE_ID}.token-speed-warning-gm`));
     } else {
@@ -466,16 +466,7 @@ Hooks.on("controlToken", async (token, boolFlag) => {
     }
   }
   await updateUnmodifiedSpeed(token);
-  switch (token.controlled) {
-    case false: {
-      globalThis.combatRangeOverlay.instance.clearAll();
-      break
-    }
-    case true: {
-      if (game.ready) await globalThis.combatRangeOverlay.instance.fullRefresh();
-      break
-    }
-  }
+  if (globalThis.combatRangeOverlay?.initialized) await globalThis.combatRangeOverlay.instance.fullRefresh();
 })
 
 Hooks.on("updateActor", async (actor) => {

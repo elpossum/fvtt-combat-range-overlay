@@ -362,7 +362,7 @@ export class Overlay {
   // }
 
   async renderApplicationHook() {
-    await this.fullRefresh();
+    if (globalThis.combatRangeOverlay?.initialized) await this.fullRefresh();
   }
 
   async targetTokenHook() {
@@ -380,6 +380,10 @@ export class Overlay {
     await this.fullRefresh();
   }
 
+  async croInitializedHook() {
+    await this.fullRefresh();
+  }
+
   registerHooks() {
     this.hookIDs.renderApplication = Hooks.on("renderApplication", async (application) => {
       if (!['croQuickSettingsDialog', 'token-hud', 'navigation', 'controls'].includes(application.id)) await this.renderApplicationHook()
@@ -388,6 +392,7 @@ export class Overlay {
     this.hookIDs.canvasReady = Hooks.on("canvasReady", () => this.canvasReadyHook());
     this.hookIDs.sceneUpdate = Hooks.on("updateScene", () => this.canvasReadyHook());
     this.hookIDs.updateWall = Hooks.on("updateWall", async () => await this.updateWallHook());
+    this.hookIDs.croInitialized = Hooks.on(`${MODULE_ID}.ready`, async () => await this.croInitializedHook())
   }
 
   unregisterHooks() {
