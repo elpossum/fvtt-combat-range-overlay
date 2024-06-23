@@ -1,5 +1,16 @@
 # Changelog
 
+## 4.3.2 - 2024/06/23
+
+### Fixed
+
+- Stop-gap fix for when using Terrain Mapper > v0.2.0. Not compatible yet (won't use terrain data) but won't break.
+- Prevent overlay attempting to draw when not initialized
+
+### Changes
+
+- Update overlay at start as well as end of turn to account for off turn movement
+
 ## 4.3.1 - 2024/06/19
 
 ### Fixed
