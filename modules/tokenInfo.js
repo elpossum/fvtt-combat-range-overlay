@@ -298,7 +298,7 @@ export class TokenInfo {
         throw ("Tried to call speed getter with an undefined actor");
       }
 
-      if (game.modules.get('terrainmapper')?.active) {
+      if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) {
         if (this.getSpeed(this.token) === 0) {
           return 0
         } else {
@@ -439,12 +439,16 @@ async function updateUnmodifiedSpeed(token) {
   try {
     speed = GridTile.costTerrainMapper(token, token.center) * TokenInfo.current.getSpeed(token);
   } catch {
-    return
+    if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper") {
+      // Incompatible version of Terrain Mapper but still need to account for tokens from when it was compatible
+      speed = TokenInfo.current.getSpeed();
+    } else return
   }
-  if (speed === TokenInfo.current.unmodifiedSpeed || isNaN(speed)) {
+  if (speed === TokenInfo.current?.unmodifiedSpeed || isNaN(speed)) {
     // Speed has not been changed since last set or the token is in an impassable space
   } else {
-    await TokenInfo.current.setUnmodifiedSpeed(speed)
+    await TokenInfo.current.setUnmodifiedSpeed(speed);
+    await globalThis.combatRangeOverlay.instance.fullRefresh();
   }
 }
 

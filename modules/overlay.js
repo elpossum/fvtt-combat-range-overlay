@@ -12,8 +12,7 @@ import { FUDGE, MAX_DIST, MODULE_ID, PRESSED_KEYS } from "./constants.js"
 import { TokenInfo } from "./tokenInfo.js";
 import * as Settings from "./settings.js";
 import { mouse } from "./mouse.js";
-import { debugLog } from "./debug.js"
-import { TerrainHelper } from "./terrainHelper.js"
+import { debugLog } from "./debug.js";
 
 // Colors
 const pathLineColor = 0x0000ff; // blue
@@ -149,7 +148,7 @@ export class Overlay {
           // Blocked, do nothing
         } else {
           let newDistance;
-          if (game.modules.get('terrainmapper')?.active) {
+          if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) {
             newDistance = current.distance + GridTile.costTerrainMapper(currentToken, neighbor);
           } else {
             newDistance = current.distance + neighbor.cost;
@@ -375,7 +374,6 @@ export class Overlay {
     this.clearAll();
     TokenInfo.resetMap();
     this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
-    if (game.modules.get('terrainmapper')?.active) setTimeout(() => TerrainHelper.sceneUpdate(), 1000)
   }
 
   async updateWallHook() {

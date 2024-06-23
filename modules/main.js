@@ -1,6 +1,7 @@
 import { mouse } from "./mouse.js";
 import { MODULE_ID } from "./constants.js";
 import { CombatRangeOverlay } from "./croClass.js";
+import { setup as terrainSetup} from "./terrainHelper.js";
 
 // Run self-executing hooks
 
@@ -22,17 +23,15 @@ import './tokenInfo.js';
  * - Honor visibility selection
  */
 
-Hooks.on("ready", function () {
+Hooks.on("ready", async function () {
   globalThis.combatRangeOverlay = new CombatRangeOverlay()
-  if (game.modules.get('terrainmapper')?.active) {
-    globalThis.combatRangeOverlay.terrainGraphics = new class FullCanvasContainer extends FullCanvasObjectMixin(PIXI.Container) { };
-  };
   globalThis.combatRangeOverlay.registerHooks();
   globalThis.combatRangeOverlay.canvasReadyHook();
   globalThis.combatRangeOverlay.setActionsToShow();
   globalThis.combatRangeOverlay.setColorByActions();
   globalThis.combatRangeOverlay.setColors();
   globalThis.combatRangeOverlay.setTerrainProvider();
+  if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) await terrainSetup();
   mouse.addHook(globalThis.combatRangeOverlay.dragHandler.bind(globalThis.combatRangeOverlay));
   globalThis.combatRangeOverlay._initialized();
   Hooks.callAll(`${ MODULE_ID }.ready`);
