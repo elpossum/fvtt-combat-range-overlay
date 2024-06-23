@@ -15,6 +15,7 @@ export class CombatRangeOverlay {
       this.colorByActions = [],
       this.colors = [],
       this.#initialized = false;
+      this.terrainProvider = null;
   }
 
   get initialized() {
@@ -51,5 +52,33 @@ export class CombatRangeOverlay {
 
   dragHandler() {
     this.instance.dragHandler();
+  }
+
+  setTerrainProvider() {
+    const terrainModules = [{id: "enhanced-terrain-layer"}, {id: "terrainmapper", latestCompatibleVersion: "0.2.0"}];
+    const activeModules = [];
+    terrainModules.forEach((module) => {
+      const moduleData = game.modules.get(module.id);
+      if (moduleData?.active) {
+        module.version = moduleData.version;
+        if (module.latestCompatibleVersion) {
+          module.isCompatible = !foundry.utils.isNewerVersion(module.version, module.latestCompatibleVersion);
+        };
+        activeModules.push(module);
+      }
+    });
+    switch (activeModules.length) {
+      case 0: {
+        break;
+      }
+      case 1: {
+        this.terrainProvider = activeModules[0];
+        break;
+      }
+      default: {
+        ui.notifications.warning(game.i18n.localize(`${MODULE_ID}.multiple-terrain-providers`))
+        break;
+      }
+    } 
   }
 } // Still need to convert fullRefresh() and settings

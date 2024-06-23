@@ -32,6 +32,7 @@ Hooks.on("ready", function () {
   globalThis.combatRangeOverlay.setActionsToShow();
   globalThis.combatRangeOverlay.setColorByActions();
   globalThis.combatRangeOverlay.setColors();
+  globalThis.combatRangeOverlay.setTerrainProvider();
   mouse.addHook(globalThis.combatRangeOverlay.dragHandler.bind(globalThis.combatRangeOverlay));
   globalThis.combatRangeOverlay._initialized();
   Hooks.callAll(`${ MODULE_ID }.ready`);

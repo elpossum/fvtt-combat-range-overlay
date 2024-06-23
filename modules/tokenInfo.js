@@ -476,6 +476,6 @@ Hooks.on("controlToken", async (token, boolFlag) => {
 
 Hooks.on("updateActor", async (actor) => {
   const token = canvas.tokens.controlled.filter((token) => token.actor === actor)[0];
-  if (!game.modules.get('terrainmapper')?.active) return
+  if (globalThis.combatRangeOverlay.terrainProvider.id !== "terrainmapper") return
   await updateUnmodifiedSpeed(token)
 })
