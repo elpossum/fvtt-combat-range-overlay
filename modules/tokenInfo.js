@@ -416,11 +416,11 @@ Hooks.on("deleteCombatant", async (combatant) => {
 
 // noinspection JSUnusedLocalSymbols
 Hooks.on("updateCombat", async (combat) => {
-  if (combat?.previous?.tokenId) {
-    const token = canvasTokensGet(combat.previous.tokenId);
-    updateMeasureFrom(token);
+  if (combat?.previous?.tokenId && !updatePositionInCombat()) {
+    const tokens = [canvasTokensGet(combat.previous.tokenId), canvasTokensGet(combat.current.tokenId)];
+    tokens.forEach((token) => updateMeasureFrom(token));
+    await globalThis.combatRangeOverlay.instance.fullRefresh();
   }
-  await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
 // noinspection JSUnusedLocalSymbols
