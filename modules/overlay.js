@@ -427,10 +427,7 @@ export class Overlay {
       if (!['croQuickSettingsDialog', 'token-hud', 'navigation', 'controls'].includes(application.id)) await this.renderApplicationHook()
     });
     this.hookIDs.targetToken = Hooks.on("targetToken", async () => await this.targetTokenHook());
-    this.hookIDs.canvasReady = Hooks.on("canvasReady", () => {
-      this.canvasReadyHook();
-      this.terrainRegionsInit();
-    });
+    this.hookIDs.canvasReady = Hooks.on("canvasReady", () => this.canvasReadyHook());
     this.hookIDs.sceneUpdate = Hooks.on("updateScene", () => this.canvasReadyHook());
     this.hookIDs.updateWall = Hooks.on("updateWall", async () => await this.updateWallHook());
     this.hookIDs.createRegion = Hooks.on("createRegion", async () => await this.regionUpdateHook());
