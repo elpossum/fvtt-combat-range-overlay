@@ -312,6 +312,7 @@ export class Overlay {
   }
 
   async fullRefresh() {
+    if (!_token?.shape) return
     if (this.drawing) {
       Hooks.once(`${MODULE_ID}.done`, async () => await this.fullRefresh());
       return;
