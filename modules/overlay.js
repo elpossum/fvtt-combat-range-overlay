@@ -269,14 +269,34 @@ export class Overlay {
     }
 
     // noinspection JSUnresolvedVariable
-    if (Settings.isShowDifficultTerrain() && canvas.terrain) {
-      try {
-        // noinspection JSUnresolvedVariable
-        canvas.drawings.addChild(globalThis.combatRangeOverlay.terrainGraphics);
-        canvas.terrain._tokenDrag = true;
-        canvas.terrain.refreshVisibility();
-      } catch {
-        // Ignore
+    if (Settings.isShowDifficultTerrain()) {
+      if (canvas.terrain) {
+        switch (globalThis.combatRangeOverlay.terrainProvider.id) {
+          case "enhanced-terrain-layer": {
+            canvas.terrain._tokenDrag = true;
+            canvas.terrain.refreshVisibility();
+            break;
+          }
+          case "terrainmapper": {
+            canvas.drawings.addChild(globalThis.combatRangeOverlay.terrainGraphics);
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      } else if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper") {
+        canvas.regions.objects.children.forEach((region) => {
+          const behaviors = region.document.behaviors.contents;
+          const isTerrain = behaviors.some((behavior) => behavior.type === "terrainmapper.setTerrain")
+          const terrainBehaviors = behaviors.filter((behavior) => behavior.type === "terrainmapper.setTerrain")
+          const shouldBeVisible = region.visible || (terrainBehaviors.some((behavior) => !behavior.disabled) && (game.user.isGM || terrainBehaviors.some((behavior) => !behavior.system.secret)));
+          globalThis.combatRangeOverlay.updateRegionMap(region.id, region.document.visibility);
+          if (globalThis.combatRangeOverlay.initialized && isTerrain && shouldBeVisible) {
+            region.document.visibility = CONST.REGION_VISIBILITY.ALWAYS;
+            region._refreshState()
+          }
+        })
       }
     }
     await Promise.all(promises)
@@ -444,13 +464,30 @@ export class Overlay {
     this.overlays.wallsOverlay = undefined;
 
     if (Settings.isShowDifficultTerrain()) {
-      try {
-        // noinspection JSUnresolvedVariable
-        canvas.drawings.removeChild(globalThis.combatRangeOverlay.terrainGraphics);
-        canvas.terrain._tokenDrag = false;
-        canvas.terrain.refreshVisibility();
-      } catch {
-        // Ignore
+      if (canvas.terrain) {
+        switch (globalThis.combatRangeOverlay.terrainProvider.id) {
+          case "enhanced-terrain-layer": {
+            canvas.terrain._tokenDrag = false;
+            canvas.terrain.refreshVisibility();
+            break;
+          }
+          case "terrainmapper": {
+            canvas.drawings.removeChild(globalThis.combatRangeOverlay.terrainGraphics);
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      } else if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.initialized) {
+        canvas.regions.objects.children.forEach((region) => {
+          const isTerrain = region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain");
+          globalThis.combatRangeOverlay.getRegionVisibility(region.id)
+          if (isTerrain) {
+            region.document.visibility = globalThis.combatRangeOverlay.getRegionVisibility(region.id)
+            region._refreshState()
+          }
+        })
       }
     }
   }
