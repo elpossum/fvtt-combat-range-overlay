@@ -371,17 +371,34 @@ export class Overlay {
   }
 
   canvasReadyHook() {
+    this.terrainRegionsInit();
     this.clearAll();
     TokenInfo.resetMap();
     this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
+  }
+
+  async regionUpdateHook() {
+    canvas.regions.objects.children.forEach((region) => {
+      if (region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain")) {
+        globalThis.combatRangeOverlay.updateRegionMap(region.id, region.document.visibility);
+      } else globalThis.combatRangeOverlay.regionMap.delete(region.id)
+    });
+    await this.fullRefresh();
   }
 
   async updateWallHook() {
     await this.fullRefresh();
   }
 
-  async croInitializedHook() {
-    await this.fullRefresh();
+  terrainRegionsInit() {
+    if (canvas.regions) {
+      globalThis.combatRangeOverlay.regionMap.clear();
+      canvas.regions.objects.children.forEach((region) => {
+        if (region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain")) {
+          globalThis.combatRangeOverlay.updateRegionMap(region.id, region.document.visibility);
+        }
+      })
+    }
   }
 
   registerHooks() {
@@ -389,10 +406,15 @@ export class Overlay {
       if (!['croQuickSettingsDialog', 'token-hud', 'navigation', 'controls'].includes(application.id)) await this.renderApplicationHook()
     });
     this.hookIDs.targetToken = Hooks.on("targetToken", async () => await this.targetTokenHook());
-    this.hookIDs.canvasReady = Hooks.on("canvasReady", () => this.canvasReadyHook());
+    this.hookIDs.canvasReady = Hooks.on("canvasReady", () => {
+      this.canvasReadyHook();
+      this.terrainRegionsInit();
+    });
     this.hookIDs.sceneUpdate = Hooks.on("updateScene", () => this.canvasReadyHook());
     this.hookIDs.updateWall = Hooks.on("updateWall", async () => await this.updateWallHook());
-    this.hookIDs.croInitialized = Hooks.on(`${MODULE_ID}.ready`, async () => await this.croInitializedHook())
+    this.hookIDs.createRegion = Hooks.on("createRegion", async () => await this.regionUpdateHook());
+    this.hookIDs.refreshRegion = Hooks.on("refreshRegion", async () => await this.regionUpdateHook());
+    this.hookIDs.deleteRegion = Hooks.on("deleteRegion", async () => await this.regionUpdateHook());
   }
 
   unregisterHooks() {

@@ -16,6 +16,7 @@ export class CombatRangeOverlay {
       this.colors = [],
       this.#initialized = false;
       this.terrainProvider = null;
+      this.regionMap = new Map();
   }
 
   get initialized() {
@@ -80,5 +81,13 @@ export class CombatRangeOverlay {
         break;
       }
     } 
+  }
+
+  updateRegionMap(id, visibility) {
+    this.regionMap.set(id, visibility)
+  }
+
+  getRegionVisibility(id) {
+    return this.regionMap.get(id)
   }
 } // Still need to convert fullRefresh() and settings
