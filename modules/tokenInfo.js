@@ -442,7 +442,7 @@ async function updateUnmodifiedSpeed(token) {
   } catch {
     if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper") {
       // Incompatible version of Terrain Mapper but still need to account for tokens from when it was compatible
-      speed = TokenInfo.current.getSpeed();
+      speed = TokenInfo.current?.getSpeed(token);
     } else return
   }
   if (speed === TokenInfo.current?.unmodifiedSpeed || isNaN(speed)) {
