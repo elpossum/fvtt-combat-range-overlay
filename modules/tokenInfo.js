@@ -427,6 +427,7 @@ Hooks.on("updateCombat", async (combat) => {
 Hooks.on("updateToken", async (tokenDocument, updateData) => {
   const tokenId = tokenDocument.id;
   const realToken = canvasTokensGet(tokenId); // Get the real token
+  if (!realToken) return;
   updateLocation(realToken, updateData);
   if (!realToken.inCombat || updatePositionInCombat()) {
     updateMeasureFrom(realToken, updateData);
