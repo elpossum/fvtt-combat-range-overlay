@@ -453,6 +453,13 @@ async function updateUnmodifiedSpeed(token) {
 }
 
 Hooks.on("controlToken", async (token, boolFlag) => {
+  if (!globalThis.combatRangeOverlay.initialized && boolFlag) {
+    token.release();
+    Hooks.once("refreshToken", () => {
+      token.control();
+    });
+    return
+  }
   if (!TokenInfo.current || !boolFlag) {
     globalThis.combatRangeOverlay.instance.clearAll();
     return;
