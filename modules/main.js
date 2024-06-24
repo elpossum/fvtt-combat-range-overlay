@@ -22,15 +22,17 @@ import './tokenInfo.js';
  * - Add visibility selection to dialog
  * - Honor visibility selection
  */
-
-Hooks.on("ready", async function () {
+Hooks.on("init", () => {
   globalThis.combatRangeOverlay = new CombatRangeOverlay()
   globalThis.combatRangeOverlay.registerHooks();
-  globalThis.combatRangeOverlay.canvasReadyHook();
   globalThis.combatRangeOverlay.setActionsToShow();
   globalThis.combatRangeOverlay.setColorByActions();
   globalThis.combatRangeOverlay.setColors();
   globalThis.combatRangeOverlay.setTerrainProvider();
+})
+
+Hooks.on("ready", async function () {
+  globalThis.combatRangeOverlay.canvasReadyHook();
   if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) await terrainSetup();
   mouse.addHook(globalThis.combatRangeOverlay.dragHandler.bind(globalThis.combatRangeOverlay));
   globalThis.combatRangeOverlay._initialized();
