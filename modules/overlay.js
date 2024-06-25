@@ -286,7 +286,7 @@ export class Overlay {
           }
         }
       } else if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper") {
-        canvas.regions.objects.children.forEach((region) => {
+        canvas.regions.placeables.forEach((region) => {
           const behaviors = region.document.behaviors.contents;
           const isTerrain = behaviors.some((behavior) => behavior.type === "terrainmapper.setTerrain")
           const terrainBehaviors = behaviors.filter((behavior) => behavior.type === "terrainmapper.setTerrain")
@@ -399,7 +399,7 @@ export class Overlay {
   }
 
   async regionUpdateHook() {
-    canvas.regions.objects.children.forEach((region) => {
+    canvas.regions.placeables.forEach((region) => {
       if (region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain")) {
         globalThis.combatRangeOverlay.updateRegionMap(region.id, region.document.visibility);
       } else globalThis.combatRangeOverlay.regionMap.delete(region.id)
@@ -414,7 +414,7 @@ export class Overlay {
   terrainRegionsInit() {
     if (canvas.regions) {
       globalThis.combatRangeOverlay.regionMap.clear();
-      canvas.regions.objects.children.forEach((region) => {
+      canvas.regions.placeables.forEach((region) => {
         if (region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain")) {
           globalThis.combatRangeOverlay.updateRegionMap(region.id, region.document.visibility);
         }
@@ -478,7 +478,7 @@ export class Overlay {
           }
         }
       } else if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.initialized) {
-        canvas.regions.objects.children.forEach((region) => {
+        canvas.regions.placeables.forEach((region) => {
           const isTerrain = region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain");
           globalThis.combatRangeOverlay.getRegionVisibility(region.id)
           if (isTerrain) {
