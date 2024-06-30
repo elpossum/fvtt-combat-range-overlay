@@ -320,7 +320,7 @@ export class Overlay {
   }
 
   async fullRefresh() {
-    if (!_token?.shape) return
+    if (!_token?.hitArea) return
     if (this.drawing) {
       Hooks.once(`${MODULE_ID}.done`, async () => await this.fullRefresh());
       return;
@@ -448,6 +448,10 @@ export class Overlay {
     }
   }
 
+  async updateETLHook(placeableDocument) {
+    if (placeableDocument.flags["enhanced-terrain-layer"]) await this.fullRefresh()
+  }
+
   registerHooks() {
     this.hookIDs.renderApplication = Hooks.on("renderApplication", async (application) => {
       if (!['croQuickSettingsDialog', 'token-hud', 'navigation', 'controls'].includes(application.id)) await this.renderApplicationHook()
@@ -460,6 +464,12 @@ export class Overlay {
     this.hookIDs.refreshRegion = Hooks.on("refreshRegion", async () => await this.regionUpdateHook());
     this.hookIDs.deleteRegion = Hooks.on("deleteRegion", async () => await this.regionUpdateHook());
     this.hookIDs.updateRegionBehaviour = Hooks.on("updateRegionBehavior", async () => await this.regionUpdateHook());
+    this.hookIDs.createDrawing = Hooks.on("createDrawing", async (drawing) => await this.updateETLHook(drawing));
+    this.hookIDs.refreshDrawing = Hooks.on("refreshDrawing", async (drawing) => await this.updateETLHook(drawing));
+    this.hookIDs.deleteDrawing = Hooks.on("deleteDrawing", async (drawing) => await this.updateETLHook(drawing));
+    this.hookIDs.createMeasuredTemplate = Hooks.on("createMeasuredTemplate", async (template) => await this.updateETLHook(template));
+    this.hookIDs.refreshMeasuredTemplate = Hooks.on("refreshMeasuredTemplate", async (template) => await this.updateETLHook(template));
+    this.hookIDs.deleteMeasuredTemplate = Hooks.on("deleteMeasuredTemplate", async (template) => await this.updateETLHook(template));
   }
 
   unregisterHooks() {
