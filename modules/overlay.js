@@ -150,6 +150,8 @@ export class Overlay {
           let newDistance;
           if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && !globalThis.combatRangeOverlay.terrainProvider?.usesRegions) {
             newDistance = current.distance + GridTile.costTerrainMapper(currentToken, neighbor);
+          } else if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider?.usesRegions) {
+            newDistance = current.distance + GridTile.costTerrainMapperV2(currentToken, neighbor);
           } else {
             newDistance = current.distance + neighbor.cost;
           };

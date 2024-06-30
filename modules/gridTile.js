@@ -3,6 +3,7 @@ import { TokenInfo } from "./tokenInfo.js"
 import { TerrainHelper } from "./terrainHelper.js"
 import { getTerrainMeasure } from "./settings.js"
 import { canvasGridSize } from "./utility.js"
+import { calculateCostAtPoint } from"./terrainHelperV2.js"
 
 export class GridTile {
   constructor(gx, gy, color) {
@@ -93,6 +94,43 @@ export class GridTile {
         const noTerrain = api.Terrain.percentMovementForTokenAlongPath(token, { x: 0, y: 0 }, { x: 50, y: 50 });
         if (foundry.utils.isNewerVersion(globalThis.combatRangeOverlay.terrainProvider?.version, '0.1.1')) return 1 / noTerrain
         else return noTerrain
+      }
+    }
+  }
+
+  static costTerrainMapperV2 (token, neighbor) {
+    if (TokenInfo.current.isIgnoreDifficultTerrain) return 1;
+    switch (getTerrainMeasure()) {
+      case "centerPoint": {
+        return calculateCostAtPoint(token, neighbor.centerPt)
+      }
+      case "fivePoint": {
+        let percent = new Array(5);
+        let n = 0
+        for (let i = 0; i < percent.length; i += 1) {
+          percent[i] = calculateCostAtPoint(token, { x: neighbor.pt.x + (2 * Math.floor(i / 2) + 1) * canvasGridSize() / 4, y: neighbor.pt.y + (2 * (i % 2) + 1) * canvasGridSize() / 4 });
+          if (i === 4) percent[i] = calculateCostAtPoint(token, neighbor.centerPt)
+          if (percent[i] !== 1) n += 1
+        };
+        if (n > 2) {
+          return Math.pow(percent.reduce((acc, curr) => acc * curr, 1), 0.2)
+        } else return 1
+      }
+      case "area": {
+        const rect = new PIXI.Rectangle(neighbor.pt.x + FUDGE, neighbor.pt.y + FUDGE, canvasGridSize() - 2 * FUDGE, canvasGridSize() - 2 * FUDGE)
+        let point;
+        let area = 0;
+        canvas.regions.placeables.forEach((region) => {
+          region.polygons.forEach((shape) => {
+            const intersect = rect.intersectPolygon(shape);
+            if (intersect.points.length > 0) {
+              point = new PIXI.Point(intersect.points[0], intersect.points[1])
+              area += intersect.area / rect.area
+            }
+          })
+        })
+        if (area >= 0.5) return calculateCostAtPoint(token, point)
+        else return 1
       }
     }
   }

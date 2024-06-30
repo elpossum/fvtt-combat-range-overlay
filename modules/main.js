@@ -11,6 +11,7 @@ import './settings.js';
 import './colorPicker.js';
 import './controls.js';
 import './tokenInfo.js';
+import './terrainHelperV2.js'
 
 
 /* Tasks
