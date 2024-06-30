@@ -293,9 +293,15 @@ export class Overlay {
           const isTerrain = behaviors.some((behavior) => behavior.type === "terrainmapper.setTerrain")
           const terrainBehaviors = behaviors.filter((behavior) => behavior.type === "terrainmapper.setTerrain")
           const shouldBeVisible = region.visible || (terrainBehaviors.some((behavior) => !behavior.disabled) && (game.user.isGM || terrainBehaviors.some((behavior) => !behavior.system.secret)));
-          globalThis.combatRangeOverlay.updateRegionMap(region.id, region.document.visibility);
+          globalThis.combatRangeOverlay.updateRegionMap(region.id, {
+            visibility: region.document.visibility,
+            alpha: region.alpha,
+            hatchThickness: region.children[0].shader.uniforms.hatchThickness
+          });
           if (globalThis.combatRangeOverlay.initialized && isTerrain && shouldBeVisible) {
             region.document.visibility = CONST.REGION_VISIBILITY.ALWAYS;
+            region.alpha = 0.5;
+            region.children[0].shader.uniforms.hatchThickness = 30;
             region._refreshState()
           }
         })
@@ -401,10 +407,23 @@ export class Overlay {
     this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
   }
 
+  sceneUpdateHook() {
+    this.canvasReadyHook();
+    const token = getCurrentToken();
+    token.release();
+    Hooks.once("refreshToken", () => {
+      canvas.tokens.get(token.id).control()
+    })
+  }
+
   async regionUpdateHook() {
     canvas.regions.placeables.forEach((region) => {
       if (region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain")) {
-        globalThis.combatRangeOverlay.updateRegionMap(region.id, region.document.visibility);
+        globalThis.combatRangeOverlay.updateRegionMap(region.id, {
+          visibility: region.document.visibility,
+          alpha: region.alpha,
+          hatchThickness: region.children[0].shader.uniforms.hatchThickness
+        });
       } else globalThis.combatRangeOverlay.regionMap.delete(region.id)
     });
     await this.fullRefresh();
@@ -419,7 +438,11 @@ export class Overlay {
       globalThis.combatRangeOverlay.regionMap.clear();
       canvas.regions.placeables.forEach((region) => {
         if (region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain")) {
-          globalThis.combatRangeOverlay.updateRegionMap(region.id, region.document.visibility);
+          globalThis.combatRangeOverlay.updateRegionMap(region.id, {
+            visibility: region.document.visibility,
+            alpha: region.alpha,
+            hatchThickness: region.children[0].shader.uniforms.hatchThickness
+          });
         }
       })
     }
@@ -431,11 +454,12 @@ export class Overlay {
     });
     this.hookIDs.targetToken = Hooks.on("targetToken", async () => await this.targetTokenHook());
     this.hookIDs.canvasReady = Hooks.on("canvasReady", () => this.canvasReadyHook());
-    this.hookIDs.sceneUpdate = Hooks.on("updateScene", () => this.canvasReadyHook());
+    this.hookIDs.sceneUpdate = Hooks.on("updateScene", () => this.sceneUpdateHook());
     this.hookIDs.updateWall = Hooks.on("updateWall", async () => await this.updateWallHook());
     this.hookIDs.createRegion = Hooks.on("createRegion", async () => await this.regionUpdateHook());
     this.hookIDs.refreshRegion = Hooks.on("refreshRegion", async () => await this.regionUpdateHook());
     this.hookIDs.deleteRegion = Hooks.on("deleteRegion", async () => await this.regionUpdateHook());
+    this.hookIDs.updateRegionBehaviour = Hooks.on("updateRegionBehavior", async () => await this.regionUpdateHook());
   }
 
   unregisterHooks() {
@@ -483,9 +507,11 @@ export class Overlay {
       } else if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.initialized) {
         canvas.regions.placeables.forEach((region) => {
           const isTerrain = region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain");
-          globalThis.combatRangeOverlay.getRegionVisibility(region.id)
+          const regionDefault = globalThis.combatRangeOverlay.getRegionMapData(region.id)
           if (isTerrain) {
-            region.document.visibility = globalThis.combatRangeOverlay.getRegionVisibility(region.id)
+            region.document.visibility = regionDefault.visibility
+            region.alpha = regionDefault.alpha;
+            region.children[0].shader.uniforms.hatchThickness = regionDefault.hatchThickness
             region._refreshState()
           }
         })
