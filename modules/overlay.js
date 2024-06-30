@@ -148,7 +148,7 @@ export class Overlay {
           // Blocked, do nothing
         } else {
           let newDistance;
-          if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) {
+          if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && !globalThis.combatRangeOverlay.terrainProvider?.usesRegions) {
             newDistance = current.distance + GridTile.costTerrainMapper(currentToken, neighbor);
           } else {
             newDistance = current.distance + neighbor.cost;
@@ -271,7 +271,7 @@ export class Overlay {
     // noinspection JSUnresolvedVariable
     if (Settings.isShowDifficultTerrain()) {
       if (canvas.terrain) {
-        switch (globalThis.combatRangeOverlay.terrainProvider.id) {
+        switch (globalThis.combatRangeOverlay.terrainProvider?.id) {
           case "enhanced-terrain-layer": {
             canvas.terrain._tokenDrag = true;
             canvas.terrain.refreshVisibility();
@@ -285,7 +285,7 @@ export class Overlay {
             break;
           }
         }
-      } else if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper") {
+      } else if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper") {
         canvas.regions.placeables.forEach((region) => {
           const behaviors = region.document.behaviors.contents;
           const isTerrain = behaviors.some((behavior) => behavior.type === "terrainmapper.setTerrain")
@@ -463,7 +463,7 @@ export class Overlay {
 
     if (Settings.isShowDifficultTerrain()) {
       if (canvas.terrain) {
-        switch (globalThis.combatRangeOverlay.terrainProvider.id) {
+        switch (globalThis.combatRangeOverlay.terrainProvider?.id) {
           case "enhanced-terrain-layer": {
             canvas.terrain._tokenDrag = false;
             canvas.terrain.refreshVisibility();

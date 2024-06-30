@@ -306,7 +306,7 @@ export class TokenInfo {
         throw ("Tried to call speed getter with an undefined actor");
       }
 
-      if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) {
+    if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper") {
         if (this.getSpeed(this.token) === 0) {
           return 0
         } else {

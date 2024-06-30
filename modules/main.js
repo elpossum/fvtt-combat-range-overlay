@@ -33,7 +33,7 @@ Hooks.on("init", () => {
 
 Hooks.on("ready", async function () {
   globalThis.combatRangeOverlay.canvasReadyHook();
-  if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) await terrainSetup();
+  if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && !globalThis.combatRangeOverlay.terrainProvider?.usesRegions) await terrainSetup();
   mouse.addHook(globalThis.combatRangeOverlay.dragHandler.bind(globalThis.combatRangeOverlay));
   globalThis.combatRangeOverlay._initialized();
   Hooks.callAll(`${ MODULE_ID }.ready`);

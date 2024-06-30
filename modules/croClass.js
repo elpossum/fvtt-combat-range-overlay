@@ -56,14 +56,14 @@ export class CombatRangeOverlay {
   }
 
   setTerrainProvider() {
-    const terrainModules = [{id: "enhanced-terrain-layer"}, {id: "terrainmapper", latestCompatibleVersion: "0.2.0"}];
+    const terrainModules = [{id: "enhanced-terrain-layer"}, {id: "terrainmapper", latestNonRegionVersion: "0.2.0"}];
     const activeModules = [];
     terrainModules.forEach((module) => {
       const moduleData = game.modules.get(module.id);
       if (moduleData?.active) {
         module.version = moduleData.version;
-        if (module.latestCompatibleVersion) {
-          module.isCompatible = !foundry.utils.isNewerVersion(module.version, module.latestCompatibleVersion);
+        if (module.latestNonRegionVersion) {
+          module.usesRegions = foundry.utils.isNewerVersion(module.version, module.latestNonRegionVersion);
         };
         activeModules.push(module);
       }
