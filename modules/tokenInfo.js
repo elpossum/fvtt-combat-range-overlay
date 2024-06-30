@@ -300,20 +300,20 @@ export class TokenInfo {
   }
 
   get speed() {
-      const actor = this.token.actor;
-      if (!actor) {
-        throw ("Tried to call speed getter with an undefined actor");
-      }
+    const actor = this.token.actor;
+    if (!actor) {
+      throw ("Tried to call speed getter with an undefined actor");
+    }
 
     if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper") {
-        if (this.getSpeed(this.token) === 0) {
-          return 0
-        } else {
-          return this.unmodifiedSpeed
-        }
+      if (this.getSpeed(this.token) === 0) {
+        return 0
       } else {
-        return this.getSpeed(this.token)
+        return this.unmodifiedSpeed
       }
+    } else {
+      return this.getSpeed(this.token)
+    }
   }
 
   getSpeedFromAttributes({object=undefined, includeOtherSpeeds=false}={}) {
@@ -506,7 +506,8 @@ Hooks.on("controlToken", async (token, boolFlag) => {
     globalThis.combatRangeOverlay.instance.clearAll();
     return;
   }
-  const speed = await TokenInfo.current?.speed
+  updateMeasureFrom(token);
+  const speed = TokenInfo.current?.speed
   if (!speed && TokenInfo.current?.getSpeedFromAttributes() === undefined && TokenInfo.current.ignoreSetSpeed !== true) {
     if (game.user.isGM) {
       uiNotificationsWarn(game.i18n.localize(`${MODULE_ID}.token-speed-warning-gm`));
@@ -520,7 +521,7 @@ Hooks.on("controlToken", async (token, boolFlag) => {
 
 Hooks.on("updateActor", async (actor) => {
   const token = canvas.tokens.controlled.filter((token) => token.actor === actor)[0];
-  if (globalThis.combatRangeOverlay.terrainProvider.id !== "terrainmapper") return
+  if (!token || globalThis.combatRangeOverlay.terrainProvider?.id !== "terrainmapper") return
   await updateUnmodifiedSpeed(token)
 })
 
