@@ -13,6 +13,7 @@ import { TokenInfo } from "./tokenInfo.js";
 import * as Settings from "./settings.js";
 import { mouse } from "./mouse.js";
 import { debugLog } from "./debug.js";
+import { TerrainHelper } from "./terrainHelper.js";
 
 // Colors
 const pathLineColor = 0x0000ff; // blue
@@ -402,6 +403,7 @@ export class Overlay {
 
   canvasReadyHook() {
     this.terrainRegionsInit();
+    TerrainHelper?.sceneUpdate();
     this.clearAll();
     TokenInfo.resetMap();
     this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
