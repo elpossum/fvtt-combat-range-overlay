@@ -8,7 +8,8 @@ export const FLAG_NAMES = {
   SPEED_OVERRIDE: "speedOverride",
   IGNORE_DIFFICULT_TERRAIN: "ignoreDifficultTerrain",
   UNMODIFIED_SPEED: "unmodifiedSpeed",
-  IGNORE_SET_SPEED: "ignoreSetSpeed"
+  IGNORE_SET_SPEED: "ignoreSetSpeed",
+  SPEED_OBJECT: "speedObject"
 };
 
 export const MAX_DIST = 999;
@@ -19,3 +20,17 @@ export const PRESSED_KEYS = {
   quickSettings: false,
   resetMeasureFrom: false
 }
+
+export const ENTRY_EVENTS = new Set([
+  CONST.REGION_EVENTS?.TOKEN_ENTER,
+  CONST.REGION_EVENTS?.TOKEN_MOVE,
+  CONST.REGION_EVENTS?.TOKEN_MOVE_IN,
+  CONST.REGION_EVENTS?.TOKEN_PRE_MOVE,
+]);
+
+export const ENTRY_EVENTS_COMBAT = new Set([
+  CONST.REGION_EVENTS?.TOKEN_ROUND_END,
+  CONST.REGION_EVENTS?.TOKEN_ROUND_START,
+  CONST.REGION_EVENTS?.TOKEN_TURN_END,
+  CONST.REGION_EVENTS?.TOKEN_TURN_START
+]);

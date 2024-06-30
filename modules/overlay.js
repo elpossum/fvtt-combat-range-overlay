@@ -13,6 +13,7 @@ import { TokenInfo } from "./tokenInfo.js";
 import * as Settings from "./settings.js";
 import { mouse } from "./mouse.js";
 import { debugLog } from "./debug.js";
+import { TerrainHelper } from "./terrainHelper.js";
 
 // Colors
 const pathLineColor = 0x0000ff; // blue
@@ -148,8 +149,10 @@ export class Overlay {
           // Blocked, do nothing
         } else {
           let newDistance;
-          if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) {
+          if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && !globalThis.combatRangeOverlay.terrainProvider?.usesRegions) {
             newDistance = current.distance + GridTile.costTerrainMapper(currentToken, neighbor);
+          } else if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider?.usesRegions) {
+            newDistance = current.distance + GridTile.costTerrainMapperV2(currentToken, neighbor);
           } else {
             newDistance = current.distance + neighbor.cost;
           };
@@ -269,14 +272,40 @@ export class Overlay {
     }
 
     // noinspection JSUnresolvedVariable
-    if (Settings.isShowDifficultTerrain() && canvas.terrain) {
-      try {
-        // noinspection JSUnresolvedVariable
-        canvas.drawings.addChild(globalThis.combatRangeOverlay.terrainGraphics);
-        canvas.terrain._tokenDrag = true;
-        canvas.terrain.refreshVisibility();
-      } catch {
-        // Ignore
+    if (Settings.isShowDifficultTerrain()) {
+      if (canvas.terrain) {
+        switch (globalThis.combatRangeOverlay.terrainProvider?.id) {
+          case "enhanced-terrain-layer": {
+            canvas.terrain._tokenDrag = true;
+            canvas.terrain.refreshVisibility();
+            break;
+          }
+          case "terrainmapper": {
+            canvas.drawings.addChild(globalThis.combatRangeOverlay.terrainGraphics);
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      } else if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper") {
+        canvas.regions.placeables.forEach((region) => {
+          const behaviors = region.document.behaviors.contents;
+          const isTerrain = behaviors.some((behavior) => behavior.type === "terrainmapper.setTerrain")
+          const terrainBehaviors = behaviors.filter((behavior) => behavior.type === "terrainmapper.setTerrain")
+          const shouldBeVisible = region.visible || (terrainBehaviors.some((behavior) => !behavior.disabled) && (game.user.isGM || terrainBehaviors.some((behavior) => !behavior.system.secret)));
+          globalThis.combatRangeOverlay.updateRegionMap(region.id, {
+            visibility: region.document.visibility,
+            alpha: region.alpha,
+            hatchThickness: region.children[0].shader.uniforms.hatchThickness
+          });
+          if (globalThis.combatRangeOverlay.initialized && isTerrain && shouldBeVisible) {
+            region.document.visibility = CONST.REGION_VISIBILITY.ALWAYS;
+            region.alpha = 0.5;
+            region.children[0].shader.uniforms.hatchThickness = 30;
+            region._refreshState()
+          }
+        })
       }
     }
     await Promise.all(promises)
@@ -292,6 +321,7 @@ export class Overlay {
   }
 
   async fullRefresh() {
+    if (!_token?.hitArea) return
     if (this.drawing) {
       Hooks.once(`${MODULE_ID}.done`, async () => await this.fullRefresh());
       return;
@@ -361,8 +391,9 @@ export class Overlay {
   //   this.fullRefresh();  // TODO Make this more efficient
   // }
 
+  //Can't remember if this is important but it seems to cause issues so I have disabled it.
   async renderApplicationHook() {
-    if (globalThis.combatRangeOverlay?.initialized) await this.fullRefresh();
+    //if (globalThis.combatRangeOverlay?.initialized) await this.fullRefresh();
   }
 
   async targetTokenHook() {
@@ -371,17 +402,56 @@ export class Overlay {
   }
 
   canvasReadyHook() {
+    this.terrainRegionsInit();
+    TerrainHelper?.sceneUpdate();
     this.clearAll();
     TokenInfo.resetMap();
     this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
+  }
+
+  sceneUpdateHook() {
+    this.canvasReadyHook();
+    const token = getCurrentToken();
+    token.release();
+    Hooks.once("refreshToken", () => {
+      canvas.tokens.get(token.id).control()
+    })
+  }
+
+  async regionUpdateHook() {
+    canvas.regions.placeables.forEach((region) => {
+      if (region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain")) {
+        globalThis.combatRangeOverlay.updateRegionMap(region.id, {
+          visibility: region.document.visibility,
+          alpha: region.alpha,
+          hatchThickness: region.children[0].shader.uniforms.hatchThickness
+        });
+      } else globalThis.combatRangeOverlay.regionMap.delete(region.id)
+    });
+    await this.fullRefresh();
   }
 
   async updateWallHook() {
     await this.fullRefresh();
   }
 
-  async croInitializedHook() {
-    await this.fullRefresh();
+  terrainRegionsInit() {
+    if (canvas.regions) {
+      globalThis.combatRangeOverlay.regionMap.clear();
+      canvas.regions.placeables.forEach((region) => {
+        if (region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain")) {
+          globalThis.combatRangeOverlay.updateRegionMap(region.id, {
+            visibility: region.document.visibility,
+            alpha: region.alpha,
+            hatchThickness: region.children[0].shader.uniforms.hatchThickness
+          });
+        }
+      })
+    }
+  }
+
+  async updateETLHook(placeableDocument) {
+    if (placeableDocument.flags && placeableDocument.flags["enhanced-terrain-layer"]) await this.fullRefresh()
   }
 
   registerHooks() {
@@ -390,9 +460,18 @@ export class Overlay {
     });
     this.hookIDs.targetToken = Hooks.on("targetToken", async () => await this.targetTokenHook());
     this.hookIDs.canvasReady = Hooks.on("canvasReady", () => this.canvasReadyHook());
-    this.hookIDs.sceneUpdate = Hooks.on("updateScene", () => this.canvasReadyHook());
+    this.hookIDs.sceneUpdate = Hooks.on("updateScene", () => this.sceneUpdateHook());
     this.hookIDs.updateWall = Hooks.on("updateWall", async () => await this.updateWallHook());
-    this.hookIDs.croInitialized = Hooks.on(`${MODULE_ID}.ready`, async () => await this.croInitializedHook())
+    this.hookIDs.createRegion = Hooks.on("createRegion", async () => await this.regionUpdateHook());
+    this.hookIDs.refreshRegion = Hooks.on("refreshRegion", async () => await this.regionUpdateHook());
+    this.hookIDs.deleteRegion = Hooks.on("deleteRegion", async () => await this.regionUpdateHook());
+    this.hookIDs.updateRegionBehaviour = Hooks.on("updateRegionBehavior", async () => await this.regionUpdateHook());
+    this.hookIDs.createDrawing = Hooks.on("createDrawing", async (drawing) => await this.updateETLHook(drawing));
+    this.hookIDs.refreshDrawing = Hooks.on("refreshDrawing", async (drawing) => await this.updateETLHook(drawing));
+    this.hookIDs.deleteDrawing = Hooks.on("deleteDrawing", async (drawing) => await this.updateETLHook(drawing));
+    this.hookIDs.createMeasuredTemplate = Hooks.on("createMeasuredTemplate", async (template) => await this.updateETLHook(template));
+    this.hookIDs.refreshMeasuredTemplate = Hooks.on("refreshMeasuredTemplate", async (template) => await this.updateETLHook(template));
+    this.hookIDs.deleteMeasuredTemplate = Hooks.on("deleteMeasuredTemplate", async (template) => await this.updateETLHook(template));
   }
 
   unregisterHooks() {
@@ -422,13 +501,32 @@ export class Overlay {
     this.overlays.wallsOverlay = undefined;
 
     if (Settings.isShowDifficultTerrain()) {
-      try {
-        // noinspection JSUnresolvedVariable
-        canvas.drawings.removeChild(globalThis.combatRangeOverlay.terrainGraphics);
-        canvas.terrain._tokenDrag = false;
-        canvas.terrain.refreshVisibility();
-      } catch {
-        // Ignore
+      if (canvas.terrain) {
+        switch (globalThis.combatRangeOverlay.terrainProvider?.id) {
+          case "enhanced-terrain-layer": {
+            canvas.terrain._tokenDrag = false;
+            canvas.terrain.refreshVisibility();
+            break;
+          }
+          case "terrainmapper": {
+            canvas.drawings.removeChild(globalThis.combatRangeOverlay.terrainGraphics);
+            break;
+          }
+          default: {
+            break;
+          }
+        }
+      } else if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.initialized) {
+        canvas.regions.placeables.forEach((region) => {
+          const isTerrain = region.document.behaviors.contents.some((behavior) => behavior.type === "terrainmapper.setTerrain");
+          const regionDefault = globalThis.combatRangeOverlay.getRegionMapData(region.id)
+          if (isTerrain) {
+            region.document.visibility = regionDefault.visibility
+            region.alpha = regionDefault.alpha;
+            region.children[0].shader.uniforms.hatchThickness = regionDefault.hatchThickness
+            region._refreshState()
+          }
+        })
       }
     }
   }
@@ -572,7 +670,7 @@ export class Overlay {
         }
 
         // Color tile based on number of actions to reach it
-        const colorIndex = Math.min(Math.ceil(diagonalDistance(tile.distance) / tilesMovedPerAction), colorByActions.length - 1);
+        const colorIndex = (tile.distance && tile.distance < 1) ? 1 : Math.min(Math.ceil(diagonalDistance(tile.distance) / tilesMovedPerAction), colorByActions.length - 1);
         let color = colorByActions[colorIndex];
         let cornerPt = tile.pt;
         if (idealTileMap.has(tile.key)) {

@@ -277,7 +277,15 @@ export class TokenInfo {
   }
 
   async setIgnoreSetSpeed(ignore, updateActor = false) {
-    await this.setFlag(FLAG_NAMES.IGNORE_SET_SPEED, ignore, updateActor)
+    await this.setFlag(FLAG_NAMES.IGNORE_SET_SPEED, ignore, updateActor);
+  }
+
+  async setSpeedObject(speedObject, updateActor = false) {
+    await this.setFlag(FLAG_NAMES.SPEED_OBJECT, speedObject, updateActor);
+  }
+
+  get speedObject() {
+    return this.getFlag(FLAG_NAMES.SPEED_OBJECT);
   }
 
   getSpeed(token) {
@@ -292,44 +300,53 @@ export class TokenInfo {
   }
 
   get speed() {
-    return (async () => {
-      const actor = this.token.actor;
-      if (!actor) {
-        throw ("Tried to call speed getter with an undefined actor");
-      }
+    const actor = this.token.actor;
+    if (!actor) {
+      throw ("Tried to call speed getter with an undefined actor");
+    }
 
-      if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) {
-        if (this.getSpeed(this.token) === 0) {
-          return 0
-        } else {
-          return this.unmodifiedSpeed
-        }
+    if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper") {
+      if (this.getSpeed(this.token) === 0) {
+        return 0
       } else {
-        return this.getSpeed(this.token)
+        return this.unmodifiedSpeed
       }
-    })()
+    } else {
+      return this.getSpeed(this.token)
+    }
   }
 
-  getSpeedFromAttributes() {
-    const actor = this.token.actor;
+  getSpeedFromAttributes({object=undefined, includeOtherSpeeds=false}={}) {
+    const actor = object ?? this.token.actor;
     const actorAttrs = actor.system.attributes;
 
-    let speed = 0;
+    // 0 > null == true, but need to check if speed set
+    let speed = null;
     let otherSpeeds = [];
     switch (game.system.id) {
       case 'pf1':
       case 'D35E': {
-        otherSpeeds = Object.entries(otherSpeeds = actorAttrs.speed).map(s => s[1].total);
+        otherSpeeds = Object.values(actorAttrs.speed).map(s => s.total);
+        if (includeOtherSpeeds) {
+          otherSpeeds = actorAttrs.speed;
+        }
         break;
       }
       case 'pf2e': {
         speed = actorAttrs.speed?.total;
         // noinspection JSUnresolvedVariable
         otherSpeeds = actorAttrs.speed?.otherSpeeds?.map(s => s.total);
+        if (includeOtherSpeeds) {
+          speed = null;
+          otherSpeeds = actorAttrs.speed;
+        }
         break;
       }
       case 'dnd5e': {
-        otherSpeeds = Object.entries(actorAttrs.movement).filter(s => typeof (s[1]) === "number").map(s => s[1]);
+        otherSpeeds = Object.values(actorAttrs.movement).filter(s => typeof s === "number");
+        if (includeOtherSpeeds) {
+          otherSpeeds = actorAttrs.movement;
+        }
         break;
       }
       case 'swade': {
@@ -354,7 +371,7 @@ export class TokenInfo {
           buttons: {
             one: {
               icon: '<i class="fas fa-check"></i>',
-              label: "Submit",
+              label: game.i18n.localize(`${MODULE_ID}.dialog.submit`),
               callback: async (html) => {
                 const updateActor = html.find("[name=update-actor]")[0]?.checked;
                 const speedOverride = html.find("[name=speed-override]")[0]?.value;
@@ -363,7 +380,7 @@ export class TokenInfo {
             },
             two: {
               icon: '<i class="fas fa-times"></i>',
-              label: "Don't ask again",
+              label: game.i18n.localize(`${MODULE_ID}.dialog.not-again`),
               callback: async (html) => {
                 const updateActor = html.find("[name=update-actor]")[0]?.checked;
                 await this.setIgnoreSetSpeed(true, updateActor);
@@ -375,12 +392,17 @@ export class TokenInfo {
       }
     }
 
-    otherSpeeds.forEach(otherSpeed => {
+    if (includeOtherSpeeds) {
+      return speed === null ? otherSpeeds : speed
+    }
+
+    otherSpeeds?.forEach(otherSpeed => {
       if (otherSpeed > speed) {
         speed = otherSpeed;
       }
     })
 
+    if (speed === null) speed = 0;
     debugLog("getSpeedFromAttributes()", game.system.id, otherSpeeds, speed);
 
     return speed;
@@ -424,25 +446,45 @@ Hooks.on("updateCombat", async (combat) => {
 });
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("updateToken", async (tokenDocument, updateData) => {
+Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   const tokenId = tokenDocument.id;
   const realToken = canvasTokensGet(tokenId); // Get the real token
+  if (!realToken) return;
   updateLocation(realToken, updateData);
   if (!realToken.inCombat || updatePositionInCombat()) {
     updateMeasureFrom(realToken, updateData);
   }
-  await globalThis.combatRangeOverlay.instance.fullRefresh();
+  const translation = updateData.x || updateData.y;
+  const currentRegions = updateData._regions;
+  const previousRegions = opts._priorRegions?.tokenId;
+  let terrainChanged;
+  if (currentRegions) terrainChanged = !currentRegions?.every((regionId) => previousRegions?.includes(regionId)) || !previousRegions?.every((regionId) => currentRegions?.includes(regionId));
+  if (!terrainChanged && translation) await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
 async function updateUnmodifiedSpeed(token) {
   let speed;
+  let speedObject;
   try {
     speed = GridTile.costTerrainMapper(token, token.center) * TokenInfo.current.getSpeed(token);
   } catch {
-    if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper") {
-      // Incompatible version of Terrain Mapper but still need to account for tokens from when it was compatible
-      speed = TokenInfo.current.getSpeed();
+    if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider?.usesRegions) {
+      if (TokenInfo.current.getSpeed(token) === 0) {
+        await TokenInfo.current.setUnmodifiedSpeed(0);
+        return;
+      }
+      let clone = token.actor.clone();
+      clone.effects.forEach((value) => {
+        if (value.flags?.terrainmapper?.uniqueEffectType === "Terrain") clone.effects.delete(value.id)
+      });
+      clone.reset()
+      speed = TokenInfo.current.getSpeedFromAttributes({object: clone});
+      speedObject = TokenInfo.current.getSpeedFromAttributes({object: clone, includeOtherSpeeds: true})
+      clone = null;
     } else return
+  }
+  if (speedObject) {
+    await TokenInfo.current.setSpeedObject(speedObject);
   }
   if (speed === TokenInfo.current?.unmodifiedSpeed || isNaN(speed)) {
     // Speed has not been changed since last set or the token is in an impassable space
@@ -453,11 +495,19 @@ async function updateUnmodifiedSpeed(token) {
 }
 
 Hooks.on("controlToken", async (token, boolFlag) => {
+  if (!globalThis.combatRangeOverlay.initialized && boolFlag) {
+    token.release();
+    Hooks.once("refreshToken", () => {
+      token.control();
+    });
+    return
+  }
   if (!TokenInfo.current || !boolFlag) {
     globalThis.combatRangeOverlay.instance.clearAll();
     return;
   }
-  const speed = await TokenInfo.current?.speed
+  updateMeasureFrom(token);
+  const speed = TokenInfo.current?.speed
   if (!speed && TokenInfo.current?.getSpeedFromAttributes() === undefined && TokenInfo.current.ignoreSetSpeed !== true) {
     if (game.user.isGM) {
       uiNotificationsWarn(game.i18n.localize(`${MODULE_ID}.token-speed-warning-gm`));
@@ -471,6 +521,19 @@ Hooks.on("controlToken", async (token, boolFlag) => {
 
 Hooks.on("updateActor", async (actor) => {
   const token = canvas.tokens.controlled.filter((token) => token.actor === actor)[0];
-  if (globalThis.combatRangeOverlay.terrainProvider.id !== "terrainmapper") return
+  if (!token || globalThis.combatRangeOverlay.terrainProvider?.id !== "terrainmapper") return
   await updateUnmodifiedSpeed(token)
 })
+
+async function updateUnmodifiedSpeedOnEffect(effect) {
+  const token = getCurrentToken();
+  if (token && effect.flags?.terrainmapper?.uniqueEffectType !== "Terrain") await updateUnmodifiedSpeed(token);
+  else await globalThis.combatRangeOverlay.instance.fullRefresh()
+}
+
+Hooks.on("createActiveEffect", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("updateActiveEffect", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("deleteActiveEffect", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("createItem", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("updateItem", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("deleteItem", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))

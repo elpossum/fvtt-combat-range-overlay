@@ -3,7 +3,7 @@ import { TokenInfo } from "./tokenInfo.js"
 export let TerrainHelper
 
 export async function setup() {
-  if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) {
+  if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && !globalThis.combatRangeOverlay.terrainProvider?.usesRegion) {
     const terrainMapper = await import("../../terrainmapper/scripts/Terrain.js");
     const terrainLayerShader = await import("../../terrainmapper/scripts/glsl/TerrainLayerShader.js");
     const terrainQuadMesh = await import("../../terrainmapper/scripts/glsl/TerrainQuadMesh.js");

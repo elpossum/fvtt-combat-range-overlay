@@ -18,8 +18,8 @@ export const diagonals = {
 }
 
 const terrainMeasureTypes = {
-  CENTER_POINT: "center-point",
-  FIVE_POINT: "five-point",
+  CENTER_POINT: "centerPoint",
+  FIVE_POINT: "fivePoint",
   AREA: "area"
 }
 
@@ -44,7 +44,7 @@ const settingNames = {
   TERRAIN_MEASURE: "terrain-measure"
 };
 const hiddenSettings = [settingNames.IS_ACTIVE, settingNames.SHOWN_NOTIFICATION];
-const defaultFalse = [settingNames.IS_ACTIVE, settingNames.SHOW_DIFFICULT_TERRAIN, settingNames.SHOW_WALLS, settingNames.IGNORE_DIFFICULT_TERRAIN, settingNames.SHOWN_NOTIFICATION];
+const defaultFalse = [settingNames.IS_ACTIVE, settingNames.SHOW_DIFFICULT_TERRAIN, settingNames.SHOW_WALLS, settingNames.SHOWN_NOTIFICATION];
 const ignore = [settingNames.MOVEMENT_ALPHA, settingNames.IC_VISIBILITY, settingNames.OOC_VISIBILITY, settingNames.RANGES, settingNames.DIAGONALS, settingNames.DEFAULT_WEAPON_RANGE, settingNames.SPEED_ATTR_PATH, settingNames.INFO_BUTTON, settingNames.ACTIONS_SHOWN, settingNames.TERRAIN_MEASURE];
 
 Hooks.once("init", () => {
@@ -57,7 +57,7 @@ Hooks.once("init", () => {
   });
 
   // noinspection JSUnusedLocalSymbols
-  for (const [key, settingName] of Object.entries(settingNames)) {
+  for (const settingName of Object.values(settingNames)) {
     if (!ignore.includes(settingName)) {
       game.settings.register(MODULE_ID, settingName, {
         name: `${MODULE_ID}.${settingName}`,

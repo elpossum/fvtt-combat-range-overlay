@@ -16,6 +16,7 @@ export class CombatRangeOverlay {
       this.colors = [],
       this.#initialized = false;
       this.terrainProvider = null;
+      this.regionMap = new Map();
   }
 
   get initialized() {
@@ -55,14 +56,14 @@ export class CombatRangeOverlay {
   }
 
   setTerrainProvider() {
-    const terrainModules = [{id: "enhanced-terrain-layer"}, {id: "terrainmapper", latestCompatibleVersion: "0.2.0"}];
+    const terrainModules = [{id: "enhanced-terrain-layer"}, {id: "terrainmapper", latestNonRegionVersion: "0.2.0"}];
     const activeModules = [];
     terrainModules.forEach((module) => {
       const moduleData = game.modules.get(module.id);
       if (moduleData?.active) {
         module.version = moduleData.version;
-        if (module.latestCompatibleVersion) {
-          module.isCompatible = !foundry.utils.isNewerVersion(module.version, module.latestCompatibleVersion);
+        if (module.latestNonRegionVersion) {
+          module.usesRegions = foundry.utils.isNewerVersion(module.version, module.latestNonRegionVersion);
         };
         activeModules.push(module);
       }
@@ -72,13 +73,23 @@ export class CombatRangeOverlay {
         break;
       }
       case 1: {
-        this.terrainProvider = activeModules[0];
+        if (game.system.id !== "pf2e") this.terrainProvider = activeModules[0];
         break;
       }
       default: {
-        ui.notifications.warning(game.i18n.localize(`${MODULE_ID}.multiple-terrain-providers`))
+        Hooks.on("ready", () => {
+          ui.notifications.warn(game.i18n.localize(`${MODULE_ID}.multiple-terrain-providers`))
+        })
         break;
       }
     } 
+  }
+
+  updateRegionMap(id, object) {
+    this.regionMap.set(id, object)
+  }
+
+  getRegionMapData(id) {
+    return this.regionMap.get(id)
   }
 } // Still need to convert fullRefresh() and settings

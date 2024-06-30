@@ -11,6 +11,7 @@ import './settings.js';
 import './colorPicker.js';
 import './controls.js';
 import './tokenInfo.js';
+import './terrainHelperV2.js'
 
 
 /* Tasks
@@ -22,16 +23,18 @@ import './tokenInfo.js';
  * - Add visibility selection to dialog
  * - Honor visibility selection
  */
-
-Hooks.on("ready", async function () {
+Hooks.on("init", () => {
   globalThis.combatRangeOverlay = new CombatRangeOverlay()
   globalThis.combatRangeOverlay.registerHooks();
-  globalThis.combatRangeOverlay.canvasReadyHook();
   globalThis.combatRangeOverlay.setActionsToShow();
   globalThis.combatRangeOverlay.setColorByActions();
   globalThis.combatRangeOverlay.setColors();
   globalThis.combatRangeOverlay.setTerrainProvider();
-  if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider.isCompatible) await terrainSetup();
+})
+
+Hooks.on("ready", async function () {
+  globalThis.combatRangeOverlay.canvasReadyHook();
+  if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && !globalThis.combatRangeOverlay.terrainProvider?.usesRegions) await terrainSetup();
   mouse.addHook(globalThis.combatRangeOverlay.dragHandler.bind(globalThis.combatRangeOverlay));
   globalThis.combatRangeOverlay._initialized();
   Hooks.callAll(`${ MODULE_ID }.ready`);
