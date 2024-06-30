@@ -451,7 +451,7 @@ export class Overlay {
   }
 
   async updateETLHook(placeableDocument) {
-    if (placeableDocument.flags["enhanced-terrain-layer"]) await this.fullRefresh()
+    if (placeableDocument.flags && placeableDocument.flags["enhanced-terrain-layer"]) await this.fullRefresh()
   }
 
   registerHooks() {
