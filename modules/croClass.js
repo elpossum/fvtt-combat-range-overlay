@@ -73,7 +73,7 @@ export class CombatRangeOverlay {
         break;
       }
       case 1: {
-        this.terrainProvider = activeModules[0];
+        if (game.system.id !== "pf2e") this.terrainProvider = activeModules[0];
         break;
       }
       default: {

@@ -42,7 +42,7 @@ export class GridTile {
   }
 
   get cost() {
-    if (TokenInfo.current.isIgnoreDifficultTerrain) {
+    if (TokenInfo.current.isIgnoreDifficultTerrain || !globalThis.combatRangeOverlay.terrainProvider) {
       return 1;
     } else {
       // noinspection JSUnresolvedVariable
