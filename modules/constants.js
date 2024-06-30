@@ -8,7 +8,8 @@ export const FLAG_NAMES = {
   SPEED_OVERRIDE: "speedOverride",
   IGNORE_DIFFICULT_TERRAIN: "ignoreDifficultTerrain",
   UNMODIFIED_SPEED: "unmodifiedSpeed",
-  IGNORE_SET_SPEED: "ignoreSetSpeed"
+  IGNORE_SET_SPEED: "ignoreSetSpeed",
+  SPEED_OBJECT: "speedObject"
 };
 
 export const MAX_DIST = 999;

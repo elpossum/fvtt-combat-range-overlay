@@ -277,7 +277,15 @@ export class TokenInfo {
   }
 
   async setIgnoreSetSpeed(ignore, updateActor = false) {
-    await this.setFlag(FLAG_NAMES.IGNORE_SET_SPEED, ignore, updateActor)
+    await this.setFlag(FLAG_NAMES.IGNORE_SET_SPEED, ignore, updateActor);
+  }
+
+  async setSpeedObject(speedObject, updateActor = false) {
+    await this.setFlag(FLAG_NAMES.SPEED_OBJECT, speedObject, updateActor);
+  }
+
+  get speedObject() {
+    return this.getFlag(FLAG_NAMES.SPEED_OBJECT);
   }
 
   getSpeed(token) {
@@ -310,26 +318,37 @@ export class TokenInfo {
     })()
   }
 
-  getSpeedFromAttributes() {
-    const actor = this.token.actor;
+  getSpeedFromAttributes({object=undefined, includeOtherSpeeds=false}={}) {
+    const actor = object ?? this.token.actor;
     const actorAttrs = actor.system.attributes;
 
-    let speed = 0;
+    // 0 > null == true, but need to check if speed set
+    let speed = null;
     let otherSpeeds = [];
     switch (game.system.id) {
       case 'pf1':
       case 'D35E': {
-        otherSpeeds = Object.entries(otherSpeeds = actorAttrs.speed).map(s => s[1].total);
+        otherSpeeds = Object.values(actorAttrs.speed).map(s => s.total);
+        if (includeOtherSpeeds) {
+          otherSpeeds = actorAttrs.speed;
+        }
         break;
       }
       case 'pf2e': {
         speed = actorAttrs.speed?.total;
         // noinspection JSUnresolvedVariable
         otherSpeeds = actorAttrs.speed?.otherSpeeds?.map(s => s.total);
+        if (includeOtherSpeeds) {
+          speed = null;
+          otherSpeeds = actorAttrs.speed;
+        }
         break;
       }
       case 'dnd5e': {
-        otherSpeeds = Object.entries(actorAttrs.movement).filter(s => typeof (s[1]) === "number").map(s => s[1]);
+        otherSpeeds = Object.values(actorAttrs.movement).filter(s => typeof s === "number");
+        if (includeOtherSpeeds) {
+          otherSpeeds = actorAttrs.movement;
+        }
         break;
       }
       case 'swade': {
@@ -375,12 +394,17 @@ export class TokenInfo {
       }
     }
 
-    otherSpeeds.forEach(otherSpeed => {
+    if (includeOtherSpeeds) {
+      return speed === null ? otherSpeeds : speed
+    }
+
+    otherSpeeds?.forEach(otherSpeed => {
       if (otherSpeed > speed) {
         speed = otherSpeed;
       }
     })
 
+    if (speed === null) speed = 0;
     debugLog("getSpeedFromAttributes()", game.system.id, otherSpeeds, speed);
 
     return speed;
@@ -437,13 +461,27 @@ Hooks.on("updateToken", async (tokenDocument, updateData) => {
 
 async function updateUnmodifiedSpeed(token) {
   let speed;
+  let speedObject;
   try {
     speed = GridTile.costTerrainMapper(token, token.center) * TokenInfo.current.getSpeed(token);
   } catch {
-    if (globalThis.combatRangeOverlay.terrainProvider.id === "terrainmapper") {
-      // Incompatible version of Terrain Mapper but still need to account for tokens from when it was compatible
-      speed = TokenInfo.current?.getSpeed(token);
+    if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && globalThis.combatRangeOverlay.terrainProvider?.usesRegions) {
+      if (TokenInfo.current.getSpeed(token) === 0) {
+        await TokenInfo.current.setUnmodifiedSpeed(0);
+        return;
+      }
+      let clone = token.actor.clone();
+      clone.effects.forEach((value) => {
+        if (value.flags?.terrainmapper?.uniqueEffectType === "Terrain") clone.effects.delete(value.id)
+      });
+      clone.reset()
+      speed = TokenInfo.current.getSpeedFromAttributes({object: clone});
+      speedObject = TokenInfo.current.getSpeedFromAttributes({object: clone, includeOtherSpeeds: true})
+      clone = null;
     } else return
+  }
+  if (speedObject) {
+    await TokenInfo.current.setSpeedObject(speedObject);
   }
   if (speed === TokenInfo.current?.unmodifiedSpeed || isNaN(speed)) {
     // Speed has not been changed since last set or the token is in an impassable space
