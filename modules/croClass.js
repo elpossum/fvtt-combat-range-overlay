@@ -77,7 +77,9 @@ export class CombatRangeOverlay {
         break;
       }
       default: {
-        ui.notifications.warning(game.i18n.localize(`${MODULE_ID}.multiple-terrain-providers`))
+        Hooks.on("ready", () => {
+          ui.notifications.warn(game.i18n.localize(`${MODULE_ID}.multiple-terrain-providers`))
+        })
         break;
       }
     } 
