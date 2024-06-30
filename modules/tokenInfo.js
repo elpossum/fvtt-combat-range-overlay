@@ -300,7 +300,6 @@ export class TokenInfo {
   }
 
   get speed() {
-    return (async () => {
       const actor = this.token.actor;
       if (!actor) {
         throw ("Tried to call speed getter with an undefined actor");
@@ -315,7 +314,6 @@ export class TokenInfo {
       } else {
         return this.getSpeed(this.token)
       }
-    })()
   }
 
   getSpeedFromAttributes({object=undefined, includeOtherSpeeds=false}={}) {
@@ -373,7 +371,7 @@ export class TokenInfo {
           buttons: {
             one: {
               icon: '<i class="fas fa-check"></i>',
-              label: "Submit",
+              label: game.i18n.localize(`${MODULE_ID}.dialog.submit`),
               callback: async (html) => {
                 const updateActor = html.find("[name=update-actor]")[0]?.checked;
                 const speedOverride = html.find("[name=speed-override]")[0]?.value;
@@ -382,7 +380,7 @@ export class TokenInfo {
             },
             two: {
               icon: '<i class="fas fa-times"></i>',
-              label: "Don't ask again",
+              label: game.i18n.localize(`${MODULE_ID}.dialog.not-again`),
               callback: async (html) => {
                 const updateActor = html.find("[name=update-actor]")[0]?.checked;
                 await this.setIgnoreSetSpeed(true, updateActor);
