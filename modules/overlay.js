@@ -384,8 +384,9 @@ export class Overlay {
   //   this.fullRefresh();  // TODO Make this more efficient
   // }
 
+  //Can't remember if this is important but it seems to cause issues so I have disabled it.
   async renderApplicationHook() {
-    if (globalThis.combatRangeOverlay?.initialized) await this.fullRefresh();
+    //if (globalThis.combatRangeOverlay?.initialized) await this.fullRefresh();
   }
 
   async targetTokenHook() {
