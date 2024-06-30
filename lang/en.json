@@ -8,7 +8,7 @@
     "show-turn-order-hint": "Show combatant turn orders relative to the active token",
     "show-potential-targets": "Indicate potential targets?",
     "show-potential-targets-hint": "Circle potential targets; color indicates how many actions of movement to reach target",
-    "show-difficult-terrain": "Show difficult terrain? (Only works for GM currently)",
+    "show-difficult-terrain": "Show difficult terrain? (Only works for GM currently if Terrain Mapper < v0.3.0)",
     "show-difficult-terrain-hint": "Draw an overlay on top of difficult terrain",
     "show-walls": "Show walls?",
     "show-walls-hint": "Draw an overlay on top of all walls",
@@ -29,8 +29,8 @@
     "terrain-measure": "Terrain Measure",
     "terrain-measure-hint": "How is the terrain of a square is determined?",
     "terrain-measure-types": {
-      "center-point": "Center point determines terrain",
-      "five-point": "Majority of five points determine terrain",
+      "centerPoint": "Center point determines terrain",
+      "fivePoint": "Majority of five points determine terrain",
       "area": "Majority area determines terrain"
     },
     "ranges": "Available weapon ranges",
@@ -118,6 +118,10 @@
       }
     },
     "no-color-settings": "Either of lib - Color Settings or Color Picker are not installed/active so colours can't be changed using a picker. This message will not be shown again.",
-    "multiple-terrain-providers": "Multiple modules providing terrain data are active. Please make sure only one is enable to allow Combat Range Overlay to use terrain data."
+    "multiple-terrain-providers": "Multiple modules providing terrain data are active. Please make sure only one is enable to allow Combat Range Overlay to use terrain data.",
+    "dialog": {
+      "submit": "Submit",
+      "not-again": "Don't ask again"
+    }
   }
 }
