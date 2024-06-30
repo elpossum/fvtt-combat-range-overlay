@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.4.0 - 2024/06/30
+
+### Fixed
+
+- Fix some minor bugs
+
+### Added
+
+- Add compatibility for Terrain Mapper > v0.2.0
+
 ## 4.3.2 - 2024/06/23
 
 ### Fixed
