@@ -448,7 +448,7 @@ Hooks.on("updateCombat", async (combat) => {
 });
 
 // noinspection JSUnusedLocalSymbols
-Hooks.on("updateToken", async (tokenDocument, updateData) => {
+Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   const tokenId = tokenDocument.id;
   const realToken = canvasTokensGet(tokenId); // Get the real token
   if (!realToken) return;
@@ -456,7 +456,12 @@ Hooks.on("updateToken", async (tokenDocument, updateData) => {
   if (!realToken.inCombat || updatePositionInCombat()) {
     updateMeasureFrom(realToken, updateData);
   }
-  await globalThis.combatRangeOverlay.instance.fullRefresh();
+  const translation = updateData.x || updateData.y;
+  const currentRegions = updateData._regions;
+  const previousRegions = opts._priorRegions?.tokenId;
+  let terrainChanged;
+  if (currentRegions) terrainChanged = !currentRegions?.every((regionId) => previousRegions?.includes(regionId)) || !previousRegions?.every((regionId) => currentRegions?.includes(regionId));
+  if (!terrainChanged && translation) await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
 async function updateUnmodifiedSpeed(token) {
@@ -520,3 +525,16 @@ Hooks.on("updateActor", async (actor) => {
   if (globalThis.combatRangeOverlay.terrainProvider.id !== "terrainmapper") return
   await updateUnmodifiedSpeed(token)
 })
+
+async function updateUnmodifiedSpeedOnEffect(effect) {
+  const token = getCurrentToken();
+  if (token && effect.flags?.terrainmapper?.uniqueEffectType !== "Terrain") await updateUnmodifiedSpeed(token);
+  else await globalThis.combatRangeOverlay.instance.fullRefresh()
+}
+
+Hooks.on("createActiveEffect", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("updateActiveEffect", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("deleteActiveEffect", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("createItem", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("updateItem", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("deleteItem", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))

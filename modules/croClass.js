@@ -83,11 +83,11 @@ export class CombatRangeOverlay {
     } 
   }
 
-  updateRegionMap(id, visibility) {
-    this.regionMap.set(id, visibility)
+  updateRegionMap(id, object) {
+    this.regionMap.set(id, object)
   }
 
-  getRegionVisibility(id) {
+  getRegionMapData(id) {
     return this.regionMap.get(id)
   }
 } // Still need to convert fullRefresh() and settings
