@@ -552,7 +552,7 @@ Hooks.on("updateActor", async (actor) => {
 async function updateUnmodifiedSpeedOnEffect(effect) {
   const token = getCurrentToken();
   if (token && effect.flags?.terrainmapper?.uniqueEffectType !== "Terrain") await updateUnmodifiedSpeed(token);
-  else await globalThis.combatRangeOverlay.instance.fullRefresh()
+  await globalThis.combatRangeOverlay.instance.fullRefresh()
 }
 
 Hooks.on("createActiveEffect", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
