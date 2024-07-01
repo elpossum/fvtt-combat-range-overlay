@@ -8,7 +8,7 @@ import {
 } from "./utility.js"
 
 import { GridTile } from "./gridTile.js";
-import { FUDGE, MAX_DIST, MODULE_ID, PRESSED_KEYS } from "./constants.js"
+import { FUDGE, MAX_DIST, MODULE_ID, PRESSED_KEYS, SOCKET_TYPES } from "./constants.js"
 import { TokenInfo } from "./tokenInfo.js";
 import * as Settings from "./settings.js";
 import { mouse } from "./mouse.js";
@@ -186,7 +186,7 @@ export class Overlay {
     const weaponRangeInTiles = currentWeaponRange.map(i => ({ ...i, range: i.range / this.DISTANCE_PER_TILE }));
 
     for (const targetToken of game.user.targets) {
-      targetMap.set(targetToken.id, calculateTilesInRange(weaponRangeInTiles, targetToken));
+      if (targetToken.visible) targetMap.set(targetToken.id, calculateTilesInRange(weaponRangeInTiles, targetToken));
     }
     return targetMap;
   }
@@ -398,6 +398,7 @@ export class Overlay {
 
   async targetTokenHook() {
     this.newTarget = true;
+    globalThis.combatRangeOverlay.setTargetVisibility();
     await this.fullRefresh();
   }
 
@@ -454,6 +455,17 @@ export class Overlay {
     if (placeableDocument.flags && placeableDocument.flags["enhanced-terrain-layer"]) await this.fullRefresh()
   }
 
+  async visibilityRefreshHook() {
+    globalThis.combatRangeOverlay.emit(SOCKET_TYPES.REFRESH_VISIBILITY, {userId: game.userId, tokenId: getCurrentToken()?.id})
+    globalThis.combatRangeOverlay.refreshTargetVisibility();
+    const targets = game.user.targets;
+    const refresh = targets.some((target) => globalThis.combatRangeOverlay.targetVisionMap.get(target.id)?.new !== globalThis.combatRangeOverlay.targetVisionMap.get(target.id)?.old);
+    if (refresh) {
+      globalThis.combatRangeOverlay.setTargetVisibility();
+      await globalThis.combatRangeOverlay.instance.fullRefresh();
+    }
+  }
+
   registerHooks() {
     this.hookIDs.renderApplication = Hooks.on("renderApplication", async (application) => {
       if (!['croQuickSettingsDialog', 'token-hud', 'navigation', 'controls'].includes(application.id)) await this.renderApplicationHook()
@@ -472,6 +484,7 @@ export class Overlay {
     this.hookIDs.createMeasuredTemplate = Hooks.on("createMeasuredTemplate", async (template) => await this.updateETLHook(template));
     this.hookIDs.refreshMeasuredTemplate = Hooks.on("refreshMeasuredTemplate", async (template) => await this.updateETLHook(template));
     this.hookIDs.deleteMeasuredTemplate = Hooks.on("deleteMeasuredTemplate", async (template) => await this.updateETLHook(template));
+    this.hookIDs.visibilityRefresh = Hooks.on("visibilityRefresh", async () => await this.visibilityRefreshHook());
   }
 
   unregisterHooks() {
@@ -808,7 +821,7 @@ function combatantComparator(a, b) {
     return a.tokenId - b.tokenId;
 }*/
 
-function checkTileToTokenVisibility(tile, token) {
+export function checkTileToTokenVisibility(tile, token) {
   const t = Math.min(token.h, token.w) / 4;
   const offsets = t > 0 ? [[0, 0], [-t, 0], [t, 0], [0, -t], [0, t], [-t, -t], [-t, t], [t, t], [t, -t]] : [[0, 0]];
   const points = offsets.map(o => new PIXI.Point(token.center.x + o[0], token.center.y + o[1]));

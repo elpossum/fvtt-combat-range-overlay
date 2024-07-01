@@ -3,6 +3,7 @@ import { canvasTokensGet, getCurrentToken, uiNotificationsWarn, getWeaponRanges 
 import { debugLog } from "./debug.js"
 import { getSpeedAttrPath, updatePositionInCombat, getWeaponRange } from "./settings.js"
 import { GridTile } from "./gridTile.js"
+import { checkTileToTokenVisibility } from "./overlay.js";
 
 export class TokenInfo {
   static _tokenInfoMap = new Map();
@@ -454,12 +455,33 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   if (!realToken.inCombat || updatePositionInCombat()) {
     updateMeasureFrom(realToken, updateData);
   }
+
   const translation = updateData.x || updateData.y;
+  let visionRefresh;
+  if (translation && game.user.targets.size) {
+    const targetBlocked = new Map();
+    const newCenter = {
+      w: realToken.w,
+      h: realToken.h,
+      center: {
+        x: updateData.x ? realToken.center.x + updateData.x - realToken.x : realToken.center.x,
+        y: updateData.y ? realToken.center.y + updateData.y - realToken.y : realToken.center.y
+      }
+    };
+    game.user.targets.forEach((target) => {
+      const blocked = !checkTileToTokenVisibility({centerPt: target.center}, newCenter)
+      targetBlocked.set(target.id, blocked)
+    })
+    targetBlocked.forEach((blocked, id) => {
+      visionRefresh = visionRefresh || globalThis.combatRangeOverlay.targetVisionMap.get(id).new === blocked
+    });
+  }
+
   const currentRegions = updateData._regions;
   const previousRegions = opts._priorRegions?.tokenId;
   let terrainChanged;
   if (currentRegions) terrainChanged = !currentRegions?.every((regionId) => previousRegions?.includes(regionId)) || !previousRegions?.every((regionId) => currentRegions?.includes(regionId));
-  if (!terrainChanged && translation) await globalThis.combatRangeOverlay.instance.fullRefresh();
+  if (!terrainChanged && translation && !visionRefresh) await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
 async function updateUnmodifiedSpeed(token) {
@@ -503,9 +525,11 @@ Hooks.on("controlToken", async (token, boolFlag) => {
     return
   }
   if (!TokenInfo.current || !boolFlag) {
+    globalThis.combatRangeOverlay.targetVisionMap.clear();
     globalThis.combatRangeOverlay.instance.clearAll();
     return;
   }
+  globalThis.combatRangeOverlay.setTargetVisibility();
   updateMeasureFrom(token);
   const speed = TokenInfo.current?.speed
   if (!speed && TokenInfo.current?.getSpeedFromAttributes() === undefined && TokenInfo.current.ignoreSetSpeed !== true) {

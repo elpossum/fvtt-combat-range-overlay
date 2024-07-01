@@ -1,6 +1,7 @@
 import { colorSettingNames } from "./colorPicker.js";
-import { MODULE_ID } from "./constants.js";
+import { MODULE_ID, SOCKET_TYPES } from "./constants.js";
 import { Overlay } from "./overlay.js";
+import { getCurrentToken } from "./utility.js";
 
 export class CombatRangeOverlay {
 
@@ -85,6 +86,17 @@ export class CombatRangeOverlay {
   getRegionMapData(id) {
     return this.regionMap.get(id)
   }
+
+  setTargetVisibility() {
+    if (getCurrentToken() && game.user.targets.size) game.user.targets.forEach((target) => this.targetVisionMap.set(target.id, {new: target.visible, old: target.visible}));
+    else this.targetVisionMap.clear();
+  }
+
+  refreshTargetVisibility() {
+    if (getCurrentToken() && game.user.targets.size) game.user.targets.forEach((target) => this.targetVisionMap.set(target.id, {new: target.visible, old: this.targetVisionMap.get(target.id)?.new}));
+    else this.targetVisionMap.clear();
+  }
+
   registerSocketListeners() {
     game.socket.on(`module.${MODULE_ID}`, ({type, payload}) => {
       switch (type) {
@@ -99,5 +111,10 @@ export class CombatRangeOverlay {
 
   emit(type, payload) {
     return game.socket.emit(`module.${MODULE_ID}`, {type, payload})
+  }
+
+  handleVisionRefresh(payload) {
+    const refresh = game.userId !== payload.userId && game.user.targets.ids.includes(payload.tokenId);
+    if (refresh) this.instance.visibilityRefreshHook();
   }
 } // Still need to convert fullRefresh() and settings
