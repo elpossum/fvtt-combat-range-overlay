@@ -1,5 +1,15 @@
 # Changelog
 
+## 4.5.0 -2024/07/01
+
+### Fixed
+
+- Fix changing weapons not refreshing the overlay
+
+### Added
+
+- Make token visibility be respected
+
 ## 4.4.0 - 2024/06/30
 
 ### Fixed
