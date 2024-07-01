@@ -13,23 +13,8 @@ import './controls.js';
 import './tokenInfo.js';
 import './terrainHelperV2.js'
 
-
-/* Tasks
- * Basic functionality:
- * - Register Hooks for joining combat and ending combat turn to update current measureFrom
- * - Add Hook to draw overlay
- *
- * Enhanced functionality:
- * - Add visibility selection to dialog
- * - Honor visibility selection
- */
 Hooks.on("init", () => {
   globalThis.combatRangeOverlay = new CombatRangeOverlay()
-  globalThis.combatRangeOverlay.registerHooks();
-  globalThis.combatRangeOverlay.setActionsToShow();
-  globalThis.combatRangeOverlay.setColorByActions();
-  globalThis.combatRangeOverlay.setColors();
-  globalThis.combatRangeOverlay.setTerrainProvider();
 })
 
 Hooks.on("ready", async function () {

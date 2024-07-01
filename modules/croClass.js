@@ -10,6 +10,20 @@ export class CombatRangeOverlay {
   constructor() {
     this.instance = new Overlay();
     this.showNumericMovementCost = false;
+    this.showPathLines = false;
+    this.roundNumericMovementCost = true;
+    this.actionsToShow = 2;
+    this.colorByActions = [];
+    this.colors = [];
+    this.#initialized = false;
+    this.terrainProvider = null;
+    this.regionMap = new Map();
+    this.targetVisionMap = new Map();
+    this.registerHooks();
+    this.setActionsToShow();
+    this.setColorByActions();
+    this.setColors();
+    this.setTerrainProvider();
     this.registerSocketListeners();
   }
 
