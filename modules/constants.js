@@ -34,3 +34,7 @@ export const ENTRY_EVENTS_COMBAT = new Set([
   CONST.REGION_EVENTS?.TOKEN_TURN_END,
   CONST.REGION_EVENTS?.TOKEN_TURN_START
 ]);
+
+export const SOCKET_TYPES = {
+  REFRESH_VISIBILITY: "refreshVisibility"
+}

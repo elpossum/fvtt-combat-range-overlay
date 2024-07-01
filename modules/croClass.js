@@ -9,14 +9,7 @@ export class CombatRangeOverlay {
   constructor() {
     this.instance = new Overlay();
     this.showNumericMovementCost = false;
-    this.showPathLines = false,
-      this.roundNumericMovementCost = true,
-      this.actionsToShow = 2,
-      this.colorByActions = [],
-      this.colors = [],
-      this.#initialized = false;
-      this.terrainProvider = null;
-      this.regionMap = new Map();
+    this.registerSocketListeners();
   }
 
   get initialized() {
@@ -91,5 +84,20 @@ export class CombatRangeOverlay {
 
   getRegionMapData(id) {
     return this.regionMap.get(id)
+  }
+  registerSocketListeners() {
+    game.socket.on(`module.${MODULE_ID}`, ({type, payload}) => {
+      switch (type) {
+        case SOCKET_TYPES.REFRESH_VISIBILITY:
+          this.handleVisionRefresh(payload)
+          break;
+        default:
+          break;
+      }
+    })
+  }
+
+  emit(type, payload) {
+    return game.socket.emit(`module.${MODULE_ID}`, {type, payload})
   }
 } // Still need to convert fullRefresh() and settings
