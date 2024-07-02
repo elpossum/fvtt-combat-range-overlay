@@ -617,6 +617,7 @@ export class Overlay {
   }
 
   async drawCosts(movementCostMap, targetRangeMap) {
+    const los = getCurrentToken().vision.los.clone();
     const rangeMap = buildRangeMap(targetRangeMap);
     const idealTileMap = calculateIdealTileMap(movementCostMap, targetRangeMap, rangeMap);
     const colorByActions = globalThis.combatRangeOverlay.colorByActions;
@@ -677,10 +678,14 @@ export class Overlay {
           this.overlays.distanceOverlay.lineStyle(highlightLineWidth, idealTileMap.get(tile.key).color);
         } else {
           this.overlays.distanceOverlay.lineStyle(0, 0);
+        };
+        const rect = new PIXI.Polygon(cornerPt.x, cornerPt.y, cornerPt.x + canvasGridSize(), cornerPt.y, cornerPt.x + canvasGridSize(), cornerPt.y + canvasGridSize(), cornerPt.x, cornerPt.y + canvasGridSize());
+        const intersect = los.intersectPolygon(rect);
+        if (intersect?.area / rect.area >= Settings.getVisionMaskPercent() || Settings.getVisionMaskType() !== Settings.visionMaskingTypes.INDIVIDUAL) {
+          this.overlays.distanceOverlay.beginFill(color, Settings.getMovementAlpha());
+          this.overlays.distanceOverlay.drawRect(cornerPt.x, cornerPt.y, canvasGridSize(), canvasGridSize());
+          this.overlays.distanceOverlay.endFill();
         }
-        this.overlays.distanceOverlay.beginFill(color, Settings.getMovementAlpha());
-        this.overlays.distanceOverlay.drawRect(cornerPt.x, cornerPt.y, canvasGridSize(), canvasGridSize());
-        this.overlays.distanceOverlay.endFill();
       }
     }
 
