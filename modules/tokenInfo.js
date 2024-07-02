@@ -1,7 +1,7 @@
 import { FLAG_NAMES, MODULE_ID } from "./constants.js"
 import { canvasTokensGet, getCurrentToken, uiNotificationsWarn, getWeaponRanges } from "./utility.js"
 import { debugLog } from "./debug.js"
-import { getSpeedAttrPath, updatePositionInCombat, getWeaponRange } from "./settings.js"
+import * as Settings from "./settings.js";
 import { GridTile } from "./gridTile.js"
 import { checkTileToTokenVisibility } from "./overlay.js";
 
@@ -70,7 +70,7 @@ export class TokenInfo {
 
   get weaponRangeColor() {
     return (async () => {
-      const DEFAULT_WEAPON_RANGE = getWeaponRange();
+      const DEFAULT_WEAPON_RANGE = Settings.getWeaponRange();
       const colors = globalThis.combatRangeOverlay.colors;
       if (this.getFlag(FLAG_NAMES.WEAPON_RANGE)) {
         let range = [{
@@ -292,9 +292,9 @@ export class TokenInfo {
   getSpeed(token) {
     if (this.speedOverride) {
       return this.speedOverride;
-    } else if (getSpeedAttrPath()) {
+    } else if (Settings.getSpeedAttrPath()) {
       // noinspection JSCheckFunctionSignatures,JSUnresolvedVariable
-      return foundry.utils.getProperty(token.actor, getSpeedAttrPath());
+      return foundry.utils.getProperty(token.actor, Settings.getSpeedAttrPath());
     } else {
       return this.getSpeedFromAttributes()
     }
@@ -439,7 +439,7 @@ Hooks.on("deleteCombatant", async (combatant) => {
 
 // noinspection JSUnusedLocalSymbols
 Hooks.on("updateCombat", async (combat) => {
-  if (combat?.previous?.tokenId && !updatePositionInCombat()) {
+  if (combat?.previous?.tokenId && !Settings.updatePositionInCombat()) {
     const tokens = [canvasTokensGet(combat.previous.tokenId), canvasTokensGet(combat.current.tokenId)];
     tokens.forEach((token) => updateMeasureFrom(token));
     await globalThis.combatRangeOverlay.instance.fullRefresh();
@@ -452,7 +452,7 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   const realToken = canvasTokensGet(tokenId); // Get the real token
   if (!realToken) return;
   updateLocation(realToken, updateData);
-  if (!realToken.inCombat || updatePositionInCombat()) {
+  if (!realToken.inCombat || Settings.updatePositionInCombat()) {
     updateMeasureFrom(realToken, updateData);
   }
 
