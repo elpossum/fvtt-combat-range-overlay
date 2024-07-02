@@ -456,7 +456,7 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
     updateMeasureFrom(realToken, updateData);
   }
 
-  const translation = updateData.x || updateData.y;
+  const translation = !!updateData.x || !!updateData.y;
   if (translation) globalThis.combatRangeOverlay.instance.tokenPositionChanged = true;
   let visionRefresh;
   if (translation && game.user.targets.size) {
