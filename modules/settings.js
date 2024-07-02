@@ -23,6 +23,12 @@ const terrainMeasureTypes = {
   AREA: "area"
 }
 
+export const visionMaskingTypes = {
+  NONE: "none",
+  MASK: "mask",
+  INDIVIDUAL: "individual"
+}
+
 const settingNames = {
   IS_ACTIVE: 'is-active',
   IC_VISIBILITY: 'ic_visibility',
@@ -41,11 +47,13 @@ const settingNames = {
   UPDATE_POSITION_IN_COMBAT: "update-position-in-combat",
   ACTIONS_SHOWN: "actions-shown",
   SHOWN_NOTIFICATION: "shown-notification",
-  TERRAIN_MEASURE: "terrain-measure"
+  TERRAIN_MEASURE: "terrain-measure",
+  VISION_MASKING_TYPE: "vision-masking-type",
+  VISION_MASKING_PERCENTAGE: "vision-masking-percentage"
 };
 const hiddenSettings = [settingNames.IS_ACTIVE, settingNames.SHOWN_NOTIFICATION];
 const defaultFalse = [settingNames.IS_ACTIVE, settingNames.SHOW_DIFFICULT_TERRAIN, settingNames.SHOW_WALLS, settingNames.SHOWN_NOTIFICATION];
-const ignore = [settingNames.MOVEMENT_ALPHA, settingNames.IC_VISIBILITY, settingNames.OOC_VISIBILITY, settingNames.RANGES, settingNames.DIAGONALS, settingNames.DEFAULT_WEAPON_RANGE, settingNames.SPEED_ATTR_PATH, settingNames.INFO_BUTTON, settingNames.ACTIONS_SHOWN, settingNames.TERRAIN_MEASURE];
+const ignore = [settingNames.MOVEMENT_ALPHA, settingNames.VISION_MASKING_TYPE, settingNames.VISION_MASKING_PERCENTAGE, settingNames.IC_VISIBILITY, settingNames.OOC_VISIBILITY, settingNames.RANGES, settingNames.DIAGONALS, settingNames.DEFAULT_WEAPON_RANGE, settingNames.SPEED_ATTR_PATH, settingNames.INFO_BUTTON, settingNames.ACTIONS_SHOWN, settingNames.TERRAIN_MEASURE];
 
 Hooks.once("init", () => {
   game.settings.registerMenu(MODULE_ID, settingNames.INFO_BUTTON, {
@@ -102,6 +110,38 @@ Hooks.once("init", () => {
       step: .05
     },
     onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
+  });
+
+  game.settings.register(MODULE_ID, settingNames.VISION_MASKING_TYPE, {
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}-hint`),
+    scope: 'client',
+    config: true,
+    type: String,
+    default: visionMaskingTypes.NONE,
+    choices: {
+      none: game.i18n.localize(`${MODULE_ID}.vision-mask-types.${visionMaskingTypes.NONE}`),
+      mask: game.i18n.localize(`${MODULE_ID}.vision-mask-types.${visionMaskingTypes.MASK}`),
+      individual: game.i18n.localize(`${MODULE_ID}.vision-mask-types.${visionMaskingTypes.INDIVIDUAL}`)
+    },
+    onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
+  });
+
+  game.settings.register(MODULE_ID, settingNames.VISION_MASKING_PERCENTAGE, {
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}-hint`),
+    scope: 'client',
+    config: true,
+    type: Number,
+    default: 50,
+    range: {
+      min: 0,
+      max: 100,
+      step: 5
+    },
+    onChange: async () => { 
+      if (getVisionMaskType() === visionMaskingTypes.INDIVIDUAL) await globalThis.combatRangeOverlay.instance.fullRefresh() 
+    }
   });
 
   game.settings.register(MODULE_ID, settingNames.IC_VISIBILITY, {
@@ -318,4 +358,12 @@ export function getWeaponRange() {
 
 export function getTerrainMeasure() {
   return game.settings.get(MODULE_ID, settingNames.TERRAIN_MEASURE)
+}
+
+export function getVisionMaskType() {
+  return game.settings.get(MODULE_ID, settingNames.VISION_MASKING_TYPE)
+}
+
+export function getVisionMaskPercent() {
+  return game.settings.get(MODULE_ID, settingNames.VISION_MASKING_PERCENTAGE) / 100
 }
