@@ -57,8 +57,8 @@ const ignore = [settingNames.MOVEMENT_ALPHA, settingNames.VISION_MASKING_TYPE, s
 
 Hooks.once("init", () => {
   game.settings.registerMenu(MODULE_ID, settingNames.INFO_BUTTON, {
-    name: `${MODULE_ID}.${settingNames.INFO_BUTTON}`,
-    label: `${MODULE_ID}.${settingNames.INFO_BUTTON}`,
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.INFO_BUTTON}`),
+    label: game.i18n.localize(`${MODULE_ID}.${settingNames.INFO_BUTTON}`),
     icon: "fas fa-info-circle",
     type: ModuleInfoApp,
     restricted: false
@@ -68,8 +68,8 @@ Hooks.once("init", () => {
   for (const settingName of Object.values(settingNames)) {
     if (!ignore.includes(settingName)) {
       game.settings.register(MODULE_ID, settingName, {
-        name: `${MODULE_ID}.${settingName}`,
-        hint: `${MODULE_ID}.${settingName}-hint`,
+        name: game.i18n.localize(`${MODULE_ID}.${settingName}`),
+        hint: game.i18n.localize(`${MODULE_ID}.${settingName}-hint`),
         scope: "client",
         config: !hiddenSettings.includes(settingName),
         type: Boolean,
@@ -80,8 +80,8 @@ Hooks.once("init", () => {
   }
 
   game.settings.register(MODULE_ID, settingNames.ACTIONS_SHOWN, {
-    name: `${MODULE_ID}.${settingNames.ACTIONS_SHOWN}`,
-    hint: `${MODULE_ID}.${settingNames.ACTIONS_SHOWN}-hint`,
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.ACTIONS_SHOWN}`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.ACTIONS_SHOWN}-hint`),
     scope: 'client',
     config: true,
     type: Number,
@@ -98,8 +98,8 @@ Hooks.once("init", () => {
   });
 
   game.settings.register(MODULE_ID, settingNames.MOVEMENT_ALPHA, {
-    name: `${MODULE_ID}.${settingNames.MOVEMENT_ALPHA}`,
-    hint: `${MODULE_ID}.${settingNames.MOVEMENT_ALPHA}-hint`,
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.MOVEMENT_ALPHA}`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.MOVEMENT_ALPHA}-hint`),
     scope: 'client',
     config: true,
     type: Number,
@@ -145,60 +145,60 @@ Hooks.once("init", () => {
   });
 
   game.settings.register(MODULE_ID, settingNames.IC_VISIBILITY, {
-    name: `${MODULE_ID}.${settingNames.IC_VISIBILITY}`,
-    hint: `${MODULE_ID}.${settingNames.IC_VISIBILITY}-hint`,
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.IC_VISIBILITY}`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.IC_VISIBILITY}-hint`),
     scope: 'client',
     config: true,
     type: String,
     default: overlayVisibility.ALWAYS,
     choices: {
-      always: `${MODULE_ID}.visibilities.${overlayVisibility.ALWAYS}`,
-      activeCombatant: `${MODULE_ID}.visibilities.${overlayVisibility.ACTIVE_COMBATANT}`,
-      drag: `${MODULE_ID}.visibilities.${overlayVisibility.DRAG}`,
-      hotkeys: `${MODULE_ID}.visibilities.${overlayVisibility.HOTKEYS}`,
-      both: `${MODULE_ID}.visibilities.${overlayVisibility.BOTH}`,
-      never: `${MODULE_ID}.visibilities.${overlayVisibility.NEVER}`
+      always: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.ALWAYS}`),
+      activeCombatant: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.ACTIVE_COMBATANT}`),
+      drag: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.DRAG}`),
+      hotkeys: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.HOTKEYS}`),
+      both: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.BOTH}`),
+      never: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.NEVER}`)
     },
     onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
   });
 
   game.settings.register(MODULE_ID, settingNames.OOC_VISIBILITY, {
-    name: `${MODULE_ID}.${settingNames.OOC_VISIBILITY}`,
-    hint: `${MODULE_ID}.${settingNames.OOC_VISIBILITY}-hint`,
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.OOC_VISIBILITY}`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.OOC_VISIBILITY}-hint`),
     scope: 'client',
     config: true,
     type: String,
     default: overlayVisibility.NEVER,
     choices: {
-      always: `${MODULE_ID}.visibilities.${overlayVisibility.ALWAYS}`,
-      drag: `${MODULE_ID}.visibilities.${overlayVisibility.DRAG}`,
-      hotkeys: `${MODULE_ID}.visibilities.${overlayVisibility.HOTKEYS}`,
-      both: `${MODULE_ID}.visibilities.${overlayVisibility.BOTH}`,
-      never: `${MODULE_ID}.visibilities.${overlayVisibility.NEVER}`
+      always: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.ALWAYS}`),
+      drag: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.DRAG}`),
+      hotkeys: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.HOTKEYS}`),
+      both: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.BOTH}`),
+      never: game.i18n.localize(`${MODULE_ID}.visibilities.${overlayVisibility.NEVER}`)
     },
     onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
   });
 
   if (game.modules.get('terrainmapper')?.active) {
     game.settings.register(MODULE_ID, settingNames.TERRAIN_MEASURE, {
-      name: `${MODULE_ID}.${settingNames.TERRAIN_MEASURE}`,
-      hint: `${MODULE_ID}.${settingNames.TERRAIN_MEASURE}-hint`,
+      name: game.i18n.localize(`${MODULE_ID}.${settingNames.TERRAIN_MEASURE}`),
+      hint: game.i18n.localize(`${MODULE_ID}.${settingNames.TERRAIN_MEASURE}-hint`),
       scope: 'world',
       config: true,
       type: String,
       default: terrainMeasureTypes.CENTER_POINT,
       choices: {
-        centerPoint: `${MODULE_ID}.terrain-measure-types.${terrainMeasureTypes.CENTER_POINT}`,
-        fivePoint: `${MODULE_ID}.terrain-measure-types.${terrainMeasureTypes.FIVE_POINT}`,
-        area: `${MODULE_ID}.terrain-measure-types.${terrainMeasureTypes.AREA}`
+        centerPoint: game.i18n.localize(`${MODULE_ID}.terrain-measure-types.${terrainMeasureTypes.CENTER_POINT}`),
+        fivePoint: game.i18n.localize(`${MODULE_ID}.terrain-measure-types.${terrainMeasureTypes.FIVE_POINT}`),
+        area: game.i18n.localize(`${MODULE_ID}.terrain-measure-types.${terrainMeasureTypes.AREA}`)
       },
       onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
     })
   }
 
   game.settings.register(MODULE_ID, settingNames.RANGES, {
-    name: `${MODULE_ID}.${settingNames.RANGES}`,
-    hint: `${MODULE_ID}.${settingNames.RANGES}-hint`,
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.RANGES}`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.RANGES}-hint`),
     scope: 'client',
     config: true,
     type: String,
@@ -207,8 +207,8 @@ Hooks.once("init", () => {
   });
 
   game.settings.register(MODULE_ID, settingNames.DEFAULT_WEAPON_RANGE, {
-    name: `${MODULE_ID}.${settingNames.DEFAULT_WEAPON_RANGE}`,
-    hint: `${MODULE_ID}.${settingNames.DEFAULT_WEAPON_RANGE}-hint`,
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.DEFAULT_WEAPON_RANGE}`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.DEFAULT_WEAPON_RANGE}-hint`),
     scope: 'world',
     config: true,
     type: Number,
@@ -217,24 +217,24 @@ Hooks.once("init", () => {
   });
 
   game.settings.register(MODULE_ID, settingNames.DIAGONALS, {
-    name: `${MODULE_ID}.${settingNames.DIAGONALS}.name`,
-    hint: `${MODULE_ID}.${settingNames.DIAGONALS}.hint`,
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.DIAGONALS}.name`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.DIAGONALS}.hint`),
     scope: 'world',
     config: true,
     type: String,
     default: diagonals.FIVE_TEN_FIVE,
     choices: {
-      fiveTenFive: `${MODULE_ID}.${settingNames.DIAGONALS}.${diagonals.FIVE_TEN_FIVE}`,
-      tenFiveTen: `${MODULE_ID}.${settingNames.DIAGONALS}.${diagonals.TEN_FIVE_TEN}`,
-      five: `${MODULE_ID}.${settingNames.DIAGONALS}.${diagonals.FIVE}`,
-      ten: `${MODULE_ID}.${settingNames.DIAGONALS}.${diagonals.TEN}`,
+      fiveTenFive: game.i18n.localize(`${MODULE_ID}.${settingNames.DIAGONALS}.${diagonals.FIVE_TEN_FIVE}`),
+      tenFiveTen: game.i18n.localize(`${MODULE_ID}.${settingNames.DIAGONALS}.${diagonals.TEN_FIVE_TEN}`),
+      five: game.i18n.localize(`${MODULE_ID}.${settingNames.DIAGONALS}.${diagonals.FIVE}`),
+      ten: game.i18n.localize(`${MODULE_ID}.${settingNames.DIAGONALS}.${diagonals.TEN}`),
     },
     onChange: async () => { await globalThis.combatRangeOverlay.instance.fullRefresh() }
   });
 
   game.settings.register(MODULE_ID, settingNames.SPEED_ATTR_PATH, {
-    name: `${MODULE_ID}.${settingNames.SPEED_ATTR_PATH}`,
-    hint: `${MODULE_ID}.${settingNames.SPEED_ATTR_PATH}-hint`,
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.SPEED_ATTR_PATH}`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.SPEED_ATTR_PATH}-hint`),
     scope: 'world',
     config: true,
     type: String,
@@ -242,8 +242,8 @@ Hooks.once("init", () => {
   });
 
   game.keybindings.register(MODULE_ID, 'showOverlay', {
-    name: `${MODULE_ID}.keybindings.showOverlay.name`,
-    hint: `${MODULE_ID}.keybindings.showOverlay.hint`,
+    name: game.i18n.localize(`${MODULE_ID}.keybindings.showOverlay.name`),
+    hint: game.i18n.localize(`${MODULE_ID}.keybindings.showOverlay.hint`),
     editable: [
       {
         key: 'AltLeft'
@@ -260,8 +260,8 @@ Hooks.once("init", () => {
   })
 
   game.keybindings.register(MODULE_ID, 'quickSettings', {
-    name: `${MODULE_ID}.keybindings.quickSettings.name`,
-    hint: `${MODULE_ID}.keybindings.quickSettings.hint`,
+    name: game.i18n.localize(`${MODULE_ID}.keybindings.quickSettings.name`),
+    hint: game.i18n.localize(`${MODULE_ID}.keybindings.quickSettings.hint`),
     editable: [
       {
         key: 'ShiftLeft'
@@ -276,8 +276,8 @@ Hooks.once("init", () => {
   })
 
   game.keybindings.register(MODULE_ID, 'resetMeasureFrom', {
-    name: `${MODULE_ID}.keybindings.resetMeasureFrom.name`,
-    hint: `${MODULE_ID}.keybindings.resetMeasureFrom.hint`,
+    name: game.i18n.localize(`${MODULE_ID}.keybindings.resetMeasureFrom.name`),
+    hint: game.i18n.localize(`${MODULE_ID}.keybindings.resetMeasureFrom.hint`),
     editable: [
       {
         key: 'ControlLeft'
