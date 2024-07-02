@@ -462,7 +462,7 @@ export class Overlay {
     globalThis.combatRangeOverlay.refreshTargetVisibility();
     const targets = game.user.targets;
     const refresh = targets.some((target) => globalThis.combatRangeOverlay.targetVisionMap.get(target.id)?.new !== globalThis.combatRangeOverlay.targetVisionMap.get(target.id)?.old);
-    if (refresh) {
+    if (refresh || Settings.getVisionMaskType() !== Settings.visionMaskingTypes.NONE) {
       globalThis.combatRangeOverlay.setTargetVisibility();
       await globalThis.combatRangeOverlay.instance.fullRefresh();
     }
