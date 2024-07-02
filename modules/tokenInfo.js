@@ -457,6 +457,7 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   }
 
   const translation = updateData.x || updateData.y;
+  if (translation) globalThis.combatRangeOverlay.instance.tokenPositionChanged = true;
   let visionRefresh;
   if (translation && game.user.targets.size) {
     const targetBlocked = new Map();
@@ -481,7 +482,7 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   const previousRegions = opts._priorRegions?.tokenId;
   let terrainChanged;
   if (currentRegions) terrainChanged = !currentRegions?.every((regionId) => previousRegions?.includes(regionId)) || !previousRegions?.every((regionId) => currentRegions?.includes(regionId));
-  if (!terrainChanged && translation && !visionRefresh) await globalThis.combatRangeOverlay.instance.fullRefresh();
+  if (!terrainChanged && translation && !visionRefresh && Settings.getVisionMaskType() === Settings.visionMaskingTypes.NONE) await globalThis.combatRangeOverlay.instance.fullRefresh();
 });
 
 async function updateUnmodifiedSpeed(token) {
@@ -529,6 +530,7 @@ Hooks.on("controlToken", async (token, boolFlag) => {
     globalThis.combatRangeOverlay.instance.clearAll();
     return;
   }
+  globalThis.combatRangeOverlay.instance.tokenPositionChanged = false;
   globalThis.combatRangeOverlay.setTargetVisibility();
   updateMeasureFrom(token);
   const speed = TokenInfo.current?.speed

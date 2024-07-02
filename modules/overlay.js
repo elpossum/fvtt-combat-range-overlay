@@ -88,6 +88,8 @@ export class Overlay {
     this.justActivated = false;
     this.DISTANCE_PER_TILE = 0;
     this.drawing = false;
+    this.tokenRefreshTracker = 0;
+    this.tokenPositionChanged = false;
   }
 
   // Use Dijkstra's shortest path algorithm
@@ -462,9 +464,20 @@ export class Overlay {
     globalThis.combatRangeOverlay.refreshTargetVisibility();
     const targets = game.user.targets;
     const refresh = targets.some((target) => globalThis.combatRangeOverlay.targetVisionMap.get(target.id)?.new !== globalThis.combatRangeOverlay.targetVisionMap.get(target.id)?.old);
-    if (refresh || Settings.getVisionMaskType() !== Settings.visionMaskingTypes.NONE) {
+    if (refresh) {
       globalThis.combatRangeOverlay.setTargetVisibility();
       await globalThis.combatRangeOverlay.instance.fullRefresh();
+    } else if (Settings.getVisionMaskType() !== Settings.visionMaskingTypes.NONE && this.tokenRefreshTracker === 0 && this.tokenPositionChanged) {
+      this.tokenPositionChanged = false;
+      const hookId = Hooks.on("refreshToken", async (_token, opts) => {
+        this.clearAll();
+        !opts.refreshPosition ? this.tokenRefreshTracker++ : this.tokenRefreshTracker = 0;
+        if (this.tokenRefreshTracker === canvas.tokens.placeables.length) {
+          this.tokenRefreshTracker = 0;
+          Hooks.off("refreshToken", hookId);
+          await this.fullRefresh();
+        }
+      })
     }
   }
 
