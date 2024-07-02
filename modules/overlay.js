@@ -412,10 +412,12 @@ export class Overlay {
   sceneUpdateHook() {
     this.canvasReadyHook();
     const token = getCurrentToken();
-    token.release();
-    Hooks.once("refreshToken", () => {
-      canvas.tokens.get(token.id).control()
-    })
+    if (token) {
+      token.release();
+      Hooks.once("refreshToken", () => {
+        canvas.tokens.get(token.id).control()
+      })
+    }
   }
 
   async regionUpdateHook() {
