@@ -26,6 +26,15 @@
       "both": "With either drag or hotkeys",
       "never": "Never"
     },
+    "vision-masking-type": "Vision masking type",
+    "vision-masking-type-hint": "How should visibility affect the overlay?",
+    "vision-mask-types": {
+      "none": "No masking",
+      "mask": "Masked directly",
+      "individual": "Tiles by percentage visible"
+    },
+    "vision-masking-percentage": "Vision masking percentage",
+    "vision-masking-percentage-hint": "How much of a tile should be visible to be shown?",
     "terrain-measure": "Terrain Measure",
     "terrain-measure-hint": "How is the terrain of a square is determined?",
     "terrain-measure-types": {
