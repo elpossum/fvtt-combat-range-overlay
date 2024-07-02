@@ -620,6 +620,14 @@ export class Overlay {
 
   async drawCosts(movementCostMap, targetRangeMap) {
     const los = getCurrentToken().vision.los.clone();
+    if (Settings.getVisionMaskType() === Settings.visionMaskingTypes.MASK) {
+      const losGraphics = new PIXI.Graphics();
+      losGraphics.beginFill();
+      losGraphics.drawPolygon(los);
+      losGraphics.endFill();
+      this.overlays.distanceOverlay.addChild(losGraphics);
+      this.overlays.distanceOverlay.mask = losGraphics;
+    }
     const rangeMap = buildRangeMap(targetRangeMap);
     const idealTileMap = calculateIdealTileMap(movementCostMap, targetRangeMap, rangeMap);
     const colorByActions = globalThis.combatRangeOverlay.colorByActions;
