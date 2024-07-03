@@ -1,6 +1,16 @@
 # Changelog
 
-## 4.5.0 -2024/07/01
+## 4.6.0 - 2024/07/03
+
+### Fixed
+
+- Fix minor bugs
+
+### Added
+
+- Add vision masking options
+
+## 4.5.0 - 2024/07/01
 
 ### Fixed
 
