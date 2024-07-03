@@ -128,6 +128,7 @@ export class CombatRangeOverlay {
   }
 
   handleVisionRefresh(payload) {
+    if (!this.#initialized) return;
     const refresh = game.userId !== payload.userId && game.user.targets.ids.includes(payload.tokenId);
     if (refresh) this.instance.visibilityRefreshHook();
   }
