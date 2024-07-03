@@ -542,6 +542,13 @@ Hooks.on("controlToken", async (token, boolFlag) => {
     }
   }
   await updateUnmodifiedSpeed(token);
+  if (!token.vision.los || globalThis.combatRangeOverlay.instance.tokenLayerJustActivated) {
+    Hooks.once("sightRefresh", () => {
+      Hooks.once("refreshToken", async () => await globalThis.combatRangeOverlay.instance.fullRefresh());
+      token.refresh();
+    });
+    return;
+  }
   if (globalThis.combatRangeOverlay?.initialized) await globalThis.combatRangeOverlay.instance.fullRefresh();
 })
 

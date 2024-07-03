@@ -505,6 +505,7 @@ export class Overlay {
     this.hookIDs.targetToken = Hooks.on("targetToken", async () => await this.targetTokenHook());
     this.hookIDs.canvasReady = Hooks.on("canvasReady", () => this.canvasReadyHook());
     this.hookIDs.sceneUpdate = Hooks.on("updateScene", () => this.sceneUpdateHook());
+    this.hookIDs.activateTokenLayer = Hooks.on("activateTokenLayer", () => this.tokenLayerJustActivated = true);
     this.hookIDs.updateWall = Hooks.on("updateWall", async () => await this.updateWallHook());
     this.hookIDs.createRegion = Hooks.on("createRegion", async () => await this.regionUpdateHook());
     this.hookIDs.refreshRegion = Hooks.on("refreshRegion", async () => await this.regionUpdateHook());
