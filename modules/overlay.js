@@ -519,6 +519,7 @@ export class Overlay {
     this.hookIDs.deleteMeasuredTemplate = Hooks.on("deleteMeasuredTemplate", async (template) => await this.updateETLHook(template));
     this.hookIDs.sightRefresh = Hooks.on("sightRefresh", async () => await this.visibilityRefreshHook());
     if (parseInt(game.version) < 12) this.hookIDs.initializeVisionSources = Hooks.on("initializeVisionSources", () => this.refreshTokenHookv11());
+    this.hookIDs.deleteCombat = Hooks.on("deleteCombat", async () => await this.fullRefresh());
   }
 
   unregisterHooks() {
