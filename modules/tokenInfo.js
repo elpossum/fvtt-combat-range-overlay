@@ -464,10 +464,10 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
     const newCenter = {
       w: realToken.w,
       h: realToken.h,
-      center: {
+      center: parseInt(game.version) > 12 ? {
         x: updateData.x ? realToken.center.x + updateData.x - realToken.x : realToken.center.x,
         y: updateData.y ? realToken.center.y + updateData.y - realToken.y : realToken.center.y
-      }
+      } : realToken.center
     };
     game.user.targets.forEach((target) => {
       const blocked = !checkTileToTokenVisibility({centerPt: target.center}, newCenter)
