@@ -520,8 +520,11 @@ async function updateUnmodifiedSpeed(token) {
 Hooks.on("controlToken", async (token, boolFlag) => {
   if (!globalThis.combatRangeOverlay.initialized && boolFlag) {
     token.release();
-    Hooks.once("refreshToken", () => {
-      token.control();
+    const hookId = Hooks.on("refreshToken", (refreshToken) => {
+      if (token.id === refreshToken.id) {
+        Hooks.off("refreshToken", hookId);
+        Hooks.once("sightRefresh", () => token.control());
+      }
     });
     return
   }
