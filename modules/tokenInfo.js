@@ -571,5 +571,8 @@ Hooks.on("createActiveEffect", async (effect) => await updateUnmodifiedSpeedOnEf
 Hooks.on("updateActiveEffect", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
 Hooks.on("deleteActiveEffect", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
 Hooks.on("createItem", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
-Hooks.on("updateItem", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
+Hooks.on("updateItem", async (effect) => {
+  globalThis.combatRangeOverlay.instance.newTarget = true;
+  await updateUnmodifiedSpeedOnEffect(effect);
+})
 Hooks.on("deleteItem", async (effect) => await updateUnmodifiedSpeedOnEffect(effect))
