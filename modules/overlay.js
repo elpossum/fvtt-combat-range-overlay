@@ -467,18 +467,35 @@ export class Overlay {
     if (refresh) {
       globalThis.combatRangeOverlay.setTargetVisibility();
       await globalThis.combatRangeOverlay.instance.fullRefresh();
-    } else if (Settings.getVisionMaskType() !== Settings.visionMaskingTypes.NONE && this.tokenRefreshTracker === 0 && this.tokenPositionChanged) {
+    } else if (Settings.getVisionMaskType() !== Settings.visionMaskingTypes.NONE && this.tokenRefreshTracker === 0 && this.tokenPositionChanged && parseInt(game.version) > 11) {
+      this.refreshTokenHookv12()
+    }
+  }
+
+  refreshTokenHookv11() {
+    if (Settings.getVisionMaskType() !== Settings.visionMaskingTypes.NONE && this.tokenPositionChanged) {
       this.tokenPositionChanged = false;
-      const hookId = Hooks.on("refreshToken", async (_token, opts) => {
+      const hookId = Hooks.on("refreshToken", (token) => {
         this.clearAll();
-        !opts.refreshPosition ? this.tokenRefreshTracker++ : this.tokenRefreshTracker = 0;
-        if (this.tokenRefreshTracker === canvas.tokens.placeables.length) {
-          this.tokenRefreshTracker = 0;
+        if (!token._animation) {
           Hooks.off("refreshToken", hookId);
-          await this.fullRefresh();
+          Hooks.once("sightRefresh", async () => await this.fullRefresh());
         }
       })
     }
+  }
+
+  refreshTokenHookv12() {
+    this.tokenPositionChanged = false;
+    const hookId = Hooks.on("refreshToken", async (_token, opts) => {
+      this.clearAll();
+      !opts.refreshPosition ? this.tokenRefreshTracker++ : this.tokenRefreshTracker = 0;
+      if (this.tokenRefreshTracker === canvas.tokens.placeables.length) {
+        this.tokenRefreshTracker = 0;
+        Hooks.off("refreshToken", hookId);
+        await this.fullRefresh();
+      }
+    })
   }
 
   registerHooks() {
@@ -499,7 +516,8 @@ export class Overlay {
     this.hookIDs.createMeasuredTemplate = Hooks.on("createMeasuredTemplate", async (template) => await this.updateETLHook(template));
     this.hookIDs.refreshMeasuredTemplate = Hooks.on("refreshMeasuredTemplate", async (template) => await this.updateETLHook(template));
     this.hookIDs.deleteMeasuredTemplate = Hooks.on("deleteMeasuredTemplate", async (template) => await this.updateETLHook(template));
-    this.hookIDs.visibilityRefresh = Hooks.on("visibilityRefresh", async () => await this.visibilityRefreshHook());
+    this.hookIDs.sightRefresh = Hooks.on("sightRefresh", async () => await this.visibilityRefreshHook());
+    if (parseInt(game.version) < 12) this.hookIDs.initializeVisionSources = Hooks.on("initializeVisionSources", () => this.refreshTokenHookv11());
   }
 
   unregisterHooks() {
