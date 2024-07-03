@@ -499,9 +499,9 @@ export class Overlay {
   }
 
   registerHooks() {
-    this.hookIDs.renderApplication = Hooks.on("renderApplication", async (application) => {
+    /* this.hookIDs.renderApplication = Hooks.on("renderApplication", async (application) => {
       if (!['croQuickSettingsDialog', 'token-hud', 'navigation', 'controls'].includes(application.id)) await this.renderApplicationHook()
-    });
+    }); */
     this.hookIDs.targetToken = Hooks.on("targetToken", async () => await this.targetTokenHook());
     this.hookIDs.canvasReady = Hooks.on("canvasReady", () => this.canvasReadyHook());
     this.hookIDs.sceneUpdate = Hooks.on("updateScene", () => this.sceneUpdateHook());
@@ -523,10 +523,10 @@ export class Overlay {
   }
 
   unregisterHooks() {
-    Hooks.off("renderApplication", this.hookIDs.renderApplication);
+    //Hooks.off("renderApplication", this.hookIDs.renderApplication);
     Hooks.off("targetToken", this.hookIDs.targetToken);
     Hooks.off("canvasReady", this.hookIDs.canvasReady);
-    this.hookIDs.renderApplication = undefined;
+    //this.hookIDs.renderApplication = undefined;
     this.hookIDs.targetToken = undefined;
     this.hookIDs.canvasReady = undefined;
   }
