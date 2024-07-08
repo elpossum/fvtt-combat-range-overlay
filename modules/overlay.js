@@ -665,7 +665,7 @@ export class Overlay {
   }
 
   async drawCosts(movementCostMap, targetRangeMap) {
-    const los = getCurrentToken().vision.los.clone();
+    const los = getCurrentToken().vision?.los?.clone();
     if (Settings.getVisionMaskType() === Settings.visionMaskingTypes.MASK) {
       const losGraphics = new PIXI.Graphics();
       losGraphics.beginFill();
@@ -734,12 +734,33 @@ export class Overlay {
           this.overlays.distanceOverlay.lineStyle(highlightLineWidth, idealTileMap.get(tile.key).color);
         } else {
           this.overlays.distanceOverlay.lineStyle(0, 0);
-        };
-        const rect = new PIXI.Polygon(cornerPt.x, cornerPt.y, cornerPt.x + canvasGridSize(), cornerPt.y, cornerPt.x + canvasGridSize(), cornerPt.y + canvasGridSize(), cornerPt.x, cornerPt.y + canvasGridSize());
-        const intersect = los.intersectPolygon(rect);
-        if (intersect?.area / rect.area >= Settings.getVisionMaskPercent() || Settings.getVisionMaskType() !== Settings.visionMaskingTypes.INDIVIDUAL) {
-          this.overlays.distanceOverlay.beginFill(color, Settings.getMovementAlpha());
-          this.overlays.distanceOverlay.drawRect(cornerPt.x, cornerPt.y, canvasGridSize(), canvasGridSize());
+        }
+        const rect = new PIXI.Polygon(
+          cornerPt.x,
+          cornerPt.y,
+          cornerPt.x + canvasGridSize(),
+          cornerPt.y,
+          cornerPt.x + canvasGridSize(),
+          cornerPt.y + canvasGridSize(),
+          cornerPt.x,
+          cornerPt.y + canvasGridSize(),
+        );
+        const intersect = los?.intersectPolygon(rect);
+        if (
+          intersect?.area / rect.area >= Settings.getVisionMaskPercent() ||
+          Settings.getVisionMaskType() !==
+            Settings.visionMaskingTypes.INDIVIDUAL
+        ) {
+          this.overlays.distanceOverlay.beginFill(
+            color,
+            Settings.getMovementAlpha(),
+          );
+          this.overlays.distanceOverlay.drawRect(
+            cornerPt.x,
+            cornerPt.y,
+            canvasGridSize(),
+            canvasGridSize(),
+          );
           this.overlays.distanceOverlay.endFill();
         }
       }
