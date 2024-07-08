@@ -1,7 +1,21 @@
-import { TokenInfo } from "./tokenInfo.js"
+/* globals
+canvas,
+PIXI,
+ui,
+FullCanvasObjectMixin,
+game,
+Token
+*/
 
-export let TerrainHelper
+import {MODULE_ID} from "./constants.js";
+import {TokenInfo} from "./tokenInfo.js";
+import { cro } from "./main.js";
 
+export let TerrainHelper;
+
+/**
+ * Setup terrain if Terrain Mapper >= 0.3.0
+ */
 export async function setup() {
   try {
     const terrainMapper = await import(
@@ -13,25 +27,50 @@ export async function setup() {
     const terrainQuadMesh = await import(
       "../../terrainmapper/scripts/glsl/TerrainQuadMesh.js"
     );
+
+    /**
+     * Extends Terrain Mapper's Terrain class
+     */
     TerrainHelper = class TerrainHelper extends terrainMapper.Terrain {
-
+      /**
+       * Determine the cost of moving at a point
+       * @param {Token} token - The token to check cost for
+       * @param {PIXI.Point|{x: number, y: number}} origin - THe point to test
+       * @returns {number} - The cost of the terrain
+       */
       static percentMovementForTokenAlongPath(token, origin) {
-        if (!(origin instanceof PIXI.Point)) origin = new PIXI.Point(origin.x, origin.y);
+        if (!(origin instanceof PIXI.Point))
+          origin = new PIXI.Point(origin.x, origin.y);
 
-        const activeTerrains = canvas.terrain.activeTerrainsAt(origin, token.elevationE)
-        const percent = activeTerrains.map(t =>
-          (t.movementSpeedForToken(token) ?? 1) / TokenInfo.current.getSpeed(token)
-        ).reduce((acc, curr) => acc * curr, 1);
+        const activeTerrains = canvas.terrain.activeTerrainsAt(
+          origin,
+          token.elevationE,
+        );
+        const percent = activeTerrains
+          .map(
+            (t) =>
+              (t.movementSpeedForToken(token) ?? 1) /
+              TokenInfo.current.getSpeed(token),
+          )
+          .reduce((acc, curr) => acc * curr, 1);
         return percent;
       }
 
+      /**
+       * Update the terrain graphics when terrain updated
+       */
       static sceneUpdate() {
-        globalThis.combatRangeOverlay.terrainGraphics.removeChildren();
+        cro.terrainGraphics.removeChildren();
         const nLayers = canvas.terrain.constructor.MAX_LAYERS;
-        const blendMode = game.version < 12 ? 2 : 1
+        const blendMode = game.version < 12 ? 2 : 1;
         for (let i = 0; i < nLayers; i += 1) {
           const shader = terrainLayerShader.TerrainLayerShader.create();
-          const m = globalThis.combatRangeOverlay.terrainGraphics.addChild(new terrainQuadMesh.TerrainQuadMesh(canvas.dimensions.sceneRect, shader));
+          const m = cro.terrainGraphics.addChild(
+            new terrainQuadMesh.TerrainQuadMesh(
+              canvas.dimensions.sceneRect,
+              shader,
+            ),
+          );
           m.shader.uniforms.uTerrainLayer = i;
           m.blendMode = blendMode;
         }
@@ -39,7 +78,7 @@ export async function setup() {
     };
 
     /* Make a canvas sized PIXI Container */
-    globalThis.combatRangeOverlay.terrainGraphics =
+    cro.terrainGraphics =
       new (class FullCanvasContainer extends FullCanvasObjectMixin(
         PIXI.Container,
       ) {})();
