@@ -462,17 +462,25 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   if (translation && game.user.targets.size) {
     const targetBlocked = new Map();
     const newCenter = {
-      w: realToken.w,
-      h: realToken.h,
-      center: parseInt(game.version) > 12 ? {
-        x: updateData.x ? realToken.center.x + updateData.x - realToken.x : realToken.center.x,
-        y: updateData.y ? realToken.center.y + updateData.y - realToken.y : realToken.center.y
-      } : realToken.center
+      centerPt:
+        parseInt(game.version) > 11
+          ? {
+              x: updateData.x
+                ? realToken.center.x + updateData.x - realToken.x
+                : realToken.center.x,
+              y: updateData.y
+                ? realToken.center.y + updateData.y - realToken.y
+                : realToken.center.y,
+            }
+          : realToken.center,
     };
     game.user.targets.forEach((target) => {
-      const blocked = !checkTileToTokenVisibility({centerPt: target.center}, newCenter)
-      targetBlocked.set(target.id, blocked)
-    })
+      const blocked = !checkTileToTokenVisibility(
+        newCenter,
+        target,
+      );
+      targetBlocked.set(target.id, blocked);
+    });
     targetBlocked.forEach((blocked, id) => {
       visionRefresh = visionRefresh || globalThis.combatRangeOverlay.targetVisionMap.get(id).new === blocked
     });
