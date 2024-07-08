@@ -3,11 +3,16 @@ import { TokenInfo } from "./tokenInfo.js"
 export let TerrainHelper
 
 export async function setup() {
-  if (globalThis.combatRangeOverlay.terrainProvider?.id === "terrainmapper" && !globalThis.combatRangeOverlay.terrainProvider?.usesRegion) {
-    const terrainMapper = await import("../../terrainmapper/scripts/Terrain.js");
-    const terrainLayerShader = await import("../../terrainmapper/scripts/glsl/TerrainLayerShader.js");
-    const terrainQuadMesh = await import("../../terrainmapper/scripts/glsl/TerrainQuadMesh.js");
-
+  try {
+    const terrainMapper = await import(
+      "../../terrainmapper/scripts/Terrain.js"
+    );
+    const terrainLayerShader = await import(
+      "../../terrainmapper/scripts/glsl/TerrainLayerShader.js"
+    );
+    const terrainQuadMesh = await import(
+      "../../terrainmapper/scripts/glsl/TerrainQuadMesh.js"
+    );
     TerrainHelper = class TerrainHelper extends terrainMapper.Terrain {
 
       static percentMovementForTokenAlongPath(token, origin) {
@@ -33,11 +38,19 @@ export async function setup() {
       }
     };
 
-    globalThis.combatRangeOverlay.terrainGraphics = new class FullCanvasContainer extends FullCanvasObjectMixin(PIXI.Container) { };
-    setTimeout(() => TerrainHelper.sceneUpdate(), 1000)
-    
-  } else {
-    ui.notifications.warn('Terrain Mapper in unexpected location')
+    /* Make a canvas sized PIXI Container */
+    globalThis.combatRangeOverlay.terrainGraphics =
+      new (class FullCanvasContainer extends FullCanvasObjectMixin(
+        PIXI.Container,
+      ) {})();
+    const timeout = setTimeout(() => {
+      TerrainHelper.sceneUpdate();
+      clearTimeout(timeout);
+    }, 1000);
+  } catch {
+    ui.notifications.warn(
+      game.i18n.localize(`${MODULE_ID}.terrain-mapper-misplaced`),
+    );
   }
 }
 
