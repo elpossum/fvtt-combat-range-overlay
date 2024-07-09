@@ -709,6 +709,10 @@ export class Overlay {
     });
   }
 
+  terrainUpdateHook() {
+    if (cro.initialized && cro.terrainProvider?.id === "terrainmapper" && !cro.terrainProvider.usesRegions) TerrainHelper.sceneUpdate()
+  }
+
   /**
    * Register hooks
    */
@@ -733,6 +737,10 @@ export class Overlay {
     this.hookIDs.updateWall = Hooks.on(
       "updateWall",
       async () => await this.updateWallHook(),
+    );
+    this.hookIDs.terrainUpdate = Hooks.on (
+      "deactivateTerrainLayer",
+      () => this.terrainUpdateHook(),
     );
     this.hookIDs.createRegion = Hooks.on(
       "createRegion",
