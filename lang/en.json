@@ -127,7 +127,6 @@
       }
     },
     "no-color-settings": "Either of lib - Color Settings or Color Picker are not installed/active so colours can't be changed using a picker. This message will not be shown again.",
-    "terrain-mapper-misplaced": "Terrain Mapper is installed in an unexpected location",
     "multiple-terrain-providers": "Multiple modules providing terrain data are active. Please make sure only one is enable to allow Combat Range Overlay to use terrain data.",
     "dialog": {
       "submit": "Submit",
