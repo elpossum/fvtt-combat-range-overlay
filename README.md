@@ -26,7 +26,7 @@ diagonal movement.
 Weapon range is more complex so the path cannot be manually set for unsupported systems. Pathfinder 2e, Pathfinder 1e, DnD3.5e, SWADE, WFRP4e
 and DnD5e are all supported to the best of my knowledge of the systems. If you are using an unsupported system, you will be prompted for weapon range when you try to bring up the overlay.
 
-**Modules**: This module requires lib-wrapper and supports the Enhanced Terrain Layer (not updated for Foundry v11 though may have some functionality) and Terrain Mapper (doesn't work with PF2E) modules. Can use lib-ColorSettings or Color Picker to choose overlay colors (alpha currently not working).
+**Modules**: This module requires lib-wrapper and supports the Enhanced Terrain Layer (not updated for Foundry v11 though may have some functionality) and Terrain Mapper (requires TM >= v0.3.0 to work with PF2E) modules.
 
 ## Understanding the Overlay
 
@@ -34,14 +34,14 @@ and DnD5e are all supported to the best of my knowledge of the systems. If you a
 
 The overlay in this image assumes a movement speed of 15ft/action and a weapon range of 10ft.
 
-1. Tiles tinted blue can be reached in a single action.  
-2. Tiles tinted yellow can be reached in 2 actions.  
-3. Enemies circled in white can be attacked without moving.  
-4. Enemies circled in blue can be attacked in a single move.  
-5. Enemies circled in yellow can be attacked with 2 moves.  
-6. Enemies circled in red require 3 or more movements to attack.  
-7. All tokens (other than the selected token) in combat are annotated with their initiative order relative to the current token.  
-8. The selected token is annotated with the currently selected weapon range.  
+1. Tiles tinted blue can be reached in a single action.
+2. Tiles tinted yellow can be reached in 2 actions.
+3. Enemies circled in white can be attacked without moving.
+4. Enemies circled in blue can be attacked in a single move.
+5. Enemies circled in yellow can be attacked with 2 moves.
+6. Enemies circled in red require 3 or more movements to attack.
+7. All tokens (other than the selected token) in combat are annotated with their initiative order relative to the current token.
+8. The selected token is annotated with the currently selected weapon range.
 
 <img alt="A close up of the previous screenshot focusing on one player and two enemies. One enemy is now targeted and the squares within both movement and weapon range are highlighted." src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/900a2659-5eca-4ae1-9aa6-3bd8c1d91251" height="400">
 
@@ -113,11 +113,10 @@ Or you can use the Overlay to see who's close to you _and_ going before your tea
 If you're using an unsupported System, you'll need to set the speed attribute path in
 the module settings. Here's how to do it:
 
-1) Select a token
-1) Open your browser's dev tools (often F12) and switch to the Javascript console
-1) Type in `_token.actor` and press Enter
-1) Expand the result, then keep expanding children until you find the movement speed. Take note of each child
-you expand
-    * For instance, with Pathfinder 2E, you expand `system`, `attributes`, `speed`, and find the speed in `total` <img alt="A screenshot of the console showing expanding children to find the speed location" src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/dec46190-f2d4-47f8-9b29-e1c9d656ba4f" height="800">
-1) Join these names with periods to come up with your attribute path
-    * For Pathfinder 2E, this would be `system.attributes.speed.total`
+1. Select a token
+2. Open your browser's dev tools (often F12) and switch to the Javascript console
+3. Type in `_token.actor` and press Enter
+4. Expand the result, then keep expanding children until you find the movement speed. Take note of each child
+   you expand \* For instance, with Pathfinder 2E, you expand `system`, `attributes`, `speed`, and find the speed in `total` <img alt="A screenshot of the console showing expanding children to find the speed location" src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/dec46190-f2d4-47f8-9b29-e1c9d656ba4f" height="800">
+5. Join these names with periods to come up with your attribute path
+   - For Pathfinder 2E, this would be `system.attributes.speed.total`

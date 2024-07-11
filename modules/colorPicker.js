@@ -1,11 +1,12 @@
 /* globals
 game,
 Hooks,
-ColorPicker
+FormApplication,
+foundry
 */
 
-import { MODULE_ID } from "./constants.js";
-import { cro } from "./main.js";
+import {MODULE_ID} from "./constants.js";
+import {cro} from "./main.js";
 
 /**
  * The names of color settings
@@ -27,91 +28,132 @@ export const colorSettingNames = [
  * @type {Array<string>}
  */
 const defaultColors = [
-  "#ffffffff",
-  "#0000ffff",
-  "#ffff00ff",
-  "#ff0000ff",
-  "#800080ff",
-  "#ffffffff",
-  "#0000ffff",
-  "#ffff00ff",
+  "#ffffff",
+  "#0000ff",
+  "#ffff00",
+  "#ff0000",
+  "#800080",
+  "#ffffff",
+  "#0000ff",
+  "#ffff00",
 ];
 
 /**
  * Update the setting on change
  */
-async function updateSettings() {
+function updateSettings() {
   cro.colorByActions = [];
   cro.colors = [];
   for (let i = 0; i < 5; i++) {
-    cro.colorByActions.push(
-      parseInt(
-        game.settings
-          .get(MODULE_ID, colorSettingNames[i])
-          .slice(0, -2)
-          .replace("#", "0x"),
-        16,
-      ),
-    );
+    cro.colorByActions.push(game.settings.get(MODULE_ID, colorSettingNames[i]));
   }
   for (let i = 5; i < 8; i++) {
-    cro.colors.push(
-      parseInt(
-        game.settings
-          .get(MODULE_ID, colorSettingNames[i])
-          .slice(0, -2)
-          .replace("#", "0x"),
-        16,
-      ),
-    );
+    cro.colors.push(game.settings.get(MODULE_ID, colorSettingNames[i]));
   }
-   cro.fullRefresh();
 }
 
-/* On Foundry init, register settings */
-Hooks.once("init", () => {
-  if (game.modules.get("colorsettings")?.active) {
-    for (const [index, colorSettingName] of colorSettingNames.entries()) {
-      new window.Ardittristan.ColorSetting(MODULE_ID, colorSettingName, {
-        name: `${MODULE_ID}.color-picker.${colorSettingName}.name`,
-        hint: `${MODULE_ID}.color-picker.${colorSettingName}.hint`,
-        label: `${MODULE_ID}.color-picker.label`,
-        restricted: false,
-        defaultColor: `${defaultColors[index]}`,
-        scope: "client",
-        onChange: updateSettings,
-      });
+class ColorPickerApp extends FormApplication {
+  /**
+   * Creates an instance of ModuleInfoApp
+   * @param {object} [options] - Foundry FormApplication options
+   */
+  constructor(options = {}) {
+    super(options);
+  }
+
+  /**
+   * Get default render options
+   * @type {object}
+   */
+  static get defaultOptions() {
+    return foundry.utils.mergeObject(super.defaultOptions, {
+      id: `${MODULE_ID}-color-picker`,
+      title: `${MODULE_ID}.color-picker.label`,
+      template: `modules/${MODULE_ID}/templates/colorPicker.hbs`,
+      popOut: true,
+    });
+  }
+
+  /**
+   * Get this module's version
+   * @returns {{version: string, MODULE_ID: string}} - A version number and the module id
+   */
+  getData() {
+    const o = {
+      buttons: {
+        save: `${MODULE_ID}.color-picker.save`,
+        reset: `${MODULE_ID}.color-picker.reset`,
+      },
+      settings: {},
+    };
+    colorSettingNames.forEach((name, index) => {
+      o.settings[name] = {};
+      o.settings[name].key = name;
+      o.settings[name].name = `${MODULE_ID}.color-picker.${name}.name`;
+      o.settings[name].hint = `${MODULE_ID}.color-picker.${name}.hint`;
+      o.settings[name].value = game.settings.get(MODULE_ID, name);
+      o.settings[name].default = defaultColors[index];
+    });
+    return o;
+  }
+
+  /**
+   * On update, do nothing. Required implementation from prototype
+   * @param {object} _event - The triggering event
+   * @param {object} formData - The data entered in the form
+   */
+  async _updateObject(_event, formData) {
+    const promises = [];
+    Object.entries(formData).forEach(async ([key, value]) => {
+      promises.push(game.settings.set(MODULE_ID, key, value));
+    });
+    await Promise.all(promises);
+    updateSettings();
+    cro.fullRefresh();
+  }
+}
+
+/* On Foundry init, register settings and potentially migrate from old settings*/
+Hooks.once("init", async () => {
+  colorSettingNames.forEach((name, index) => {
+    game.settings.register(MODULE_ID, name, {
+      name: game.i18n.localize(`${MODULE_ID}.color-picker.${name}.name`),
+      hint: game.i18n.localize(`${MODULE_ID}.color-picker.${name}.hint`),
+      label: game.i18n.localize(`${MODULE_ID}.color-picker.label`),
+      restricted: false,
+      type: String,
+      config: false,
+      default: `${defaultColors[index]}`,
+      scope: "client",
+      onChange: () => {},
+    });
+  });
+  game.settings.registerMenu(MODULE_ID, "color-picker", {
+    name: game.i18n.localize(`${MODULE_ID}.color-picker.title`),
+    label: game.i18n.localize(`${MODULE_ID}.color-picker.label`),
+    icon: "fas fa-paint-brush",
+    type: ColorPickerApp,
+    restricted: false,
+  });
+
+  //This updates from settings with external color pickers active as they stored color as an 8 digit hex code, not a 6 digit one
+  let update = false;
+  const updateData = {};
+  colorSettingNames.forEach((name) => {
+    const value = game.settings.get(MODULE_ID, name);
+    updateData[name] = value;
+    if (value.length === 9) {
+      const newValue = value.slice(0, -2);
+      updateData[name] = newValue;
+      update = true;
     }
-  } else if (game.modules.get("color-picker")?.active) {
-    for (const [index, colorSettingName] of colorSettingNames.entries()) {
-      ColorPicker.register(
-        MODULE_ID,
-        colorSettingName,
-        {
-          name: `${MODULE_ID}.color-picker.${colorSettingName}.name`,
-          hint: `${MODULE_ID}.color-picker.${colorSettingName}.hint`,
-          label: `${MODULE_ID}.color-picker.label`,
-          restricted: false,
-          default: `${defaultColors[index]}`,
-          scope: "client",
-          onChange: updateSettings,
-        },
-        { format: "hexa" },
-      );
-    }
-  } else {
-    for (const [index, colorSettingName] of colorSettingNames.entries()) {
-      game.settings.register(MODULE_ID, colorSettingName, {
-        name: `${MODULE_ID}.color-picker.${colorSettingName}.name`,
-        hint: `${MODULE_ID}.color-picker.${colorSettingName}.hint`,
-        label: `${MODULE_ID}.color-picker.label`,
-        restricted: false,
-        type: String,
-        config: true,
-        default: `${defaultColors[index]}`,
-        scope: "client",
-        onChange: updateSettings,
-      });
-    }
+  });
+  if (update) {
+    const promises = [];
+    colorSettingNames.forEach((name) => {
+      promises.push(game.settings.set(MODULE_ID, name, updateData[name]));
+    });
+    await Promise.all(promises);
+    updateSettings();
   }
 });

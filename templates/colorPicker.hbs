@@ -1,0 +1,25 @@
+<form onsubmit="event.preventDefault();">
+  {{#each settings as |setting|}}
+    <div class="form-group">
+      <label for="{{setting.key}}">{{localize setting.name}}</label>
+      <div class="form-fields">
+        {{colorPicker
+          name=setting.key
+          value=setting.value
+          default=setting.default
+        }}
+      </div>
+      <p class="hint">{{localize setting.hint}}</p>
+    </div>
+  {{/each}}
+  <footer>
+    <button type="submit">
+      <i class="fa-regular fa-save"></i>
+      {{localize settings.buttons.save}}
+    </button>
+    <button type="reset">
+      <i class="fa-solid fa-undo"></i>
+      {{localize settings.buttons.save}}
+    </button>
+  </footer>
+</form>

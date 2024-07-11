@@ -5,10 +5,10 @@ foundry,
 ui
 */
 
-import { colorSettingNames } from "./colorPicker.js";
-import { MODULE_ID, SOCKET_TYPES } from "./constants.js";
-import { Overlay } from "./overlay.js";
-import { getCurrentToken } from "./utility.js";
+import {colorSettingNames} from "./colorPicker.js";
+import {MODULE_ID, SOCKET_TYPES} from "./constants.js";
+import {Overlay} from "./overlay.js";
+import {getCurrentToken} from "./utility.js";
 
 /**
  * The class that handles the module
@@ -83,13 +83,7 @@ export class CombatRangeOverlay {
   setColorByActions() {
     for (let i = 0; i < 5; i++) {
       this.colorByActions.push(
-        parseInt(
-          game.settings
-            .get(MODULE_ID, colorSettingNames[i])
-            .slice(0, -2)
-            .replace("#", "0x"),
-          16,
-        ),
+        game.settings.get(MODULE_ID, colorSettingNames[i]),
       );
     }
   }
@@ -99,15 +93,7 @@ export class CombatRangeOverlay {
    */
   setColors() {
     for (let i = 5; i < 8; i++) {
-      this.colors.push(
-        parseInt(
-          game.settings
-            .get(MODULE_ID, colorSettingNames[i])
-            .slice(0, -2)
-            .replace("#", "0x"),
-          16,
-        ),
-      );
+      this.colors.push(game.settings.get(MODULE_ID, colorSettingNames[i]));
     }
   }
 
@@ -123,8 +109,8 @@ export class CombatRangeOverlay {
    */
   setTerrainProvider() {
     const terrainModules = [
-      { id: "enhanced-terrain-layer" },
-      { id: "terrainmapper", latestNonRegionVersion: "0.2.0" },
+      {id: "enhanced-terrain-layer"},
+      {id: "terrainmapper", latestNonRegionVersion: "0.2.0"},
     ];
     const activeModules = [];
     terrainModules.forEach((module) => {
@@ -210,7 +196,7 @@ export class CombatRangeOverlay {
    * Currently only used for updating visiibility for user who aren't the one moving the token
    */
   registerSocketListeners() {
-    game.socket.on(`module.${MODULE_ID}`, ({ type, payload }) => {
+    game.socket.on(`module.${MODULE_ID}`, ({type, payload}) => {
       switch (type) {
         case SOCKET_TYPES.REFRESH_VISIBILITY:
           this.handleVisionRefresh(payload);
@@ -228,7 +214,7 @@ export class CombatRangeOverlay {
    * @returns {*} - The response
    */
   emit(type, payload) {
-    return game.socket.emit(`module.${MODULE_ID}`, { type, payload });
+    return game.socket.emit(`module.${MODULE_ID}`, {type, payload});
   }
 
   /**
@@ -247,6 +233,6 @@ export class CombatRangeOverlay {
    * Redraw the overlay
    */
   fullRefresh() {
-    this.instance.fullRefresh()
+    this.instance.fullRefresh();
   }
 }

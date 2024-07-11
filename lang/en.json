@@ -92,6 +92,7 @@
     },
     "color-picker": {
       "label": "Colour Picker",
+      "title": "CRO Color Picker",
       "no-actions": {
         "name": "No action colour",
         "hint": "The colour that will be used to colour spaces/targets that can be reached in no actions"
@@ -125,7 +126,6 @@
         "hint": "The colour that will be used to highlight spaces that targets can be reached from by weapon three"
       }
     },
-    "no-color-settings": "Either of lib - Color Settings or Color Picker are not installed/active so colours can't be changed using a picker. This message will not be shown again.",
     "multiple-terrain-providers": "Multiple modules providing terrain data are active. Please make sure only one is enable to allow Combat Range Overlay to use terrain data.",
     "dialog": {
       "submit": "Submit",
