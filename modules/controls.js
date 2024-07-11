@@ -49,7 +49,7 @@ function _showRangeDialog() {
   );
   const resetButton = {
     icon: '<i class="fas fa-arrow-rotate-left"></i>',
-    label: "Reset",
+    label: game.i18n.localize(`${MODULE_ID}.dialog.reset`),
     callback: () =>
       getCurrentToken().document.unsetFlag(
         "combat-range-overlay",
@@ -129,7 +129,7 @@ async function _toggleButtonClick(toggled, controls) {
       );
     } else {
       TokenInfo.current.updateMeasureFrom();
-       cro.fullRefresh();
+      cro.fullRefresh();
     }
   } else {
     isActive = toggled;

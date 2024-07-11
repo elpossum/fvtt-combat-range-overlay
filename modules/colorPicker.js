@@ -5,8 +5,8 @@ FormApplication,
 foundry
 */
 
-import {MODULE_ID} from "./constants.js";
-import {cro} from "./main.js";
+import { MODULE_ID } from "./constants.js";
+import { cro } from "./main.js";
 
 /**
  * The names of color settings
@@ -98,13 +98,13 @@ class ColorPickerApp extends FormApplication {
   }
 
   /**
-   * On update, do nothing. Required implementation from prototype
+   * On submit, update settings with new values
    * @param {object} _event - The triggering event
    * @param {object} formData - The data entered in the form
    */
   async _updateObject(_event, formData) {
     const promises = [];
-    Object.entries(formData).forEach(async ([key, value]) => {
+    Object.entries(formData).forEach(([key, value]) => {
       promises.push(game.settings.set(MODULE_ID, key, value));
     });
     await Promise.all(promises);
@@ -129,7 +129,7 @@ Hooks.once("init", async () => {
     });
   });
   game.settings.registerMenu(MODULE_ID, "color-picker", {
-    name: game.i18n.localize(`${MODULE_ID}.color-picker.title`),
+    name: game.i18n.localize(`${MODULE_ID}.color-picker.label`),
     label: game.i18n.localize(`${MODULE_ID}.color-picker.label`),
     icon: "fas fa-paint-brush",
     type: ColorPickerApp,

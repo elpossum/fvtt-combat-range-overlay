@@ -92,7 +92,6 @@
     },
     "color-picker": {
       "label": "Colour Picker",
-      "title": "CRO Color Picker",
       "no-actions": {
         "name": "No action colour",
         "hint": "The colour that will be used to colour spaces/targets that can be reached in no actions"
@@ -129,7 +128,8 @@
     "multiple-terrain-providers": "Multiple modules providing terrain data are active. Please make sure only one is enable to allow Combat Range Overlay to use terrain data.",
     "dialog": {
       "submit": "Submit",
-      "not-again": "Don't ask again"
+      "not-again": "Don't ask again",
+      "reset": "Reset"
     },
     "basic-info": {
       "button": "Basic Information",
