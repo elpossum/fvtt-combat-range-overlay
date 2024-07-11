@@ -1,76 +1,71 @@
-<form>
-  <div class="flexcol">
-    <h1>Combat Range Overlay</h1>
-  </div>
-  <div class="readme flexcol">
-    <h2>Basic Usage</h2>
-    <p>
-      Click
-      <img src="https://i.imgur.com/Q3baWqE.png" />
-      to toggle the Overlay on and off. Once the Overlay is enabled, it should
-      Just Work™ with little to no interaction from you. By default, it assumes
-      your weapon has a range of 5 feet; shift-click the button to change it for
-      your currently selected token. Normally the Overlay will reread your
-      position at the end of your combat turn; control-click the button to force
-      the Overlay to reposition. Display preferences are available in the
-      module's Settings page.
-    </p>
-
-    <h2>Understanding the Overlay</h2>
-    <p><img
-        width="450"
-        height="450"
-        src="https://i.imgur.com/1YCtMlcm.png"
-        alt="legend"
-        title="legend"
-      /></p>
-    <p>
-      The overlay in this image assumes a movement speed of 15ft/action and a
-      weapon range of 10ft.<br />
-      1) Tiles tinted blue can be reached in a single action.<br />
-      2) Tiles tinted yellow can be reached in 2 actions.<br />
-      3) Enemies circled in white can be attacked without moving.<br />
-      4) Enemies circled in blue can be attacked in a single move.<br />
-      5) Enemies circled in yellow can be attacked with 2 moves.<br />
-      6) Enemies circled in red require 3 or more movements to attack.<br />
-      7) All tokens (other than the selected token) in combat are annotated with
-      their initiative order relative to the current token.<br />
-      8) The selected token is annotated with the currently selected weapon
-      range.<br />
-    </p>
-
-    <p><img
-        width="450"
-        height="450"
-        src="https://i.imgur.com/hvcAz8Dm.png"
-        alt="legend"
-        title="legend"
-      /></p>
-    <p>
-      If a target is selected, tiles in your movement range
-      <i>and</i>
-      in range of the target will be highlighted in white, and only tiles on the
-      shortest path to the highlighted squares will remain tinted.<br />
-      If multiple targets are selected, only tiles in range of
-      <i>all</i>
-      targeted enemies will be highlighted. If there's no way to hit all
-      targeted enemies at once, the Overlay will display a warning and act as if
-      no enemies are targeted.
-    </p>
-
-    <p>
-      <a
-        href="https://github.com/elpossum/fvtt-combat-range-overlay#readme"
-        title="Documentation"
-      ><i class="fas fa-book-open"></i> Documentation</a>
-      <!-- <a href="https://github.com/elpossum/fvtt-combat-range-overlay/wiki" title="Wiki"><i class="fas fa-book"></i> Wiki / More Info</a> -->
-      <a
-        href="https://github.com/elpossum/fvtt-combat-range-overlay/issues"
-        title="Issues"
-      ><i class="fas fa-exclamation-circle"></i> Issues</a>
-    </p>
-    <p>
-      <span class="version">Version {{version}}</span>
-    </p>
-  </div>
-</form>
+{{#with (concat MODULE_ID ".basic-info.") as |base|}}
+  <form>
+    <div class="flexcol">
+      <h1>{{localize (concat base "module-data.title")}}</h1>
+    </div>
+    <div class="readme flexcol">
+      {{#with (concat base "basic-usage.") as |usage|}}
+        <h2>{{localize (concat usage "heading")}}</h2>
+        <p>
+          <img
+            alt={{localize (concat usage "alt")}}
+            src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/98317ccc-85d3-4ed5-b68b-582d75aa9916"
+            height="50"
+          />
+          {{localize (concat usage "body")}}
+        </p><br />
+      {{/with}}
+      {{#with (concat base "legend.") as |legend|}}
+        <h2>{{localize (concat legend "heading")}}</h2>
+        <img
+          alt="{{localize (concat legend "alt")}}"
+          src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/ee2e8018-4bb2-44b8-b9f9-025c44d68342"
+          title={{localize (concat legend "title")}}
+        /><br />
+        {{localize (concat legend "assumes")}}
+        <ol>
+          <li>{{localize (concat legend "1")}}</li>
+          <li>{{localize (concat legend "2")}}</li>
+          <li>{{localize (concat legend "3")}}</li>
+          <li>{{localize (concat legend "4")}}</li>
+          <li>{{localize (concat legend "5")}}</li>
+          <li>{{localize (concat legend "6")}}</li>
+          <li>{{localize (concat legend "7")}}</li>
+          <li>{{localize (concat legend "8")}}</li>
+        </ol><br />
+      {{/with}}
+      {{#with (concat base "targeting.") as |target|}}
+        <img
+          alt="{{localize (concat target "alt")}}"
+          src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/900a2659-5eca-4ae1-9aa6-3bd8c1d91251"
+          title={{localize (concat target "title")}}
+        /><br />
+        <ul>
+          <li>{{localize (concat target "single-target")}}</li>
+          <li>{{localize (concat target "multiple-targets")}}</li>
+          <li>{{localize (concat target "no-good-targets")}}</li>
+        </ul>
+      {{/with}}
+      <br />
+      {{#with (concat base "module-data.") as |data|}}
+        <p>
+          <a
+            href="https://github.com/elpossum/fvtt-combat-range-overlay#readme"
+            title={{localize (concat data "documentation")}}
+          ><i class="fas fa-book-open"></i>
+            {{localize (concat data "documentation")}}</a>
+          <!-- <a href="https://github.com/elpossum/fvtt-combat-range-overlay/wiki" title="Wiki"><i class="fas fa-book"></i> Wiki / More Info</a> -->
+          <a
+            href="https://github.com/elpossum/fvtt-combat-range-overlay/issues"
+            title={{localize (concat data "issues")}}
+          ><i class="fas fa-exclamation-circle"></i>
+            {{localize (concat data "issues")}}</a>
+        </p>
+        <p>
+          <span class="version">{{localize (concat data "version")}}
+            {{@root.version}}</span>
+        </p>
+      {{/with}}
+    </div>
+  </form>
+{{/with}}

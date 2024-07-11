@@ -74,7 +74,7 @@ const settingNames = {
   DEFAULT_WEAPON_RANGE: "default-weapon-range",
   SHOW_WEAPON_RANGE: "show-weapon-range",
   SPEED_ATTR_PATH: "speed-attr-path",
-  INFO_BUTTON: "info-button",
+  INFO_BUTTON: "basic-info.button",
   UPDATE_POSITION_IN_COMBAT: "update-position-in-combat",
   ACTIONS_SHOWN: "actions-shown",
   SHOWN_NOTIFICATION: "shown-notification",
@@ -119,7 +119,6 @@ Hooks.once("init", () => {
     restricted: false,
   });
 
-  // noinspection JSUnusedLocalSymbols
   for (const settingName of Object.values(settingNames)) {
     if (!ignore.includes(settingName)) {
       game.settings.register(MODULE_ID, settingName, {

@@ -21,8 +21,8 @@ export default class ModuleInfoApp extends FormApplication {
    */
   static get defaultOptions() {
     return foundry.utils.mergeObject(super.defaultOptions, {
-      id: "combat-range-overlay-info",
-      title: `${MODULE_ID}.info-button`,
+      id: `${MODULE_ID}-info`,
+      title: `${MODULE_ID}.basic-info.button`,
       template: `modules/${MODULE_ID}/templates/info.hbs`,
       popOut: true,
       width: 500,
@@ -32,11 +32,12 @@ export default class ModuleInfoApp extends FormApplication {
 
   /**
    * Get this module's version
-   * @returns {{version: string}} - A version number
+   * @returns {{version: string, MODULE_ID: string}} - A version number and the module id
    */
   getData() {
     return {
       version: game.modules.get(MODULE_ID).version,
+      MODULE_ID: MODULE_ID,
     };
   }
 

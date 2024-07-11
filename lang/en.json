@@ -70,7 +70,6 @@
     "show-weapon-range-hint": "Annotate selected token with current weapon range",
     "speed-attr-path": "Internal attribute path for Speed",
     "speed-attr-path-hint": "Advanced: Set this only if you're using a System that can't autodetect token Speed",
-    "info-button": "Basic Information",
     "update-position-in-combat": "Update overlay source in combat?",
     "update-position-in-combat-hint": "When off, the overlay will not automatically update upon movement in combat",
     "actions-shown": "Actions to show",
@@ -131,6 +130,41 @@
     "dialog": {
       "submit": "Submit",
       "not-again": "Don't ask again"
+    },
+    "basic-info": {
+      "button": "Basic Information",
+      "basic-usage": {
+        "body": "Click to toggle the Overlay on and off. Once the Overlay is enabled, it should Just Work™ with little to no interaction from you. If your system is supported, your weapon range and speed should be automatically detected. Otherwise, it assumes your weapon has a range of 5 feet (configurable in settings); shift-click the button to change it for your currently selected token. Normally the Overlay will reread your position at the end of your combat turn; control-click the button to force the Overlay to reposition. This is also configurable in settings. Display preferences are available in the module's Settings page.",
+        "heading": "Basic Usage",
+        "alt": "Button showing two figures with a horizontal double-headed arrow connecting them"
+      },
+      "legend": {
+        "alt": "A screenshot of several tokens with the overlay active and numbers corresponding to the following legend.",
+        "title": "Legend",
+        "heading": "Understanding the Overlay",
+        "assumes": "The overlay in this image assumes a movement speed of 15ft/action and a weapon range of 10ft.",
+        "1": "Tiles tinted blue can be reached in a single action.",
+        "2": "Tiles tinted yellow can be reached in 2 actions.",
+        "3": "Enemies circled in white can be attacked without moving.",
+        "4": "Enemies circled in blue can be attacked in a single move.",
+        "5": "Enemies circled in yellow can be attacked with 2 moves.",
+        "6": "Enemies circled in red require 3 or more movements to attack.",
+        "7": "All tokens (other than the selected token) in combat are annotated with their initiative order relative to the current token.",
+        "8": "The selected token is annotated with the currently selected weapon range."
+      },
+      "targeting": {
+        "alt": "A close up of the previous screenshot focusing on one player and two enemies. One enemy is now targeted and the squares within both movement and weapon range are highlighted.",
+        "title": "Targeting",
+        "single-target": "If a target is selected, tiles in your movement range **and** in range of the target will be highlighted in white, and only tiles on the shortest path to the highlighted squares will remain tinted.",
+        "multiple-targets": "If multiple targets are selected, only tiles in range of **all** targeted enemies will be highlighted.",
+        "no-good-targets": "If there's no way to hit all targeted enemies at once, the Overlay will display a warning and act as if no enemies are targeted."
+      },
+      "module-data": {
+        "title": "Combat Range Overlay",
+        "documentation": "Documentation",
+        "issues": "Issues",
+        "version": "Version"
+      }
     }
   }
 }
