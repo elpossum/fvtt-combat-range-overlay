@@ -30,7 +30,7 @@ and DnD5e are all supported to the best of my knowledge of the systems. If you a
 
 ## Understanding the Overlay
 
-<img alt="legend" src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/ee2e8018-4bb2-44b8-b9f9-025c44d68342" height="400">
+<img alt="A screenshot of several tokens with the overlay active and numbers corresponding to the following legend." src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/ee2e8018-4bb2-44b8-b9f9-025c44d68342" height="400">
 
 The overlay in this image assumes a movement speed of 15ft/action and a weapon range of 10ft.
 
@@ -43,7 +43,7 @@ The overlay in this image assumes a movement speed of 15ft/action and a weapon r
 7. All tokens (other than the selected token) in combat are annotated with their initiative order relative to the current token.  
 8. The selected token is annotated with the currently selected weapon range.  
 
-<img alt="single target" src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/900a2659-5eca-4ae1-9aa6-3bd8c1d91251" height="400">
+<img alt="A close up of the previous screenshot focusing on one player and two enemies. One enemy is now targeted and the squares within both movement and weapon range are highlighted." src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/900a2659-5eca-4ae1-9aa6-3bd8c1d91251" height="400">
 
 If a target is selected, tiles in your movement range _and_ in range of the target will be highlighted in white, and only tiles on the shortest path to the highlighted squares will remain tinted.  
 If multiple targets are selected, only tiles in range of _all_ targeted enemies will be highlighted. If there's no way to hit all targeted enemies at once, the Overlay will display a warning and act as if no enemies are targeted.
