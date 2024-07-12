@@ -130,3 +130,33 @@ export function uiNotificationsWarn(msg) {
 export function uiNotificationsInfo(msg) {
   ui.notifications.info(msg);
 }
+
+/**
+ * From Foundry v12
+ * Compute the signed area of polygon using an approach similar to ClipperLib.Clipper.Area.
+ * The math behind this is based on the Shoelace formula. https://en.wikipedia.org/wiki/Shoelace_formula.
+ * The area is positive if the orientation of the polygon is positive.
+ * @returns {number} - The signed area of the polygon
+ */
+export function signedArea() {
+  const points = this.points;
+  const ln = points.length;
+  if (ln < 6) return 0;
+
+  // Compute area
+  let area = 0;
+  let x1 = points[ln - 2];
+  let y1 = points[ln - 1];
+  for (let i = 0; i < ln; i += 2) {
+    const x2 = points[i];
+    const y2 = points[i + 1];
+    area += (x2 - x1) * (y2 + y1);
+    x1 = x2;
+    y1 = y2;
+  }
+
+  // Negate the area because in Foundry canvas, y-axis is reversed
+  // See https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperorientation
+  // The 1/2 comes from the Shoelace formula
+  return area * -0.5;
+}
