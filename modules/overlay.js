@@ -141,8 +141,7 @@ export class Overlay {
     // TODO Fix caching
     const tilesPerAction =
       (await TokenInfo.current.speed) / this.DISTANCE_PER_TILE;
-    const maxTiles =
-      tilesPerAction * cro.actionsToShow;
+    const maxTiles = tilesPerAction * cro.actionsToShow;
 
     const currentToken = getCurrentToken();
     const currentTokenInfo = TokenInfo.getById(currentToken.id);
@@ -211,16 +210,14 @@ export class Overlay {
         } else {
           let newDistance;
           if (
-            cro.terrainProvider?.id ===
-              "terrainmapper" &&
+            cro.terrainProvider?.id === "terrainmapper" &&
             !cro.terrainProvider?.usesRegions
           ) {
             newDistance =
               current.distance +
               GridTile.costTerrainMapper(currentToken, neighbor);
           } else if (
-            cro.terrainProvider?.id ===
-              "terrainmapper" &&
+            cro.terrainProvider?.id === "terrainmapper" &&
             cro.terrainProvider?.usesRegions
           ) {
             newDistance =
@@ -336,7 +333,10 @@ export class Overlay {
             Math.ceil(diagonalDistance(bestCost) / tilesMovedPerAction),
             colorByActions.length - 1,
           );
-          let color = colorByActions[colorIndex];
+          let color =
+            parseInt(game.version) > 11
+              ? colorByActions[colorIndex]
+              : parseInt(colorByActions[colorIndex].replace("#", "0x"), 16);
 
           const tokenOverlay = new PIXI.Graphics();
           tokenOverlay.lineStyle(potentialTargetLineWidth, color);
@@ -409,18 +409,14 @@ export class Overlay {
           break;
         }
         case "terrainmapper": {
-          canvas.drawings.addChild(
-            cro.terrainGraphics,
-          );
+          canvas.drawings.addChild(cro.terrainGraphics);
           break;
         }
         default: {
           break;
         }
       }
-    } else if (
-      cro.terrainProvider?.id === "terrainmapper"
-    ) {
+    } else if (cro.terrainProvider?.id === "terrainmapper") {
       canvas.regions.placeables.forEach((region) => {
         const behaviors = region.document.behaviors.contents;
         const isTerrain = behaviors.some(
@@ -439,11 +435,7 @@ export class Overlay {
           alpha: region.alpha,
           hatchThickness: region.children[0].shader.uniforms.hatchThickness,
         });
-        if (
-          cro.initialized &&
-          isTerrain &&
-          shouldBeVisible
-        ) {
+        if (cro.initialized && isTerrain && shouldBeVisible) {
           region.document.visibility = CONST.REGION_VISIBILITY.ALWAYS;
           region.alpha = 0.5;
           region.children[0].shader.uniforms.hatchThickness = 30;
@@ -462,7 +454,7 @@ export class Overlay {
       ? Settings.getICVisibility()
       : Settings.getOOCVisibility();
     if (visibilitySetting !== Settings.overlayVisibility.ALWAYS) {
-       cro.fullRefresh();
+      cro.fullRefresh();
     }
   }
 
@@ -472,7 +464,7 @@ export class Overlay {
   async fullRefresh() {
     if (!getCurrentToken()?.hitArea) return;
     if (this.drawing) {
-      Hooks.once(`${MODULE_ID}.done`, async () =>  cro.fullRefresh());
+      Hooks.once(`${MODULE_ID}.done`, async () => cro.fullRefresh());
       return;
     }
     this.drawing = true;
@@ -555,7 +547,7 @@ export class Overlay {
   async targetTokenHook() {
     this.newTarget = true;
     cro.setTargetVisibility();
-     cro.fullRefresh();
+    cro.fullRefresh();
   }
 
   /**
@@ -600,14 +592,14 @@ export class Overlay {
         });
       } else cro.regionMap.delete(region.id);
     });
-     cro.fullRefresh();
+    cro.fullRefresh();
   }
 
   /**
    * Update overlays when walls are updated
    */
   async updateWallHook() {
-     cro.fullRefresh();
+    cro.fullRefresh();
   }
 
   /**
@@ -641,7 +633,7 @@ export class Overlay {
       placeableDocument.flags &&
       placeableDocument.flags["enhanced-terrain-layer"]
     )
-       cro.fullRefresh();
+      cro.fullRefresh();
   }
 
   /**
@@ -661,14 +653,16 @@ export class Overlay {
     );
     if (refresh) {
       cro.setTargetVisibility();
-       cro.fullRefresh();
+      cro.fullRefresh();
     } else if (
       Settings.getVisionMaskType() !== Settings.visionMaskingTypes.NONE &&
       this.tokenRefreshTracker === 0 &&
       this.tokenPositionChanged &&
       parseInt(game.version) !== 11
     ) {
-      parseInt(game.version) > 11 ? this.refreshTokenHookv12() : this.refreshTokenHookv11();
+      parseInt(game.version) > 11
+        ? this.refreshTokenHookv12()
+        : this.refreshTokenHookv11();
     }
   }
 
@@ -685,7 +679,7 @@ export class Overlay {
         this.clearAll();
         if (!token._animation) {
           Hooks.off("refreshToken", hookId);
-          Hooks.once("sightRefresh", async () =>  cro.fullRefresh());
+          Hooks.once("sightRefresh", async () => cro.fullRefresh());
         }
       });
     }
@@ -704,13 +698,18 @@ export class Overlay {
       if (this.tokenRefreshTracker === canvas.tokens.placeables.length) {
         this.tokenRefreshTracker = 0;
         Hooks.off("refreshToken", hookId);
-         cro.fullRefresh();
+        cro.fullRefresh();
       }
     });
   }
 
   terrainUpdateHook() {
-    if (cro.initialized && cro.terrainProvider?.id === "terrainmapper" && !cro.terrainProvider.usesRegions) TerrainHelper.sceneUpdate()
+    if (
+      cro.initialized &&
+      cro.terrainProvider?.id === "terrainmapper" &&
+      !cro.terrainProvider.usesRegions
+    )
+      TerrainHelper.sceneUpdate();
   }
 
   /**
@@ -738,9 +737,8 @@ export class Overlay {
       "updateWall",
       async () => await this.updateWallHook(),
     );
-    this.hookIDs.terrainUpdate = Hooks.on (
-      "deactivateTerrainLayer",
-      () => this.terrainUpdateHook(),
+    this.hookIDs.terrainUpdate = Hooks.on("deactivateTerrainLayer", () =>
+      this.terrainUpdateHook(),
     );
     this.hookIDs.createRegion = Hooks.on(
       "createRegion",
@@ -791,9 +789,8 @@ export class Overlay {
         "initializeVisionSources",
         () => this.refreshTokenHookv11(),
       );
-    this.hookIDs.deleteCombat = Hooks.on(
-      "deleteCombat",
-      async () =>  cro.fullRefresh(),
+    this.hookIDs.deleteCombat = Hooks.on("deleteCombat", async () =>
+      cro.fullRefresh(),
     );
   }
 
@@ -856,26 +853,19 @@ export class Overlay {
           break;
         }
         case "terrainmapper": {
-          canvas.drawings.removeChild(
-            cro.terrainGraphics,
-          );
+          canvas.drawings.removeChild(cro.terrainGraphics);
           break;
         }
         default: {
           break;
         }
       }
-    } else if (
-      cro.terrainProvider?.id === "terrainmapper" &&
-      cro.initialized
-    ) {
+    } else if (cro.terrainProvider?.id === "terrainmapper" && cro.initialized) {
       canvas.regions.placeables.forEach((region) => {
         const isTerrain = region.document.behaviors.contents.some(
           (behavior) => behavior.type === "terrainmapper.setTerrain",
         );
-        const regionDefault = cro.getRegionMapData(
-          region.id,
-        );
+        const regionDefault = cro.getRegionMapData(region.id);
         if (isTerrain) {
           region.document.visibility = regionDefault.visibility;
           region.alpha = regionDefault.alpha;
@@ -1077,7 +1067,12 @@ export class Overlay {
         if (idealTileMap.has(tile.key)) {
           this.overlays.distanceOverlay.lineStyle(
             highlightLineWidth,
-            idealTileMap.get(tile.key).color,
+            parseInt(game.version) > 10
+              ? idealTileMap.get(tile.key).color
+              : parseInt(
+                  idealTileMap.get(tile.key).color.replace("#", "0x"),
+                  16,
+                ),
           );
         } else {
           this.overlays.distanceOverlay.lineStyle(0, 0);
@@ -1098,6 +1093,8 @@ export class Overlay {
           Settings.getVisionMaskType() !==
             Settings.visionMaskingTypes.INDIVIDUAL
         ) {
+          if (parseInt(game.version) < 11)
+            color = parseInt(color.replace("#", "0x"), 16);
           this.overlays.distanceOverlay.beginFill(
             color,
             Settings.getMovementAlpha(),
