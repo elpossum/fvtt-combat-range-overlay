@@ -666,9 +666,9 @@ export class Overlay {
       Settings.getVisionMaskType() !== Settings.visionMaskingTypes.NONE &&
       this.tokenRefreshTracker === 0 &&
       this.tokenPositionChanged &&
-      parseInt(game.version) > 11
+      parseInt(game.version) !== 11
     ) {
-      this.refreshTokenHookv12();
+      parseInt(game.version) > 11 ? this.refreshTokenHookv12() : this.refreshTokenHookv11();
     }
   }
 
