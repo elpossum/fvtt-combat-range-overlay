@@ -54,6 +54,8 @@
     },
     "default-weapon-range": "Default weapon range",
     "default-weapon-range-hint": "What is the default weapon range?",
+    "supported-actors": "Actors to support",
+    "supported-actors-hint": "Comma separated list of actor types for which the overlay should show",
     "quick-settings": {
       "title": "Combat Range Overlay Quick Settings",
       "weapon-range-header": "Weapon Range:",

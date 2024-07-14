@@ -81,6 +81,7 @@ const settingNames = {
   TERRAIN_MEASURE: "terrain-measure",
   VISION_MASKING_TYPE: "vision-masking-type",
   VISION_MASKING_PERCENTAGE: "vision-masking-percentage",
+  SUPPORTED_ACTORS: "supported-actors",
 };
 
 /* Set which settings should be not configurable, default to false, and are non-boolean */
@@ -107,6 +108,7 @@ const ignore = [
   settingNames.INFO_BUTTON,
   settingNames.ACTIONS_SHOWN,
   settingNames.TERRAIN_MEASURE,
+  settingNames.SUPPORTED_ACTORS,
 ];
 
 /* Register settings and keybindings */
@@ -129,7 +131,7 @@ Hooks.once("init", () => {
         type: Boolean,
         default: !defaultFalse.includes(settingName),
         onChange: async () => {
-           cro.fullRefresh();
+          cro.fullRefresh();
         },
       });
     }
@@ -148,11 +150,8 @@ Hooks.once("init", () => {
       step: 1,
     },
     onChange: async () => {
-      cro.actionsToShow = game.settings.get(
-        MODULE_ID,
-        "actions-shown",
-      );
-       cro.fullRefresh();
+      cro.actionsToShow = game.settings.get(MODULE_ID, "actions-shown");
+      cro.fullRefresh();
     },
   });
 
@@ -171,7 +170,7 @@ Hooks.once("init", () => {
       step: 0.05,
     },
     onChange: async () => {
-       cro.fullRefresh();
+      cro.fullRefresh();
     },
   });
 
@@ -198,7 +197,7 @@ Hooks.once("init", () => {
       ),
     },
     onChange: async () => {
-       cro.fullRefresh();
+      cro.fullRefresh();
     },
   });
 
@@ -220,7 +219,7 @@ Hooks.once("init", () => {
     },
     onChange: async () => {
       if (getVisionMaskType() === visionMaskingTypes.INDIVIDUAL)
-         cro.fullRefresh();
+        cro.fullRefresh();
     },
   });
 
@@ -252,7 +251,7 @@ Hooks.once("init", () => {
       ),
     },
     onChange: async () => {
-       cro.fullRefresh();
+      cro.fullRefresh();
     },
   });
 
@@ -283,7 +282,7 @@ Hooks.once("init", () => {
       ),
     },
     onChange: async () => {
-       cro.fullRefresh();
+      cro.fullRefresh();
     },
   });
 
@@ -309,7 +308,7 @@ Hooks.once("init", () => {
         ),
       },
       onChange: async () => {
-         cro.fullRefresh();
+        cro.fullRefresh();
       },
     });
   }
@@ -322,7 +321,7 @@ Hooks.once("init", () => {
     type: String,
     default: DEFAULT_WEAPON_RANGES,
     onChange: async () => {
-       cro.fullRefresh();
+      cro.fullRefresh();
     },
   });
 
@@ -338,7 +337,7 @@ Hooks.once("init", () => {
     type: Number,
     default: DEFAULT_DEFAULT_WEAPON_RANGE,
     onChange: async () => {
-       cro.fullRefresh();
+      cro.fullRefresh();
     },
   });
 
@@ -364,7 +363,7 @@ Hooks.once("init", () => {
       ),
     },
     onChange: async () => {
-       cro.fullRefresh();
+      cro.fullRefresh();
     },
   });
 
@@ -379,6 +378,17 @@ Hooks.once("init", () => {
     default: "",
   });
 
+  game.settings.register(MODULE_ID, settingNames.SUPPORTED_ACTORS, {
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.SUPPORTED_ACTORS}`),
+    hint: game.i18n.localize(
+      `${MODULE_ID}.${settingNames.SUPPORTED_ACTORS}-hint`,
+    ),
+    scope: "world",
+    config: true,
+    type: Array,
+    default: ["character", "npc"],
+  });
+
   game.keybindings.register(MODULE_ID, "showOverlay", {
     name: game.i18n.localize(`${MODULE_ID}.keybindings.showOverlay.name`),
     hint: game.i18n.localize(`${MODULE_ID}.keybindings.showOverlay.hint`),
@@ -389,13 +399,11 @@ Hooks.once("init", () => {
     ],
     onDown: () => {
       PRESSED_KEYS.showOverlay = true;
-      (async () =>
-         cro.fullRefresh())();
+      (async () => cro.fullRefresh())();
     },
     onUp: () => {
       PRESSED_KEYS.showOverlay = false;
-      (async () =>
-         cro.fullRefresh())();
+      (async () => cro.fullRefresh())();
     },
   });
 
@@ -576,4 +584,12 @@ export function getVisionMaskPercent() {
   return (
     game.settings.get(MODULE_ID, settingNames.VISION_MASKING_PERCENTAGE) / 100
   );
+}
+
+/**
+ * Get which actor types the overlay should show for
+ * @returns {Array<string>} - All actor types for which the overlay should show
+ */
+export function getSupportedActors() {
+  return game.settings.get(MODULE_ID, settingNames.SUPPORTED_ACTORS);
 }

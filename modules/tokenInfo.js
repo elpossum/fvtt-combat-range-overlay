@@ -703,14 +703,14 @@ function updateLocation(token, updateData) {
 Hooks.on("createCombatant", async (combatant) => {
   const token = canvasTokensGet(combatant.token.id);
   updateMeasureFrom(token);
-   cro.fullRefresh();
+  cro.fullRefresh();
 });
 
 /* On deleting a combatant, set its measure from point to its location and refresh the overlay */
 Hooks.on("deleteCombatant", async (combatant) => {
   const token = canvasTokensGet(combatant.token?.id);
   if (token) updateMeasureFrom(token);
-   cro.fullRefresh();
+  cro.fullRefresh();
 });
 
 /* On updating a combat (changing turns), update measure from locations and refresh the overlay */
@@ -721,7 +721,7 @@ Hooks.on("updateCombat", async (combat) => {
       canvasTokensGet(combat.current.tokenId),
     ];
     tokens.forEach((token) => updateMeasureFrom(token));
-     cro.fullRefresh();
+    cro.fullRefresh();
   }
 });
 
@@ -729,7 +729,11 @@ Hooks.on("updateCombat", async (combat) => {
 Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   const tokenId = tokenDocument.id;
   const realToken = canvasTokensGet(tokenId); // Get the real token
-  if (!realToken) return;
+  if (
+    !realToken ||
+    !Settings.getSupportedActors().includes(realToken.actor.type)
+  )
+    return;
   updateLocation(realToken, updateData);
   if (!realToken.inCombat || Settings.updatePositionInCombat()) {
     updateMeasureFrom(realToken, updateData);
@@ -779,7 +783,7 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
     (Settings.getVisionMaskType() === Settings.visionMaskingTypes.NONE ||
       !realToken.vision?.los)
   )
-     cro.fullRefresh();
+    cro.fullRefresh();
 });
 
 /**
@@ -830,12 +834,13 @@ async function updateUnmodifiedSpeed(token) {
     // Speed has not been changed since last set or the token is in an impassable space
   } else {
     await TokenInfo.current?.setUnmodifiedSpeed(speed);
-     cro.fullRefresh();
+    cro.fullRefresh();
   }
 }
 
 /* On controlling a token, update its TokenInfo with its position, measure from point and speeds; then refresh the overlay */
 Hooks.on("controlToken", async (token, boolFlag) => {
+  if (!Settings.getSupportedActors().includes(token.actor.type)) return;
   // If the modules is not initialized, release the token and set to retake control after it has been fully initialized
   if (!cro.initialized && boolFlag) {
     token.release();
@@ -888,7 +893,12 @@ Hooks.on("updateActor", async (actor) => {
   const token = canvas.tokens.controlled.filter(
     (token) => token.actor === actor,
   )[0];
-  if (!token || cro.terrainProvider?.id !== "terrainmapper") return;
+  if (
+    !token ||
+    !Settings.getSupportedActors().includes(token.actor.type) ||
+    cro.terrainProvider?.id !== "terrainmapper"
+  )
+    return;
   await updateUnmodifiedSpeed(token);
 });
 
@@ -900,7 +910,7 @@ async function updateUnmodifiedSpeedOnEffect(effect) {
   const token = getCurrentToken();
   if (token && effect.flags?.terrainmapper?.uniqueEffectType !== "Terrain")
     await updateUnmodifiedSpeed(token);
-   cro.fullRefresh();
+  cro.fullRefresh();
 }
 
 /* On adding, updating or deleting an effect or weapon, update the token and refresht the overlay */
