@@ -982,7 +982,10 @@ export class Overlay {
    */
   async drawCosts(movementCostMap, targetRangeMap) {
     const los = getCurrentToken().vision?.los?.clone();
-    if (Settings.getVisionMaskType() === Settings.visionMaskingTypes.MASK) {
+    if (
+      Settings.getVisionMaskType() === Settings.visionMaskingTypes.MASK &&
+      los
+    ) {
       const losGraphics = new PIXI.Graphics();
       losGraphics.beginFill();
       losGraphics.drawPolygon(los);
@@ -1091,7 +1094,8 @@ export class Overlay {
         if (
           intersect?.area / rect.area >= Settings.getVisionMaskPercent() ||
           Settings.getVisionMaskType() !==
-            Settings.visionMaskingTypes.INDIVIDUAL
+            Settings.visionMaskingTypes.INDIVIDUAL ||
+          !los
         ) {
           if (parseInt(game.version) < 11)
             color = parseInt(color.replace("#", "0x"), 16);

@@ -736,8 +736,7 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   }
 
   const translation = !!updateData.x || !!updateData.y;
-  if (translation)
-    cro.instance.tokenPositionChanged = true;
+  if (translation) cro.instance.tokenPositionChanged = true;
   let visionRefresh;
   if (translation && game.user.targets.size) {
     const targetBlocked = new Map();
@@ -755,16 +754,12 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
           : realToken.center,
     };
     game.user.targets.forEach((target) => {
-      const blocked = !checkTileToTokenVisibility(
-        newCenter,
-        target,
-      );
+      const blocked = !checkTileToTokenVisibility(newCenter, target);
       targetBlocked.set(target.id, blocked);
     });
     targetBlocked.forEach((blocked, id) => {
       visionRefresh =
-        visionRefresh ||
-        cro.targetVisionMap.get(id).new === blocked;
+        visionRefresh || cro.targetVisionMap.get(id).new === blocked;
     });
   }
 
@@ -781,7 +776,8 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
     !terrainChanged &&
     translation &&
     !visionRefresh &&
-    Settings.getVisionMaskType() === Settings.visionMaskingTypes.NONE
+    (Settings.getVisionMaskType() === Settings.visionMaskingTypes.NONE ||
+      !realToken.vision?.los)
   )
      cro.fullRefresh();
 });
@@ -877,21 +873,14 @@ Hooks.on("controlToken", async (token, boolFlag) => {
     }
   }
   await updateUnmodifiedSpeed(token);
-  if (
-    !token.vision.los ||
-    cro.instance.tokenLayerJustActivated
-  ) {
+  if (!token.vision.los || cro.instance.tokenLayerJustActivated) {
     Hooks.once("sightRefresh", () => {
-      Hooks.once(
-        "refreshToken",
-        async () =>  cro.fullRefresh(),
-      );
+      Hooks.once("refreshToken", async () => cro.fullRefresh());
       token.refresh();
     });
     return;
   }
-  if (cro?.initialized)
-     cro.fullRefresh();
+  if (cro?.initialized) cro.fullRefresh();
 });
 
 /* On updating an actor (changing its speeds), update its TokenInfo */
@@ -899,11 +888,7 @@ Hooks.on("updateActor", async (actor) => {
   const token = canvas.tokens.controlled.filter(
     (token) => token.actor === actor,
   )[0];
-  if (
-    !token ||
-    cro.terrainProvider?.id !== "terrainmapper"
-  )
-    return;
+  if (!token || cro.terrainProvider?.id !== "terrainmapper") return;
   await updateUnmodifiedSpeed(token);
 });
 
