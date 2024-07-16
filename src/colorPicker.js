@@ -71,6 +71,7 @@ class ColorPickerApp extends FormApplication {
       title: `${MODULE_ID}.color-picker.label`,
       template: `modules/${MODULE_ID}/templates/colorPicker.hbs`,
       popOut: true,
+      resizable: true,
     });
   }
 

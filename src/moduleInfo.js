@@ -27,6 +27,7 @@ export default class ModuleInfoApp extends FormApplication {
       popOut: true,
       width: 500,
       height: 700,
+      resizable: true,
     });
   }
 
