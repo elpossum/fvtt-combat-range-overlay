@@ -43,7 +43,7 @@ const config = defineConfig(() => {
       sourcemap: true,
       minify: false,
       lib: {
-        entry: "modules/main.js",
+        entry: "src/main.js",
         formats: ["es"],
         fileName: "main",
       },
