@@ -11,7 +11,7 @@
     }
   ],
   "esmodules": [
-    "modules/main.js"
+    "main.js"
   ],
   "url": "https://github.com/elpossum/fvtt-combat-range-overlay",
   "license": "https://raw.github.com/elpossum/fvtt-combat-range-overlay/master/LICENSE",
