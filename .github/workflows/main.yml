@@ -8,14 +8,30 @@ jobs:
   build:
     runs-on: ubuntu-latest
     steps:
-    - uses: actions/checkout@v3
+      # Checkout repo
+    - name: Checkout
+      uses: actions/checkout@v3
+
+      # Setup Node
+    - name: Setup Node
+      uses: setup-node@v4
+      with: 
+        node-version: 20
+      
+      # Install dependencies
+    - name: Install dependencies
+      run: npm ci
+
+      # Build with Vite
+    - name: Build with Vite
+      run: npm run build
 
     # Substitute the Manifest and Download URLs in the module.json
     - name: Substitute Manifest and Download Links For Versioned Ones
       id: sub_manifest_link_version
-      uses: microsoft/variable-substitution@v1
+      uses: TomaszKandula/variable-substitution@v1.0.2
       with:
-        files: 'module.json'
+        files: './static/module.json'
       env:
         version: ${{github.event.release.tag_name}}
         url: https://github.com/${{github.repository}}
@@ -23,7 +39,8 @@ jobs:
         download: https://github.com/${{github.repository}}/releases/download/${{github.event.release.tag_name}}/module.zip
 
     # Create a zip file with all files required by the module to add to the release
-    - run: zip -r ./module.zip module.json LICENSE modules lang templates README.md CHANGELOG.md
+    - name: Create module.zip
+      run: zip -r ./module.zip dist
 
     # Create a release for this specific version
     - name: Update Release with Files
@@ -35,7 +52,7 @@ jobs:
         draft: false
         prerelease: false
         token: ${{ secrets.GITHUB_TOKEN }}
-        artifacts: './module.json, ./module.zip'
+        artifacts: './static/module.json, ./module.zip'
         tag: ${{ github.event.release.tag_name }}
         body: ${{ github.event.release.body }}
 
@@ -47,7 +64,7 @@ jobs:
     # Substitute values in apiRequest.json
     - name: Substitute values in API request
       id: sub_values_api
-      uses: microsoft/variable-substitution@v1
+      uses: TomaszKandula/variable-substitution@v1.0.2
       with:
         files: 'apiRequest.json'
       env:
