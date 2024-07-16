@@ -6,7 +6,9 @@
   "type": "module",
   "browser": "./modules/main.js",
   "scripts": {
-    "test": "echo \"Error: no test specified\" && exit 1"
+    "test": "echo \"Error: no test specified\" && exit 1",
+    "build": "vite build",
+    "build:dev": "vite build --watch"
   },
   "author": "elpossum",
   "license": "MIT",
@@ -16,6 +18,8 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jsdoc": "^48.5.2",
     "globals": "^15.8.0",
-    "jsdoc": "^4.0.3"
+    "jsdoc": "^4.0.3",
+    "vite": "^5.3.3",
+    "vite-plugin-static-copy": "^1.0.6"
   }
 }
