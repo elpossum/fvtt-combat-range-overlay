@@ -42,7 +42,7 @@
   },
   "compatibility": {
     "minimum": "10",
-    "verified": "12.328"
+    "verified": "12.329"
   },
   "socket": true
 }
