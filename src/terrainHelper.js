@@ -8,8 +8,8 @@ Token
 
 import {TokenInfo} from "./tokenInfo.js";
 import {cro} from "./main.js";
-import {TerrainLayerShader} from "./terrainmapper/glsl/TerrainLayerShader.js";
-import {TerrainQuadMesh} from "./terrainmapper/glsl/TerrainQuadMesh.js";
+import {TerrainLayerShader} from "./terrainMapper/glsl/TerrainLayerShader.js";
+import {TerrainQuadMesh} from "./terrainMapper/glsl/TerrainQuadMesh.js";
 
 export let TerrainHelper;
 
