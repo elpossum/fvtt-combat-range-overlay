@@ -1,5 +1,21 @@
 # Changelog
 
+## 4.6.1 - 2024/07/18
+
+### Fixed
+
+- Fallback to no masking if vision not enabled
+- Fix some Foundry v10 errors
+- Fix masking breaking if Terrain Mapper not active or Foundry older than v12 (Polygon area methods not present)
+- Fix overlay not updating on terrain change if Terrain Mapper older than v0.3.0
+- Fix visibility on diagonals
+
+### Added
+
+- Add setting to determine supported actor types. This prevents error notifications on things like loot actors
+- Add color picker implementation so no longer needs external modules for this
+- Localize more text
+
 ## 4.6.0 - 2024/07/03
 
 ### Fixed
