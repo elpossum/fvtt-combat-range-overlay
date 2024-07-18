@@ -385,8 +385,8 @@ Hooks.once("init", () => {
     ),
     scope: "world",
     config: true,
-    type: Array,
-    default: ["character", "npc"],
+    type: String,
+    default: "character,npc",
   });
 
   game.keybindings.register(MODULE_ID, "showOverlay", {
@@ -591,5 +591,5 @@ export function getVisionMaskPercent() {
  * @returns {Array<string>} - All actor types for which the overlay should show
  */
 export function getSupportedActors() {
-  return game.settings.get(MODULE_ID, settingNames.SUPPORTED_ACTORS);
+  return game.settings.get(MODULE_ID, settingNames.SUPPORTED_ACTORS).split(",");
 }
