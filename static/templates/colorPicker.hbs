@@ -1,13 +1,22 @@
 <form onsubmit="event.preventDefault();">
   {{#each settings as |setting|}}
     <div class="form-group">
-      <label for="{{setting.key}}">{{localize setting.name}}</label>
+      <label for="{{@key}}">{{localize setting.name}}</label>
       <div class="form-fields">
-        {{colorPicker
-          name=setting.key
-          value=setting.value
-          default=setting.default
-        }}
+        {{!-- colorPicker helper deprecated in v12 in favour of custom html element --}}
+        {{#if @root.useHelper}}
+          {{colorPicker
+            name=@key
+            value=setting.value
+            default=setting.default
+          }}
+        {{else}}
+          <color-picker
+            name="{{@key}}"
+            value="{{setting.value}}"
+            default="{{setting.default}}"
+          ></color-picker>
+        {{/if}}
       </div>
       <p class="hint">{{localize setting.hint}}</p>
     </div>

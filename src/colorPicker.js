@@ -81,6 +81,7 @@ class ColorPickerApp extends FormApplication {
    */
   getData() {
     const o = {
+      useHelper: parseInt(game.version) < 12,
       buttons: {
         save: `${MODULE_ID}.color-picker.save`,
         reset: `${MODULE_ID}.color-picker.reset`,
@@ -89,7 +90,6 @@ class ColorPickerApp extends FormApplication {
     };
     colorSettingNames.forEach((name, index) => {
       o.settings[name] = {};
-      o.settings[name].key = name;
       o.settings[name].name = `${MODULE_ID}.color-picker.${name}.name`;
       o.settings[name].hint = `${MODULE_ID}.color-picker.${name}.hint`;
       o.settings[name].value = game.settings.get(MODULE_ID, name);
