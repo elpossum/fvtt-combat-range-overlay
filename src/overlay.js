@@ -140,7 +140,7 @@ export class Overlay {
   async calculateMovementCosts() {
     // TODO Fix caching
     const tilesPerAction =
-      (await TokenInfo.current.speed) / this.DISTANCE_PER_TILE;
+      TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     const maxTiles = tilesPerAction * cro.actionsToShow;
 
     const currentToken = getCurrentToken();
