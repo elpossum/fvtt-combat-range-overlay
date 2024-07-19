@@ -878,7 +878,7 @@ Hooks.on("controlToken", async (token, boolFlag) => {
     }
   }
   await updateUnmodifiedSpeed(token);
-  if (!token.vision.los || cro.instance.tokenLayerJustActivated) {
+  if (!token.vision?.los || cro.instance.tokenLayerJustActivated) {
     Hooks.once("sightRefresh", () => {
       Hooks.once("refreshToken", async () => cro.fullRefresh());
       token.refresh();
