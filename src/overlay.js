@@ -139,8 +139,7 @@ export class Overlay {
    */
   async calculateMovementCosts() {
     // TODO Fix caching
-    const tilesPerAction =
-      TokenInfo.current.speed / this.DISTANCE_PER_TILE;
+    const tilesPerAction = TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     const maxTiles = tilesPerAction * cro.actionsToShow;
 
     const currentToken = getCurrentToken();
@@ -369,8 +368,8 @@ export class Overlay {
 
     this.initializePersistentVariables();
 
+    this.drawCosts(movementCosts, targetRangeMap);
     const promises = [];
-    promises.push(this.drawCosts(movementCosts, targetRangeMap));
 
     if (game.user.targets.size === 0) {
       if (Settings.isShowTurnOrder()) {
@@ -980,7 +979,7 @@ export class Overlay {
    * @param {Map<string, GridTile>} movementCostMap - A map of reachable tiles
    * @param {Map<string, Set<GridTile>>} targetRangeMap - A map of tiles that can reach the targets
    */
-  async drawCosts(movementCostMap, targetRangeMap) {
+  drawCosts(movementCostMap, targetRangeMap) {
     const los = getCurrentToken().vision?.los?.clone();
     if (
       Settings.getVisionMaskType() === Settings.visionMaskingTypes.MASK &&
@@ -1010,7 +1009,7 @@ export class Overlay {
     }
 
     const tilesMovedPerAction =
-      (await TokenInfo.current.speed) / this.DISTANCE_PER_TILE;
+      TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     this.overlays.distanceTexts = [];
     this.overlays.pathOverlay.lineStyle(pathLineWidth, pathLineColor);
 
