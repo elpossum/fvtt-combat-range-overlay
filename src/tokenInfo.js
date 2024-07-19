@@ -67,8 +67,12 @@ export class TokenInfo {
    */
   updateLocation(updateData) {
     this.location = {
-      x: updateData?.x ?? this.token.x,
-      y: updateData?.y ?? this.token.y,
+      x: updateData?.x
+        ? this.token.center.x + updateData.x - this.token.x
+        : this.token.center.x,
+      y: updateData?.y
+        ? this.token.center.y + updateData.y - this.token.y
+        : this.token.center.y,
     };
   }
 
@@ -78,8 +82,12 @@ export class TokenInfo {
    */
   updateMeasureFrom(updateData) {
     this.measureFrom = {
-      x: updateData?.x ?? this.token.x,
-      y: updateData?.y ?? this.token.y,
+      x: updateData?.x
+        ? this.token.center.x + updateData.x - this.token.x
+        : this.token.center.x,
+      y: updateData?.y
+        ? this.token.center.y + updateData.y - this.token.y
+        : this.token.center.y,
     };
   }
 
