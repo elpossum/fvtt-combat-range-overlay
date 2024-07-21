@@ -2,7 +2,8 @@
 canvas,
 ui,
 game,
-Token
+Token,
+PIXI
 */
 
 import * as Settings from "./settings.js";
@@ -159,4 +160,49 @@ export function signedArea() {
   // See https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperorientation
   // The 1/2 comes from the Shoelace formula
   return area * -0.5;
+}
+
+/**
+ * From Foundry v12
+ * Convert cube coordinates (q, r, s) into point coordinates (x, y).
+ * @param {{q: number, r: number}} cube - The cube coordinates
+ * @returns {{x: number, y: number}} - The point coordinates
+ */
+export function cubeToPoint({ q, r }) {
+  const grid = canvas.grid.grid
+  let x;
+  let y;
+
+  if (grid.columnar) {
+    x = (Math.sqrt(3) / 2) * (q + 2 / 3);
+    y = 0.5 * (q + (grid.even ? 1 : 0)) + r;
+  } else {
+    y = (Math.sqrt(3) / 2) * (r + 2 / 3);
+    x = 0.5 * (r + (grid.even ? 1 : 0)) + q;
+  }
+
+  const size = canvasGridSize();
+  x *= size;
+  y *= size;
+
+  return { x, y };
+}
+
+/**
+ * From Foundry
+ * Theoretical token shape at 0,0 origin.
+ * @param {Token} token - The token to calculate
+ * @returns {PIXI.Polygon|PIXI.Rectangle} - The token shape
+ */
+export function calculateTokenShape(token) {
+  // TODO: Use RegularPolygon shapes for use with WeilerAtherton
+  // Hexagon (for width .5 or 1)
+  // Square (for width === height)
+  let shape;
+  if ( canvas.grid.isHex ) {
+    const pts = canvas.grid.grid.getBorderPolygon(token.document.width, token.document.height, 0);
+    if ( pts ) shape = new PIXI.Polygon(pts);
+  }
+
+  return shape || new PIXI.Rectangle(0, 0, token.w, token.h);
 }
