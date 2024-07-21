@@ -1,6 +1,7 @@
 /* globals
 Hooks,
-game
+game,
+canvas
 */
 
 import {
@@ -517,7 +518,9 @@ export function getMovementAlpha() {
  * @returns {diagonals} - @see {diagonals}
  */
 export function getDiagonals() {
-  return game.settings.get(MODULE_ID, settingNames.DIAGONALS);
+  const square = parseInt(game.version) > 11 ? !canvas.grid.isHexagonal : !canvas.grid.isHex;
+  if (square) return game.settings.get(MODULE_ID, settingNames.DIAGONALS);
+  else return diagonals.FIVE;
 }
 
 /**
