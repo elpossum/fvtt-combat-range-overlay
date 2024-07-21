@@ -1097,7 +1097,7 @@ export class Overlay {
           !los
         ) {
           if (parseInt(game.version) < 11)
-            color = parseInt(color.replace("#", "0x"), 16);
+            color = parseInt(color?.replace("#", "0x"), 16);
           this.overlays.distanceOverlay.beginFill(
             color,
             Settings.getMovementAlpha(),
