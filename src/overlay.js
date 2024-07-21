@@ -8,13 +8,16 @@ CONST,
 game,
 Token,
 MeasuredTemplateDocument,
-DrawingDocument
+DrawingDocument,
+HexagonalGrid
 */
 
 import {
   calculateGridDistance,
+  calculateTokenShape,
   canvasGridSize,
   canvasTokensGet,
+  cubeToPoint,
   getCombatantToken,
   getCombatantTokenDisposition,
   getCurrentToken,
@@ -1032,6 +1035,7 @@ export class Overlay {
         }
       }
       if (drawTile) {
+        /* Currently unimplemented */
         if (cro.showNumericMovementCost) {
           const style = Object.assign({}, movementCostStyle);
           style.fontSize = style.fontSize * (canvasGridSize() / BASE_GRID_SIZE);
@@ -1071,7 +1075,6 @@ export class Overlay {
                 colorByActions.length - 1,
               );
         let color = colorByActions[colorIndex];
-        let cornerPt = tile.pt;
         if (idealTileMap.has(tile.key)) {
           this.overlays.distanceOverlay.lineStyle(
             highlightLineWidth,
@@ -1180,11 +1183,26 @@ function calculateIdealTileMap(movementTileMap, targetMap, rangeMap) {
  */
 /**
  * Calculate tiles in range of a specific target
- * @param {Array<Weapon>} rangeInTiles - An array of weapons, theer ranges and their colors
+ * @param {Array<Weapon>} rangeInTiles - An array of weapons, their ranges and their colors
  * @param {Token} targetToken - The target token
  * @returns {Set<GridTile>} - A set of tiles that can a specific target is in range from
  */
 function calculateTilesInRange(rangeInTiles, targetToken) {
+  const square =
+    parseInt(game.version) > 11 ? !canvas.grid.isHexagonal : !canvas.grid.isHex;
+  const tileSet = square
+    ? calculateTilesInRangeSquare(rangeInTiles, targetToken)
+    : calculateTilesInRangeHex(rangeInTiles, targetToken);
+  return tileSet;
+}
+
+/**
+ * Calculate tiles in range of a specific target for square tiles
+ * @param {Array<Weapon>} rangeInTiles - An array of weapons, their ranges and their colors
+ * @param {Token} targetToken - The target token
+ * @returns {Set<GridTile>} - A set of tiles that can a specific target is in range from
+ */
+function calculateTilesInRangeSquare(rangeInTiles, targetToken) {
   const tokenInfo = TokenInfo.getById(targetToken.id);
   const targetTile = GridTile.fromPixels(
     tokenInfo.location.x,
@@ -1234,7 +1252,6 @@ function calculateTilesInRange(rangeInTiles, targetToken) {
           for (const testGridX of gridXSet) {
             for (const testGridY of gridYSet) {
               const testTile = new GridTile(testGridX, testGridY, weaponColor);
-              //const testTilePoint = testTile.pt;
               let isDupe = false;
               for (const entry of tileSet) {
                 if (entry.key === testTile.key) {
@@ -1248,6 +1265,204 @@ function calculateTilesInRange(rangeInTiles, targetToken) {
                 tileSet.add(testTile);
               }
             }
+          }
+        }
+      }
+    }
+  }
+  return tileSet;
+}
+
+/**
+ * Calculate tiles in range of a specific target for hex tiles
+ * @param {Array<Weapon>} rangeInTiles - An array of weapons, their ranges and their colors
+ * @param {Token} targetToken - The target token
+ * @returns {Set<GridTile>} - A set of tiles that can a specific target is in range from
+ */
+function calculateTilesInRangeHex(rangeInTiles, targetToken) {
+  const tokenInfo = TokenInfo.getById(targetToken.id);
+  const targetTile = GridTile.fromPixels(
+    tokenInfo.location.x,
+    tokenInfo.location.y,
+  );
+  const grid = parseInt(game.version) > 11 ? canvas.grid : canvas.grid.grid;
+  const tileSet = new Set();
+  let targetTileCube;
+  switch (parseInt(game.version)) {
+    case 12:
+      targetTileCube = grid.offsetToCube({
+        i: targetTile.gx,
+        j: targetTile.gy,
+      });
+      break;
+    case 11:
+      targetTileCube = HexagonalGrid.offsetToCube(
+        { row: targetTile.gx, col: targetTile.gy },
+        { columns: grid.columnar, even: grid.even },
+      );
+      break;
+    case 10:
+      targetTileCube = grid.offsetToCube({
+        row: targetTile.gx,
+        col: targetTile.gy,
+      });
+      break;
+  }
+  const targetGridHeight = Math.floor(
+    targetToken.hitArea.getBounds().height / canvasGridSize(),
+  );
+  const targetGridWidth = Math.floor(
+    targetToken.hitArea.getBounds().width / canvasGridSize(),
+  );
+  const targetTiles = new Set();
+
+  // Find tiles that the target occupies
+  for (
+    let gridQDelta = -targetGridWidth;
+    gridQDelta <= targetGridWidth;
+    gridQDelta++
+  ) {
+    for (
+      let gridRDelta = Math.max(
+        -targetGridHeight,
+        -gridQDelta - targetGridHeight,
+      );
+      gridRDelta <= Math.min(targetGridHeight, -gridQDelta + targetGridHeight);
+      gridRDelta++
+    ) {
+      const testTile = {
+        q: targetTileCube.q + gridQDelta,
+        r: targetTileCube.r + gridRDelta,
+      };
+      const testTilePoint = grid.cubeToPoint
+        ? grid.cubeToPoint(testTile)
+        : cubeToPoint(testTile);
+      const hitArea =
+        parseInt(game.version) > 11
+          ? targetToken.hitArea
+          : calculateTokenShape(targetToken);
+      const points = [];
+      // Translate to target's postion
+      if (hitArea.points) {
+        // Hit area is a polygon
+        hitArea.points.forEach((point, index) => {
+          if (index % 2 === 0) points.push(point + targetToken.x);
+          else points.push(point + targetToken.y);
+        });
+      } else {
+        // Hit area is a rectangle
+        const rectPoints = [
+          hitArea.x,
+          hitArea.y,
+          hitArea.x + hitArea.width + FUDGE,
+          hitArea.y,
+          hitArea.x + hitArea.width + FUDGE,
+          hitArea.y + hitArea.height + FUDGE,
+          hitArea.x,
+          hitArea.y + hitArea.height + FUDGE,
+        ];
+        rectPoints.forEach((point, index) => {
+          if (index % 2 === 0) points.push(point + targetToken.x);
+          else points.push(point + targetToken.y);
+        });
+      }
+      const testArea = new PIXI.Polygon(points);
+      if (testArea.contains(testTilePoint.x, testTilePoint.y))
+        targetTiles.add(testTile);
+    }
+  }
+
+  for (const rangeInTilesElement of rangeInTiles) {
+    const weaponColor = rangeInTilesElement.color;
+    // Loop over Q and R deltas, computing distance for only a single quadrant
+    for (const targetTile of targetTiles) {
+      const targetGridQ = targetTile.q;
+      const targetGridR = targetTile.r;
+      for (
+        let gridQDelta = -rangeInTilesElement.range;
+        gridQDelta <= rangeInTilesElement.range;
+        gridQDelta++
+      ) {
+        for (
+          let gridRDelta = Math.max(
+            -rangeInTilesElement.range,
+            -gridQDelta - rangeInTilesElement.range,
+          );
+          gridRDelta <=
+          Math.min(
+            rangeInTilesElement.range,
+            -gridQDelta + rangeInTilesElement.range,
+          );
+          gridRDelta++
+        ) {
+          if (gridQDelta === 0 && gridRDelta === 0) {
+            continue;
+          }
+
+          const testGridQ = targetGridQ + gridQDelta;
+          const testGridR = targetGridR + gridRDelta;
+          let offset;
+          switch (parseInt(game.version)) {
+            case 12:
+              offset = grid.cubeToOffset({ q: testGridQ, r: testGridR });
+              break;
+            case 11:
+              offset = HexagonalGrid.cubeToOffset(
+                { q: testGridQ, r: testGridR },
+                { columns: grid.columnar, even: grid.even },
+              );
+              break;
+            case 10:
+              offset = grid.cubeToOffset({ q: testGridQ, r: testGridR });
+          }
+          const testTile =
+            parseInt(game.version) > 11
+              ? new GridTile(offset.i, offset.j, weaponColor)
+              : new GridTile(offset.row, offset.col, weaponColor);
+          let testTileCube;
+          switch (parseInt(game.version)) {
+            case 12:
+              testTileCube = grid.offsetToCube({
+                i: testTile.gx,
+                j: testTile.gy,
+              });
+              break;
+            case 11:
+              testTileCube = HexagonalGrid.offsetToCube(
+                { row: testTile.gx, col: testTile.gy },
+                { columns: grid.columnar, even: grid.even },
+              );
+              break;
+            case 10:
+              testTileCube = grid.offsetToCube({
+                row: testTile.gx,
+                col: testTile.gy,
+              });
+              break;
+          }
+
+          // Don't include tiles the target occupies
+          let isTargetTile = false;
+          targetTiles.forEach((tile) => {
+            if (tile.q === testTileCube.q && tile.r === testTileCube.r)
+              isTargetTile = true;
+          });
+          if (isTargetTile) {
+            continue;
+          }
+
+          // Don't include tiles that are already added by another weapon
+          let isDupe = false;
+          for (const entry of tileSet) {
+            if (entry.key === testTile.key) {
+              isDupe = true;
+              break;
+            }
+          }
+
+          let clearShot = checkTileToTokenVisibility(testTile, targetToken);
+          if (clearShot && !isDupe) {
+            tileSet.add(testTile);
           }
         }
       }
