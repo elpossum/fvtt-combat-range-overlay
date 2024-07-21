@@ -1085,19 +1085,10 @@ export class Overlay {
         } else {
           this.overlays.distanceOverlay.lineStyle(0, 0);
         }
-        const rect = new PIXI.Polygon(
-          cornerPt.x,
-          cornerPt.y,
-          cornerPt.x + canvasGridSize(),
-          cornerPt.y,
-          cornerPt.x + canvasGridSize(),
-          cornerPt.y + canvasGridSize(),
-          cornerPt.x,
-          cornerPt.y + canvasGridSize(),
-        );
-        const intersect = los?.intersectPolygon(rect);
+        const poly = new PIXI.Polygon(tile.vertices);
+        const intersect = los?.intersectPolygon(poly);
         if (
-          intersect?.area / rect.area >= Settings.getVisionMaskPercent() ||
+          intersect?.area / poly.area >= Settings.getVisionMaskPercent() ||
           Settings.getVisionMaskType() !==
             Settings.visionMaskingTypes.INDIVIDUAL ||
           !los
@@ -1108,12 +1099,7 @@ export class Overlay {
             color,
             Settings.getMovementAlpha(),
           );
-          this.overlays.distanceOverlay.drawRect(
-            cornerPt.x,
-            cornerPt.y,
-            canvasGridSize(),
-            canvasGridSize(),
-          );
+          this.overlays.distanceOverlay.drawPolygon(poly);
           this.overlays.distanceOverlay.endFill();
         }
       }
