@@ -66,14 +66,25 @@ export class TokenInfo {
    * @param {LocationUpdate} [updateData] - The updated coords
    */
   updateLocation(updateData) {
-    this.location = {
-      x: updateData?.x
-        ? this.token.center.x + updateData.x - this.token.x
-        : this.token.center.x,
-      y: updateData?.y
-        ? this.token.center.y + updateData.y - this.token.y
-        : this.token.center.y,
-    };
+    if (parseInt(game.version) > 11) {
+      this.location = {
+        x: updateData?.x
+          ? this.token.center.x + updateData.x - this.token.x
+          : this.token.center.x,
+        y: updateData?.y
+          ? this.token.center.y + updateData.y - this.token.y
+          : this.token.center.y,
+      };
+    } else {
+      this.location = {
+        x: updateData?.x
+          ? this.token.x + updateData.x - this.token.x
+          : this.token.x,
+        y: updateData?.y
+          ? this.token.y + updateData.y - this.token.y
+          : this.token.y,
+      };
+    }
   }
 
   /**
@@ -81,14 +92,25 @@ export class TokenInfo {
    * @param {LocationUpdate} [updateData] - The updated coords
    */
   updateMeasureFrom(updateData) {
-    this.measureFrom = {
-      x: updateData?.x
-        ? this.token.center.x + updateData.x - this.token.x
-        : this.token.center.x,
-      y: updateData?.y
-        ? this.token.center.y + updateData.y - this.token.y
-        : this.token.center.y,
-    };
+    if (parseInt(game.version) > 11) {
+      this.measureFrom = {
+        x: updateData?.x
+          ? this.token.center.x + updateData.x - this.token.x
+          : this.token.center.x,
+        y: updateData?.y
+          ? this.token.center.y + updateData.y - this.token.y
+          : this.token.center.y,
+      };
+    } else {
+      this.measureFrom = {
+        x: updateData?.x
+          ? this.token.x + updateData.x - this.token.x
+          : this.token.x,
+        y: updateData?.y
+          ? this.token.y + updateData.y - this.token.y
+          : this.token.y,
+      };
+    }
   }
 
   /**
