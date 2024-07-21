@@ -340,11 +340,11 @@ export class Overlay {
           const tokenOverlay = new PIXI.Graphics();
           tokenOverlay.lineStyle(potentialTargetLineWidth, color);
           tokenOverlay.drawCircle(
-            combatantToken.hitArea.width / 2,
-            combatantToken.hitArea.height / 2,
+            combatantToken.hitArea.getBounds().width / 2,
+            combatantToken.hitArea.getBounds().height / 2,
             Math.pow(
-              Math.pow(combatantToken.hitArea.width / 2, 2) +
-                Math.pow(combatantToken.hitArea.height / 2, 2),
+              Math.pow(combatantToken.hitArea.getBounds().width / 2, 2) +
+                Math.pow(combatantToken.hitArea.getBounds().height / 2, 2),
               0.5,
             ),
           );
@@ -912,8 +912,10 @@ export class Overlay {
     style.fontSize = style.fontSize * (canvasGridSize() / BASE_GRID_SIZE);
 
     const text = new PIXI.Text(`» ${range}`, style);
-    text.position.x = currentToken.hitArea.width - text.width - TEXT_MARGIN;
-    text.position.y = currentToken.hitArea.height - text.height - TEXT_MARGIN;
+    text.position.x =
+      currentToken.hitArea.getBounds().width - text.width - TEXT_MARGIN;
+    text.position.y =
+      currentToken.hitArea.getBounds().height - text.height - TEXT_MARGIN;
     currentToken.addChild(text);
     this.overlays.turnOrderTexts.push(text);
   }
@@ -962,9 +964,13 @@ export class Overlay {
           if (turnOrder > 0 && combatantToken.visible) {
             const text = new PIXI.Text(turnOrder, style);
             text.position.x =
-              combatantToken.hitArea.width - text.width - TEXT_MARGIN;
+              combatantToken.hitArea.getBounds().width -
+              text.width -
+              TEXT_MARGIN;
             text.position.y =
-              combatantToken.hitArea.height - text.height - TEXT_MARGIN;
+              combatantToken.hitArea.getBounds().height -
+              text.height -
+              TEXT_MARGIN;
             combatantToken.addChild(text);
             this.overlays.turnOrderTexts.push(text);
           }
