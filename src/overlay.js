@@ -310,10 +310,9 @@ export class Overlay {
           tokenOverlay.drawCircle(
             combatantToken.hitArea.getBounds().width / 2,
             combatantToken.hitArea.getBounds().height / 2,
-            Math.pow(
-              Math.pow(combatantToken.hitArea.getBounds().width / 2, 2) +
-                Math.pow(combatantToken.hitArea.getBounds().height / 2, 2),
-              0.5,
+            Math.hypot(
+              combatantToken.hitArea.getBounds().width / 2,
+              combatantToken.hitArea.getBounds().height / 2,
             ),
           );
           combatantToken.addChild(tokenOverlay);
@@ -521,7 +520,7 @@ export class Overlay {
     TerrainHelper?.sceneUpdate();
     this.clearAll();
     TokenInfo.resetMap();
-    this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
+    this.DISTANCE_PER_TILE = canvas.grid.distance;
   }
 
   /**
@@ -996,7 +995,7 @@ export class Overlay {
         }
       }
       if (drawTile) {
-        /* Currently unimplemented */
+        /* Currently unimplemented as settings*/
         if (cro.showNumericMovementCost) {
           const style = Object.assign({}, movementCostStyle);
           style.fontSize = style.fontSize * (canvasGridSize() / BASE_GRID_SIZE);
