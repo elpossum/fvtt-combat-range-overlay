@@ -110,9 +110,9 @@ export class Overlay {
 
   /**
    * Use Dijkstra's shortest path algorithm
-   * @returns {Promise<Map<string, GridTile>>} - Map of GridTiles, now with costs, and their location keys
+   * @returns {Map<string, GridTile>} - Map of GridTiles, now with costs, and their location keys
    */
-  async calculateMovementCosts() {
+  calculateMovementCosts() {
     // TODO Fix caching
     const tilesPerAction = TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     const maxTiles = tilesPerAction * cro.actionsToShow;
@@ -259,13 +259,9 @@ export class Overlay {
       return;
     }
 
-    const tilesMovedPerActionPromise =
+    const tilesMovedPerAction =
       TokenInfo.current.speed / this.DISTANCE_PER_TILE;
-    const currentWeaponRangePromise = TokenInfo.current.weaponRangeColor;
-    const [tilesMovedPerAction, currentWeaponRange] = await Promise.all([
-      tilesMovedPerActionPromise,
-      currentWeaponRangePromise,
-    ]);
+    const currentWeaponRange = await TokenInfo.current.weaponRangeColor;
 
     const weaponRangeInTiles = currentWeaponRange.map((i) => ({
       ...i,
@@ -331,12 +327,8 @@ export class Overlay {
    * Draw all overlays
    */
   async drawAll() {
-    const movementCostsPromise = this.calculateMovementCosts();
-    const targetRangeMapPromise = this.calculateTargetRangeMap();
-    const [movementCosts, targetRangeMap] = await Promise.all([
-      movementCostsPromise,
-      targetRangeMapPromise,
-    ]);
+    const movementCosts = this.calculateMovementCosts();
+    const targetRangeMap = await this.calculateTargetRangeMap();
 
     this.initializePersistentVariables();
 
