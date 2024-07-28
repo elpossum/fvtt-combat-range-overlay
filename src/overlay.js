@@ -1081,10 +1081,29 @@ export class Overlay {
    */
   drawWalls() {
     this.overlays.wallsOverlay.lineStyle(wallLineWidth, wallLineColor);
-    for (const obj of canvas.walls.quadtree.objects) {
-      const wall = obj.t;
+    const los = getCurrentToken().vision?.los?.clone();
+    for (const wall of canvas.walls.placeables) {
       if (wall.document.door || !wall.document.move) {
         continue;
+      }
+      if (los) {
+        let aVis = false;
+        let bVis = false;
+        los?.points.forEach((point, index) => {
+          if (
+            wall.edge.a.x === point &&
+            wall.edge.a.y === los.points[index + 1]
+          )
+            aVis = true;
+        });
+        los?.points.forEach((point, index) => {
+          if (
+            wall.edge.b.x === point &&
+            wall.edge.b.y === los.points[index + 1]
+          )
+            bVis = true;
+        });
+        if (!aVis || !bVis) continue;
       }
       const c = wall.document.c;
       this.overlays.wallsOverlay.moveTo(c[0], c[1]);
