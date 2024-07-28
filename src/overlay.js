@@ -525,14 +525,21 @@ export class Overlay {
 
   /**
    * Update overlay when the scene is updated
+   * @param {object} update - The scene update data
    */
-  sceneUpdateHook() {
+  sceneUpdateHook(update) {
     this.canvasReadyHook();
     const token = getCurrentToken();
     if (token) {
       token.release();
       Hooks.once("refreshToken", () => {
         canvas.tokens.get(token.id).control();
+      });
+    }
+    // If token vision is enabled or disabled refresh once initialized
+    if (update.tokenVision !== undefined) {
+      Hooks.once("initializeVisionSources", () => {
+        cro.fullRefresh();
       });
     }
   }
@@ -688,8 +695,8 @@ export class Overlay {
     this.hookIDs.canvasReady = Hooks.on("canvasReady", () =>
       this.canvasReadyHook(),
     );
-    this.hookIDs.sceneUpdate = Hooks.on("updateScene", () =>
-      this.sceneUpdateHook(),
+    this.hookIDs.sceneUpdate = Hooks.on("updateScene", (_scene, update) =>
+      this.sceneUpdateHook(update),
     );
     this.hookIDs.activateTokenLayer = Hooks.on(
       "activateTokenLayer",
