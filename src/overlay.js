@@ -28,11 +28,22 @@ import {
 
 import { GridTile } from "./gridTile.js";
 import {
+  BASE_GRID_SIZE,
   FUDGE,
+  highlightLineWidth,
   MAX_DIST,
   MODULE_ID,
+  movementCostStyle,
+  pathLineColor,
+  pathLineWidth,
+  potentialTargetLineWidth,
   PRESSED_KEYS,
   SOCKET_TYPES,
+  TEXT_MARGIN,
+  turnOrderStyle,
+  wallLineColor,
+  wallLineWidth,
+  weaponRangeStyle,
 } from "./constants.js";
 import { TokenInfo } from "./tokenInfo.js";
 import * as Settings from "./settings.js";
@@ -40,45 +51,6 @@ import { mouse } from "./mouse.js";
 import { debugLog } from "./debug.js";
 import { TerrainHelper } from "./terrainHelper.js";
 import { cro } from "./main.js";
-
-// Colors
-const pathLineColor = 0x0000ff; // blue
-const wallLineColor = 0x40e0d0; // turquoise
-
-// Line widths
-const wallLineWidth = 3;
-const pathLineWidth = 1;
-const highlightLineWidth = 3;
-const potentialTargetLineWidth = 3;
-
-const TEXT_MARGIN = 2;
-
-const BASE_GRID_SIZE = 70; // For scaling fonts
-
-// Fonts
-const movementCostStyle = {
-  fontFamily: "Arial",
-  fontSize: 30,
-  fill: 0x0000ff, // blue
-  stroke: 0xffffff, // white
-  strokeThickness: 1,
-};
-
-const turnOrderStyle = {
-  fontFamily: "Arial",
-  fontSize: 25,
-  fill: 0xffffff, // white
-  stroke: 0x000000, // black
-  strokeThickness: 5,
-};
-
-const weaponRangeStyle = {
-  fontFamily: "Arial",
-  fontSize: 20,
-  fill: 0xffffff, // white
-  stroke: 0x000000, // black
-  strokeThickness: 4,
-};
 
 /**
  * Determine how diagonal distances should be treated
