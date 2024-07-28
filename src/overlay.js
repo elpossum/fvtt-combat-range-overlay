@@ -1116,7 +1116,7 @@ export class Overlay {
 /**
  * Calculate how many targets can be reached from each tile in a map
  * @param {Map<string, Set<GridTile>>} targetMap - A map of tiles that can reach targets
- * @returns {Map<string, {count: number, color: number}>} - A map of tiles, their color, and how many targets can be reached from them
+ * @returns {Map<string, {count: number, color: string|number}>} - A map of tiles, their color, and how many targets can be reached from them
  */
 function buildRangeMap(targetMap) {
   const rangeMap = new Map();
@@ -1135,8 +1135,8 @@ function buildRangeMap(targetMap) {
  * Calculate all tiles within movement range and can reach all targets
  * @param {Map<string, GridTile>} movementTileMap - All tiles in movement range
  * @param {Map<string, Set<GridTile>>} targetMap - All tiles in range of a target
- * @param {Map<string, {count: number, color: number}>} rangeMap - How many targets a tile can reach and their color
- * @returns {Map<string, {tile: GridTile, color: number}>} - All tiles that are in range of all targets and within movement range and their colors
+ * @param {Map<string, {count: number, color: string|number}>} rangeMap - How many targets a tile can reach and their color
+ * @returns {Map<string, {tile: GridTile, color: string|number}>} - All tiles that are in range of all targets and within movement range and their colors
  */
 function calculateIdealTileMap(movementTileMap, targetMap, rangeMap) {
   const idealTileMap = new Map();
