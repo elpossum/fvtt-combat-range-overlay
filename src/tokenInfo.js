@@ -809,8 +809,8 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   if (
     !terrainChanged &&
     translation &&
-    !visionRefresh &&
-    (Settings.getVisionMaskType() === Settings.visionMaskingTypes.NONE ||
+    (!visionRefresh ||
+      Settings.getVisionMaskType() === Settings.visionMaskingTypes.NONE ||
       !realToken.vision?.los)
   )
     cro.fullRefresh();
