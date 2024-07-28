@@ -335,10 +335,7 @@ export class Overlay {
             Math.ceil(diagonalDistance(bestCost) / tilesMovedPerAction),
             colorByActions.length - 1,
           );
-          let color =
-            parseInt(game.version) > 11
-              ? colorByActions[colorIndex]
-              : parseInt(colorByActions[colorIndex].replace("#", "0x"), 16);
+          const color = colorByActions[colorIndex];
 
           const tokenOverlay = new PIXI.Graphics();
           tokenOverlay.lineStyle(potentialTargetLineWidth, color);
@@ -1074,16 +1071,11 @@ export class Overlay {
                 ),
                 colorByActions.length - 1,
               );
-        let color = colorByActions[colorIndex];
+        const color = colorByActions[colorIndex];
         if (idealTileMap.has(tile.key)) {
           this.overlays.distanceOverlay.lineStyle(
             highlightLineWidth,
-            parseInt(game.version) > 10
-              ? idealTileMap.get(tile.key).color
-              : parseInt(
-                  idealTileMap.get(tile.key).color.replace("#", "0x"),
-                  16,
-                ),
+            idealTileMap.get(tile.key).color,
           );
         } else {
           this.overlays.distanceOverlay.lineStyle(0, 0);
@@ -1096,8 +1088,6 @@ export class Overlay {
             Settings.visionMaskingTypes.INDIVIDUAL ||
           !los
         ) {
-          if (parseInt(game.version) < 11)
-            color = parseInt(color?.replace("#", "0x"), 16);
           this.overlays.distanceOverlay.beginFill(
             color,
             Settings.getMovementAlpha(),
