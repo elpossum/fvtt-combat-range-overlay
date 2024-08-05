@@ -44,7 +44,7 @@ export class SpreadingClockwiseSweepPolygon extends ClockwiseSweepPolygon {
     this.level = level ?? 0;
     this.color = color;
     this.corner = corner;
-    this.initialize(origin, { type: "movement", radius: distance });
+    this.initialize(origin, { type: "move", radius: distance });
     this.compute();
   }
   /**
