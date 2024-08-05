@@ -1089,17 +1089,18 @@ export class Overlay {
       if (los) {
         let aVis = false;
         let bVis = false;
+        const edge = parseInt(game.version > 11) ? wall.edge : wall.vertices;
         los?.points.forEach((point, index) => {
           if (
-            wall.edge.a.x === point &&
-            wall.edge.a.y === los.points[index + 1]
+            edge.a.x === point &&
+            edge.a.y === los.points[index + 1]
           )
             aVis = true;
         });
         los?.points.forEach((point, index) => {
           if (
-            wall.edge.b.x === point &&
-            wall.edge.b.y === los.points[index + 1]
+            edge.b.x === point &&
+            edge.b.y === los.points[index + 1]
           )
             bVis = true;
         });
