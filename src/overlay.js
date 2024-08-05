@@ -520,7 +520,7 @@ export class Overlay {
     TerrainHelper?.sceneUpdate();
     this.clearAll();
     TokenInfo.resetMap();
-    this.DISTANCE_PER_TILE = canvas.grid.distance;
+    this.DISTANCE_PER_TILE = game.scenes.viewed.grid.distance;
   }
 
   /**
