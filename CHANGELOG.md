@@ -1,5 +1,17 @@
 # Changelog
 
+## 4.7.0 - 2024/08/05
+
+### Added
+
+- Add functionality for hexagonal and gridless scenes
+- Draw walls only if visible
+
+### Fixed
+
+- Fix overlay not updating if token vision is enabled or disabled
+- Fix overlay not updating in certain circumstances
+
 ## 4.6.1 - 2024/07/18
 
 ### Fixed
