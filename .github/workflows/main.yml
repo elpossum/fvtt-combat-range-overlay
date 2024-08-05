@@ -22,10 +22,6 @@ jobs:
     - name: Install dependencies
       run: npm ci
 
-      # Build with Vite
-    - name: Build with Vite
-      run: npm run build
-
     # Substitute the Manifest and Download URLs in the module.json
     - name: Substitute Manifest and Download Links For Versioned Ones
       id: sub_manifest_link_version
@@ -37,6 +33,10 @@ jobs:
         url: https://github.com/${{github.repository}}
         manifest: https://github.com/${{github.repository}}/releases/latest/download/module.json
         download: https://github.com/${{github.repository}}/releases/download/${{github.event.release.tag_name}}/module.zip
+
+    # Build with Vite
+    - name: Build with Vite
+      run: npm run build
 
     # Create a zip file with all files required by the module to add to the release
     - name: Create module.zip
