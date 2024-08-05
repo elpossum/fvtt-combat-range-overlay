@@ -14,7 +14,7 @@ Click <img alt="Button showing two figures with a horizontal double-headed arrow
 
 ## Compatibility
 
-**Maps**: This module relies on square tiles; I have no idea what would happen if you tried to use it on a map with hex tiles, but I don't think it would go well.
+**Maps**: This module now works with square, hex or gridless grids.
 
 **Systems**: My table plays Pathfinder 2E, but it has been tested to some degree on PF1e, DnD3.5e, SWADE, WFRP4e and DnD5e.
 It turns out that every system stores its token/actor move speeds in a different spot,
