@@ -59,7 +59,7 @@ jobs:
     # Minify manifest and write to output
     - name: Get manifest
       id: get_manifest
-      run: echo "manifest=$(cat module.json | jq -c .)" >> $GITHUB_OUTPUT
+      run: echo "manifest=$(cat static/module.json | jq -c .)" >> $GITHUB_OUTPUT
 
     # Substitute values in apiRequest.json
     - name: Substitute values in API request
