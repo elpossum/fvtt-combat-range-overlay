@@ -4,6 +4,12 @@ Hooks,
 PIXI
 */
 
+/**
+ * @typedef {object} Point - A point-like object
+ * @property {number} x - The x coord
+ * @property {number} y - The y coord
+ */
+
 /* Add GeometryLib functions if not present */
 if (!CONFIG.GeometryLib) {
   Hooks.on("init", () => {
@@ -24,8 +30,8 @@ const polyShim = {
   iteratePoints: {
     /**
      * Iterate over the polygon's {x, y} points in order.
-     * @param {object} [options]
-     * @param {boolean} [options.close]   If close, include the first point again.
+     * @param {object} [options] - Options
+     * @param {boolean} [options.close] - If close, include the first point again.
      * @yields {PIXI.Point} PIXI.Point
      */
     value: function* ({ close = true } = {}) {
@@ -39,14 +45,14 @@ const polyShim = {
 
       if (close) yield new PIXI.Point(this.points[0], this.points[1]);
     },
-    writable: true,
+    configurable: true,
   },
 
   centroid: {
     /**
      * Calculate the centroid of the polygon
      * https://en.wikipedia.org/wiki/Centroid#Of_a_polygon
-     * @returns {Point}
+     * @returns {Point} - The centroid
      */
     get: function () {
       const pts = [...this.iteratePoints({ close: true })];
@@ -79,11 +85,14 @@ const polyShim = {
       outPoint.y *= areaMult;
       return outPoint;
     },
+    configurable: true,
   },
+
   area: {
     get: function () {
       return Math.abs(this.signedArea());
     },
+    configurable: true,
   },
 };
 
@@ -91,9 +100,9 @@ const staticPointShim = {
   midPoint: {
     /**
      * Point between two points on a line
-     * @param {PIXI.Point} a
-     * @param {PIXI.Point} b
-     * @returns {PIXI.Point}
+     * @param {PIXI.Point} a - One endpoint
+     * @param {PIXI.Point} b - The other endpoint
+     * @returns {PIXI.Point} - The midpoint
      */
     value: function (a, b) {
       a.x ||= 0;
@@ -102,7 +111,7 @@ const staticPointShim = {
       b.y ||= 0;
       return new this(a.x + (b.x - a.x) / 2, a.y + (b.y - a.y) / 2);
     },
-    writable: true,
+    configurable: true,
   },
 
   distanceBetween: {
@@ -110,28 +119,28 @@ const staticPointShim = {
      * Distance between two 2d points
      * @param {object} a - Any object with x,y properties
      * @param {object} b - Any object with x,y properties
-     * @returns {number}
+     * @returns {number} - The linear distance
      */
     value: function (a, b) {
       const dx = b.x - a.x || 0; // In case x is undefined.
       const dy = b.y - a.y || 0;
       return Math.hypot(dx, dy);
     },
-    writable: true,
+    configurable: true,
   },
 
   fromObject: {
     /**
      * Construct a PIXI point from any object that has x and y properties.
-     * @param {object} obj
-     * @returns {PIXI.Point}
+     * @param {object} obj - The source object
+     * @returns {PIXI.Point} - A point with the corresponding x and y coords
      */
     value: function (obj) {
       const x = obj.x ?? 0;
       const y = obj.y ?? 0;
       return new this(x, y);
     },
-    writable: true,
+    configurable: true,
   },
 };
 
@@ -140,13 +149,14 @@ const pointShim = {
     /**
      * Hashing key for a 2d point, rounded to nearest integer.
      * Ordered, so sortable.
-     * @returns {number}
+     * @returns {number} - The key for a point
      */
     get: function () {
       const x = Math.round(this.x);
       const y = Math.round(this.y);
       return (x << 16) ^ y;
     },
+    configurable: true,
   },
 
   add: {
@@ -156,7 +166,7 @@ const pointShim = {
      * @param {PIXI.Point} other - The point to add to `this`.
      * @param {PIXI.Point} [outPoint] - A point-like object in which to store the value.
      *   (Will create new point if none provided.)
-     * @returns {PIXI.Point}
+     * @returns {PIXI.Point} - The resulting point
      */
     value: function (other, outPoint) {
       outPoint ??= new this.constructor();
@@ -164,7 +174,7 @@ const pointShim = {
       outPoint.y = this.y + other.y;
       return outPoint;
     },
-    writable: true,
+    configurable: true,
   },
 
   subtract: {
@@ -174,7 +184,7 @@ const pointShim = {
      * @param {PIXI.Point} other - The point to subtract from `this`.
      * @param {PIXI.Point} [outPoint] - A point-like object in which to store the value.
      *   (Will create new point if none provided.)
-     * @returns {PIXI.Point}
+     * @returns {PIXI.Point} - The resulting point
      */
     value: function (other, outPoint) {
       outPoint ??= new this.constructor();
@@ -183,7 +193,7 @@ const pointShim = {
 
       return outPoint;
     },
-    writable: true,
+    configurable: true,
   },
 
   multiplyScalar: {
@@ -193,7 +203,7 @@ const pointShim = {
      * @param {PIXI.Point} scalar - The point to multiply `this` by.
      * @param {PIXI.Point} [outPoint] - A point-like object in which to store the value.
      *   (Will create new point if none provided.)
-     * @returns {PIXI.Point}
+     * @returns {PIXI.Point} - The resulting point
      */
     value: function (scalar, outPoint) {
       outPoint ??= new this.constructor();
@@ -201,20 +211,20 @@ const pointShim = {
       outPoint.y = this.y * scalar;
       return outPoint;
     },
-    writable: true,
+    configurable: true,
   },
 
   magnitude: {
     /**
      * Magnitude (length, or sometimes distance) of this point.
      * Square root of the sum of squares of each component.
-     * @returns {number}
+     * @returns {number} - The magnitude
      */
     value: function () {
       // Same as Math.sqrt(this.x * this.x + this.y * this.y)
       return Math.hypot(this.x, this.y);
     },
-    writable: true,
+    configurable: true,
   },
 
   normalize: {
@@ -222,12 +232,12 @@ const pointShim = {
      * Normalize the point.
      * @param {PIXI.Point} [outPoint] - A point-like object in which to store the value.
      *   (Will create new point if none provided.)
-     * @returns {PIXI.Point}
+     * @returns {PIXI.Point} - The normalized vector
      */
     value: function (outPoint) {
       return this.multiplyScalar(1 / this.magnitude(), outPoint);
     },
-    writable: true,
+    configurable: true,
   },
 
   towardsPoint: {
@@ -237,7 +247,7 @@ const pointShim = {
      * @param {number} distance - The distance to move from this toward other.
      * @param {PIXI.Point} outPoint - A point-like object to store the result
      *   (Will create new point if none provided.)
-     * @returns {Point3d|PIXI.Point}
+     * @returns {PIXI.Point} - The resulting point
      */
     value: function (other, distance, outPoint) {
       outPoint ??= new this.constructor();
@@ -246,15 +256,15 @@ const pointShim = {
       this.add(delta.multiplyScalar(t, outPoint), outPoint);
       return outPoint;
     },
-    writable: true,
+    configurable: true,
   },
 
   rotate: {
     /**
      * Rotate a point around a given angle
-     * @param {number} angle  In radians
-     * @param {Point3d|PIXI.Point} [outPoint] A point-like object to store the result.
-     * @returns {Point} A new point
+     * @param {number} angle - In radians
+     * @param {PIXI.Point} [outPoint] - A point-like object to store the result.
+     * @returns {Point} - A new point
      */
     value: function (angle, outPoint) {
       outPoint ??= new this.constructor();
@@ -265,16 +275,16 @@ const pointShim = {
       outPoint.y = y * cAngle + x * sAngle;
       return outPoint;
     },
-    writable: true,
+    configurable: true,
   },
 
   translate: {
     /**
      * Translate a point by a given dx, dy
-     * @param {number} dx
-     * @param {number} dy
-     * @param {Point3d|PIXI.Point} [outPoint] A point-like object to store the result.
-     * @returns {Point} A new point
+     * @param {number} dx - The x delta
+     * @param {number} dy - The y delta
+     * @param {PIXI.Point} [outPoint] - A point-like object to store the result.
+     * @returns {Point} - A new point
      */
     value: function (dx, dy, outPoint) {
       outPoint ??= new this.constructor();
@@ -282,7 +292,7 @@ const pointShim = {
       outPoint.y = this.y + dy;
       return outPoint;
     },
-    writable: true,
+    configurable: true,
   },
 };
 
@@ -290,7 +300,9 @@ const ellipseShim = {
   toPolygon: {
     /**
      * Convert to a polygon
-     * @return {PIXI.Polygon}
+     * @param {object} [options] - Options to pass to Foundry functions
+     * @param {number} [options.density] - The point density to use to convert to poly
+     * @returns {PIXI.Polygon} - The equivalent polygon
      */
     value: function ({ density } = {}) {
       // Default to the larger radius for density
@@ -319,7 +331,7 @@ const ellipseShim = {
       cirPoly.points = pts;
       return cirPoly;
     },
-    writable: true,
+    configurable: true,
   },
 
   fromCircleCoords: {
@@ -331,15 +343,15 @@ const ellipseShim = {
 
       return outPoint;
     },
-    writable: true,
+    configurable: true,
   },
 
   toCartesianCoords: {
     /**
      * Shift to cartesian coordinates from the shape space.
-     * @param {Point} a
-     * @param {PIXI.Point} [outPoint] A point-like object to store the result.
-     * @returns {Point}
+     * @param {Point} a - The shape coord
+     * @param {PIXI.Point} [outPoint] - A point-like object to store the result.
+     * @returns {Point} - The cartesian equivalent
      */
     value: function (a, outPoint) {
       outPoint ??= new PIXI.Point();
@@ -354,12 +366,14 @@ const ellipseShim = {
     get: function () {
       return Math.max(this.width, this.height);
     },
+    configurable: true,
   },
 
   ratio: {
     get: function () {
       return this.width / this.height;
     },
+    configurable: true,
   },
 };
 
