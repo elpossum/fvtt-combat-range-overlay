@@ -3,7 +3,8 @@ ClockwiseSweepPolygon,
 ClipperLib,
 PIXI,
 foundry,
-Edge
+Edge,
+game
 */
 
 /**
@@ -220,16 +221,28 @@ function extendCornerFromWalls(cornerKey, edgeSet, origin) {
   const CORNER_SPACER = 2;
   if (!edgeSet.size) return pointFromKey(cornerKey);
 
-  const edges = [...edgeSet].filter(
-    (edge) => edge.a.key === cornerKey || edge.b.key === cornerKey,
+  const edges = [...edgeSet].filter((edge) =>
+    parseInt(game.version) > 11
+      ? edge.a.key === cornerKey || edge.b.key === cornerKey
+      : edge.A.key === cornerKey || edge.B.key === cornerKey,
   );
   if (!edges.length) return pointFromKey(cornerKey); // Should not occur.
 
-  // If only a single edge, no need to move away from it as no "inside".
+  // If only a single edge, no need to move away from it as no "inside". Except in v10
   if (edges.length === 1) {
     const edge = edges[0];
-    const cornerPt = edge.a.key === cornerKey ? edge.a : edge.b;
-    return cornerPt;
+    let [cornerPt, otherPt] =
+      parseInt(game.version) > 11
+        ? edge.a.key === cornerKey
+          ? [edge.a, edge.b]
+          : [edge.b, edge.a]
+        : edge.A.key === cornerKey
+          ? [edge.A, edge.B]
+          : [edge.B, edge.A];
+    cornerPt = new PIXI.Point(cornerPt.x, cornerPt.y);
+    otherPt = new PIXI.Point(otherPt.x, otherPt.y);
+    const dist = PIXI.Point.distanceBetween(cornerPt, otherPt);
+    return parseInt(game.version) > 10 ? cornerPt : otherPt.towardsPoint(cornerPt, dist + CORNER_SPACER);
   }
 
   // Segment with the smallest (incl. negative) orientation is ccw to the point
@@ -238,7 +251,13 @@ function extendCornerFromWalls(cornerKey, edgeSet, origin) {
   const segments = [...edges].map((edge) => {
     // Construct new segment objects so walls are not modified.
     const [cornerPt, otherPt] =
-      edge.a.key === cornerKey ? [edge.a, edge.b] : [edge.b, edge.a];
+      parseInt(game.version) > 11
+        ? edge.a.key === cornerKey
+          ? [edge.a, edge.b]
+          : [edge.b, edge.a]
+        : edge.A.key === cornerKey
+          ? [edge.A, edge.B]
+          : [edge.B, edge.A];
     const segment = {
       A: cornerPt,
       B: otherPt,
