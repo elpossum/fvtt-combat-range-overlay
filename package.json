@@ -1,6 +1,6 @@
 {
   "name": "fvtt-combat-range-overlay",
-  "version": "4.6.0",
+  "version": "4.7.0",
   "description": "Combat Overlay Module for FoundryVTT",
   "private": true,
   "type": "module",
