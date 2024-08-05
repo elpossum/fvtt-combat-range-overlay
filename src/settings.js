@@ -1,6 +1,7 @@
 /* globals
 Hooks,
-game
+game,
+canvas
 */
 
 import {
@@ -82,6 +83,8 @@ const settingNames = {
   VISION_MASKING_TYPE: "vision-masking-type",
   VISION_MASKING_PERCENTAGE: "vision-masking-percentage",
   SUPPORTED_ACTORS: "supported-actors",
+  RECURSIONS: "recursions",
+  RECURSION_LIMITED: "recursion-limited",
 };
 
 /* Set which settings should be not configurable, default to false, and are non-boolean */
@@ -94,6 +97,7 @@ const defaultFalse = [
   settingNames.SHOW_DIFFICULT_TERRAIN,
   settingNames.SHOW_WALLS,
   settingNames.SHOWN_NOTIFICATION,
+  settingNames.RECURSION_LIMITED,
 ];
 const ignore = [
   settingNames.MOVEMENT_ALPHA,
@@ -109,6 +113,7 @@ const ignore = [
   settingNames.ACTIONS_SHOWN,
   settingNames.TERRAIN_MEASURE,
   settingNames.SUPPORTED_ACTORS,
+  settingNames.RECURSIONS,
 ];
 
 /* Register settings and keybindings */
@@ -136,6 +141,23 @@ Hooks.once("init", () => {
       });
     }
   }
+
+  game.settings.register(MODULE_ID, settingNames.RECURSIONS, {
+    name: game.i18n.localize(`${MODULE_ID}.${settingNames.RECURSIONS}`),
+    hint: game.i18n.localize(`${MODULE_ID}.${settingNames.RECURSIONS}-hint`),
+    scope: "world",
+    config: true,
+    type: Number,
+    default: 4,
+    range: {
+      min: 0,
+      max: 8,
+      step: 1,
+    },
+    onChange: async () => {
+      cro.fullRefresh();
+    },
+  });
 
   game.settings.register(MODULE_ID, settingNames.ACTIONS_SHOWN, {
     name: game.i18n.localize(`${MODULE_ID}.${settingNames.ACTIONS_SHOWN}`),
@@ -171,55 +193,6 @@ Hooks.once("init", () => {
     },
     onChange: async () => {
       cro.fullRefresh();
-    },
-  });
-
-  game.settings.register(MODULE_ID, settingNames.VISION_MASKING_TYPE, {
-    name: game.i18n.localize(
-      `${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}`,
-    ),
-    hint: game.i18n.localize(
-      `${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}-hint`,
-    ),
-    scope: "client",
-    config: true,
-    type: String,
-    default: visionMaskingTypes.NONE,
-    choices: {
-      none: game.i18n.localize(
-        `${MODULE_ID}.vision-mask-types.${visionMaskingTypes.NONE}`,
-      ),
-      mask: game.i18n.localize(
-        `${MODULE_ID}.vision-mask-types.${visionMaskingTypes.MASK}`,
-      ),
-      individual: game.i18n.localize(
-        `${MODULE_ID}.vision-mask-types.${visionMaskingTypes.INDIVIDUAL}`,
-      ),
-    },
-    onChange: async () => {
-      cro.fullRefresh();
-    },
-  });
-
-  game.settings.register(MODULE_ID, settingNames.VISION_MASKING_PERCENTAGE, {
-    name: game.i18n.localize(
-      `${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}`,
-    ),
-    hint: game.i18n.localize(
-      `${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}-hint`,
-    ),
-    scope: "client",
-    config: true,
-    type: Number,
-    default: 50,
-    range: {
-      min: 0,
-      max: 100,
-      step: 5,
-    },
-    onChange: async () => {
-      if (getVisionMaskType() === visionMaskingTypes.INDIVIDUAL)
-        cro.fullRefresh();
     },
   });
 
@@ -283,6 +256,55 @@ Hooks.once("init", () => {
     },
     onChange: async () => {
       cro.fullRefresh();
+    },
+  });
+
+  game.settings.register(MODULE_ID, settingNames.VISION_MASKING_TYPE, {
+    name: game.i18n.localize(
+      `${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}`,
+    ),
+    hint: game.i18n.localize(
+      `${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}-hint`,
+    ),
+    scope: "client",
+    config: true,
+    type: String,
+    default: visionMaskingTypes.NONE,
+    choices: {
+      none: game.i18n.localize(
+        `${MODULE_ID}.vision-mask-types.${visionMaskingTypes.NONE}`,
+      ),
+      mask: game.i18n.localize(
+        `${MODULE_ID}.vision-mask-types.${visionMaskingTypes.MASK}`,
+      ),
+      individual: game.i18n.localize(
+        `${MODULE_ID}.vision-mask-types.${visionMaskingTypes.INDIVIDUAL}`,
+      ),
+    },
+    onChange: async () => {
+      cro.fullRefresh();
+    },
+  });
+
+  game.settings.register(MODULE_ID, settingNames.VISION_MASKING_PERCENTAGE, {
+    name: game.i18n.localize(
+      `${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}`,
+    ),
+    hint: game.i18n.localize(
+      `${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}-hint`,
+    ),
+    scope: "client",
+    config: true,
+    type: Number,
+    default: 50,
+    range: {
+      min: 0,
+      max: 100,
+      step: 5,
+    },
+    onChange: async () => {
+      if (getVisionMaskType() === visionMaskingTypes.INDIVIDUAL)
+        cro.fullRefresh();
     },
   });
 
@@ -440,6 +462,55 @@ Hooks.once("init", () => {
   });
 });
 
+// Only add recursions and vision mask percent if they would have an effect
+Hooks.on("renderSettingsConfig", (_app, html) => {
+  const tab = html[0].querySelector(`.tab[data-tab="${MODULE_ID}"]`);
+  const recursionCheck =
+    parseInt(game.version) > 10
+      ? tab.querySelector(
+          `.form-group[data-setting-id="${MODULE_ID}.${settingNames.RECURSION_LIMITED}"]`,
+        )
+      : tab.querySelector(
+          `.form-group:has( input[name="${MODULE_ID}.${settingNames.RECURSION_LIMITED}"] )`,
+        );
+  const visionMaskInput =
+    parseInt(game.version) > 10
+      ? tab.querySelector(
+          `.form-group[data-setting-id="${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}"]`,
+        )
+      : tab.querySelector(
+          `.form-group:has( select[name="${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}"] )`,
+        );
+  const recursionSlider =
+    parseInt(game.version) > 10
+      ? tab.querySelector(
+          `.form-group[data-setting-id="${MODULE_ID}.${settingNames.RECURSIONS}"]`,
+        )
+      : tab.querySelector(
+          `.form-group:has( input[name="${MODULE_ID}.${settingNames.RECURSIONS}"] )`,
+        );
+  const visionMaskSlider =
+    parseInt(game.version) > 10
+      ? tab.querySelector(
+          `.form-group[data-setting-id="${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}"]`,
+        )
+      : tab.querySelector(
+          `.form-group:has( input[name="${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}"] )`,
+        );
+  recursionCheck.addEventListener("input", (e) => {
+    if (e.target.checked) recursionCheck.after(recursionSlider);
+    else recursionSlider.remove();
+  });
+  visionMaskInput.addEventListener("input", (e) => {
+    if (e.target.value === visionMaskingTypes.MASK)
+      visionMaskInput.after(visionMaskSlider);
+    else visionMaskSlider.remove();
+  });
+  if (!getRecursionLimited()) recursionSlider.remove();
+  if (getVisionMaskType() !== visionMaskingTypes.MASK)
+    visionMaskSlider.remove();
+});
+
 /**
  * Set the overlay's activation status
  * @param {boolean} isActive - Whether the overlay has been activated
@@ -517,7 +588,10 @@ export function getMovementAlpha() {
  * @returns {diagonals} - @see {diagonals}
  */
 export function getDiagonals() {
-  return game.settings.get(MODULE_ID, settingNames.DIAGONALS);
+  const square =
+    parseInt(game.version) > 11 ? !canvas.grid.isHexagonal : !canvas.grid.isHex;
+  if (square) return game.settings.get(MODULE_ID, settingNames.DIAGONALS);
+  else return diagonals.FIVE;
 }
 
 /**
@@ -592,4 +666,20 @@ export function getVisionMaskPercent() {
  */
 export function getSupportedActors() {
   return game.settings.get(MODULE_ID, settingNames.SUPPORTED_ACTORS).split(",");
+}
+
+/**
+ * Get the max number of recursions for gridless spreading
+ * @returns {number} - The number of recursions
+ */
+export function getNumberOfRecursions() {
+  return game.settings.get(MODULE_ID, settingNames.RECURSIONS);
+}
+
+/**
+ * Is the max number of recursions for gridless spreading limited?
+ * @returns {boolean} - False if unlimited recursion
+ */
+export function getRecursionLimited() {
+  return game.settings.get(MODULE_ID, settingNames.RECURSION_LIMITED);
 }

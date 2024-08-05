@@ -2,13 +2,16 @@
 game,
 Hooks,
 foundry,
-ui
+ui,
+canvas,
+CONST
 */
 
-import {colorSettingNames} from "./colorPicker.js";
-import {MODULE_ID, SOCKET_TYPES} from "./constants.js";
-import {Overlay} from "./overlay.js";
-import {getCurrentToken} from "./utility.js";
+import { colorSettingNames } from "./colorPicker.js";
+import { MODULE_ID, SOCKET_TYPES } from "./constants.js";
+import { GridlessOverlay } from "./gridlessOverlay.js";
+import { Overlay } from "./overlay.js";
+import { getCurrentToken } from "./utility.js";
 
 /**
  * The class that handles the module
@@ -39,6 +42,21 @@ export class CombatRangeOverlay {
     this.setColors();
     this.setTerrainProvider();
     this.registerSocketListeners();
+    Hooks.on("canvasInit", () => {
+      this.unregisterHooks();
+      if (
+        canvas.grid.type === CONST.GRID_TYPES.GRIDLESS &&
+        !(this.instance instanceof GridlessOverlay)
+      )
+        this.instance = new GridlessOverlay();
+      if (
+        canvas.grid.type !== CONST.GRID_TYPES.GRIDLESS &&
+        this.instance instanceof GridlessOverlay
+      )
+        this.instance = new Overlay();
+      this.registerHooks();
+      this.canvasReadyHook();
+    });
   }
 
   /**
@@ -64,6 +82,13 @@ export class CombatRangeOverlay {
   }
 
   /**
+   * Deregister all hooks
+   */
+  unregisterHooks() {
+    this.instance.unregisterAllHooks();
+  }
+
+  /**
    * The hook to fire on canvas ready
    */
   canvasReadyHook() {
@@ -82,8 +107,9 @@ export class CombatRangeOverlay {
    */
   setColorByActions() {
     for (let i = 0; i < 5; i++) {
+      const color = game.settings.get(MODULE_ID, colorSettingNames[i])
       this.colorByActions.push(
-        game.settings.get(MODULE_ID, colorSettingNames[i]),
+        parseInt(game.version) > 10 ? color : parseInt(color.replace("#", "0x"), 16),
       );
     }
   }
@@ -93,7 +119,10 @@ export class CombatRangeOverlay {
    */
   setColors() {
     for (let i = 5; i < 8; i++) {
-      this.colors.push(game.settings.get(MODULE_ID, colorSettingNames[i]));
+      const color = game.settings.get(MODULE_ID, colorSettingNames[i])
+      this.colors.push(
+        parseInt(game.version) > 10 ? color : parseInt(color.replace("#", "0x"), 16),
+      );
     }
   }
 
@@ -109,8 +138,8 @@ export class CombatRangeOverlay {
    */
   setTerrainProvider() {
     const terrainModules = [
-      {id: "enhanced-terrain-layer"},
-      {id: "terrainmapper", latestNonRegionVersion: "0.2.0"},
+      { id: "enhanced-terrain-layer" },
+      { id: "terrainmapper", latestNonRegionVersion: "0.2.0" },
     ];
     const activeModules = [];
     terrainModules.forEach((module) => {
@@ -196,7 +225,7 @@ export class CombatRangeOverlay {
    * Currently only used for updating visiibility for user who aren't the one moving the token
    */
   registerSocketListeners() {
-    game.socket.on(`module.${MODULE_ID}`, ({type, payload}) => {
+    game.socket.on(`module.${MODULE_ID}`, ({ type, payload }) => {
       switch (type) {
         case SOCKET_TYPES.REFRESH_VISIBILITY:
           this.handleVisionRefresh(payload);
@@ -214,7 +243,7 @@ export class CombatRangeOverlay {
    * @returns {*} - The response
    */
   emit(type, payload) {
-    return game.socket.emit(`module.${MODULE_ID}`, {type, payload});
+    return game.socket.emit(`module.${MODULE_ID}`, { type, payload });
   }
 
   /**

@@ -84,3 +84,41 @@ export const ENTRY_EVENTS_COMBAT = new Set([
 export const SOCKET_TYPES = {
   REFRESH_VISIBILITY: "refreshVisibility",
 };
+
+// Colors
+
+export const pathLineColor = 0x0000ff; // blue
+export const wallLineColor = 0x40e0d0; // turquoise
+// Line widths
+export const wallLineWidth = 3;
+export const pathLineWidth = 1;
+export const highlightLineWidth = 3;
+export const potentialTargetLineWidth = 3;
+
+export const TEXT_MARGIN = 2;
+
+export const BASE_GRID_SIZE = 70; // For scaling fonts
+// Fonts
+export const movementCostStyle = {
+  fontFamily: "Arial",
+  fontSize: 30,
+  fill: 0x0000ff, // blue
+  stroke: 0xffffff, // white
+  strokeThickness: 1,
+};
+
+export const turnOrderStyle = {
+  fontFamily: "Arial",
+  fontSize: 25,
+  fill: 0xffffff, // white
+  stroke: 0x000000, // black
+  strokeThickness: 5,
+};
+
+export const weaponRangeStyle = {
+  fontFamily: "Arial",
+  fontSize: 20,
+  fill: 0xffffff, // white
+  stroke: 0x000000, // black
+  strokeThickness: 4,
+};

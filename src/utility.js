@@ -2,7 +2,8 @@
 canvas,
 ui,
 game,
-Token
+Token,
+PIXI
 */
 
 import * as Settings from "./settings.js";
@@ -133,30 +134,45 @@ export function uiNotificationsInfo(msg) {
 
 /**
  * From Foundry v12
- * Compute the signed area of polygon using an approach similar to ClipperLib.Clipper.Area.
- * The math behind this is based on the Shoelace formula. https://en.wikipedia.org/wiki/Shoelace_formula.
- * The area is positive if the orientation of the polygon is positive.
- * @returns {number} - The signed area of the polygon
+ * Convert cube coordinates (q, r, s) into point coordinates (x, y).
+ * @param {{q: number, r: number}} cube - The cube coordinates
+ * @returns {{x: number, y: number}} - The point coordinates
  */
-export function signedArea() {
-  const points = this.points;
-  const ln = points.length;
-  if (ln < 6) return 0;
+export function cubeToPoint({ q, r }) {
+  const grid = canvas.grid.grid
+  let x;
+  let y;
 
-  // Compute area
-  let area = 0;
-  let x1 = points[ln - 2];
-  let y1 = points[ln - 1];
-  for (let i = 0; i < ln; i += 2) {
-    const x2 = points[i];
-    const y2 = points[i + 1];
-    area += (x2 - x1) * (y2 + y1);
-    x1 = x2;
-    y1 = y2;
+  if (grid.columnar) {
+    x = (Math.sqrt(3) / 2) * (q + 2 / 3);
+    y = 0.5 * (q + (grid.even ? 1 : 0)) + r;
+  } else {
+    y = (Math.sqrt(3) / 2) * (r + 2 / 3);
+    x = 0.5 * (r + (grid.even ? 1 : 0)) + q;
   }
 
-  // Negate the area because in Foundry canvas, y-axis is reversed
-  // See https://sourceforge.net/p/jsclipper/wiki/documentation/#clipperlibclipperorientation
-  // The 1/2 comes from the Shoelace formula
-  return area * -0.5;
+  const size = canvasGridSize();
+  x *= size;
+  y *= size;
+
+  return { x, y };
+}
+
+/**
+ * From Foundry
+ * Theoretical token shape at 0,0 origin.
+ * @param {Token} token - The token to calculate
+ * @returns {PIXI.Polygon|PIXI.Rectangle} - The token shape
+ */
+export function calculateTokenShape(token) {
+  // TODO: Use RegularPolygon shapes for use with WeilerAtherton
+  // Hexagon (for width .5 or 1)
+  // Square (for width === height)
+  let shape;
+  if ( canvas.grid.isHex ) {
+    const pts = canvas.grid.grid.getBorderPolygon(token.document.width, token.document.height, 0);
+    if ( pts ) shape = new PIXI.Polygon(pts);
+  }
+
+  return shape || new PIXI.Rectangle(0, 0, token.w, token.h);
 }

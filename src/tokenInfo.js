@@ -6,7 +6,8 @@ Hooks,
 Dialog,
 Token,
 Item,
-ActiveEffect
+ActiveEffect,
+CONST
 */
 
 import { FLAG_NAMES, MODULE_ID } from "./constants.js";
@@ -66,10 +67,26 @@ export class TokenInfo {
    * @param {LocationUpdate} [updateData] - The updated coords
    */
   updateLocation(updateData) {
-    this.location = {
-      x: updateData?.x ?? this.token.x,
-      y: updateData?.y ?? this.token.y,
-    };
+    if (parseInt(game.version) > 11) {
+      this.location = {
+        x: updateData?.x
+          ? this.token.center.x + updateData.x - this.token.x
+          : this.token.center.x,
+        y: updateData?.y
+          ? this.token.center.y + updateData.y - this.token.y
+          : this.token.center.y,
+      };
+    } else if (canvas.grid.type === CONST.GRID_TYPES.GRIDLESS) {
+      this.location = {
+        x: this.token.center.x,
+        y: this.token.center.y,
+      };
+    } else {
+      this.location = {
+        x: updateData?.x ? updateData.x : this.token.x,
+        y: updateData?.y ? updateData.y : this.token.y,
+      };
+    }
   }
 
   /**
@@ -77,10 +94,26 @@ export class TokenInfo {
    * @param {LocationUpdate} [updateData] - The updated coords
    */
   updateMeasureFrom(updateData) {
-    this.measureFrom = {
-      x: updateData?.x ?? this.token.x,
-      y: updateData?.y ?? this.token.y,
-    };
+    if (parseInt(game.version) > 11) {
+      this.measureFrom = {
+        x: updateData?.x
+          ? this.token.center.x + updateData.x - this.token.x
+          : this.token.center.x,
+        y: updateData?.y
+          ? this.token.center.y + updateData.y - this.token.y
+          : this.token.center.y,
+      };
+    } else if (canvas.grid.type === CONST.GRID_TYPES.GRIDLESS) {
+      this.measureFrom = {
+        x: this.token.center.x,
+        y: this.token.center.y,
+      };
+    } else {
+      this.measureFrom = {
+        x: updateData?.x ? updateData.x : this.token.x,
+        y: updateData?.y ? updateData.y : this.token.y,
+      };
+    }
   }
 
   /**
@@ -779,8 +812,8 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   if (
     !terrainChanged &&
     translation &&
-    !visionRefresh &&
-    (Settings.getVisionMaskType() === Settings.visionMaskingTypes.NONE ||
+    (!visionRefresh ||
+      Settings.getVisionMaskType() === Settings.visionMaskingTypes.NONE ||
       !realToken.vision?.los)
   )
     cro.fullRefresh();
@@ -878,7 +911,7 @@ Hooks.on("controlToken", async (token, boolFlag) => {
     }
   }
   await updateUnmodifiedSpeed(token);
-  if (!token.vision.los || cro.instance.tokenLayerJustActivated) {
+  if (!token.vision?.los || cro.instance.tokenLayerJustActivated) {
     Hooks.once("sightRefresh", () => {
       Hooks.once("refreshToken", async () => cro.fullRefresh());
       token.refresh();

@@ -15,6 +15,83 @@ import { calculateCostAtPoint } from "./terrainHelperV2.js";
 import { cro } from "./main.js";
 
 /**
+ * Calculate the vertices of a square tile
+ * @param {GridTile} tile - The tile to get the vertices of
+ * @returns {Array<{x: number, y: number}>} - The four vertices
+ */
+function squareVertices(tile) {
+  const grid = canvas.grid.grid;
+  const [i, j] = grid.getGridPositionFromPixels(
+    tile.centerPt.x,
+    tile.centerPt.y,
+  );
+  const x0 = j * canvasGridSize();
+  const x1 = (j + 1) * canvasGridSize();
+  const y0 = i * canvasGridSize();
+  const y1 = (i + 1) * canvasGridSize();
+  return [
+    { x: x0, y: y0 },
+    { x: x1, y: y0 },
+    { x: x1, y: y1 },
+    { x: x0, y: y1 },
+  ];
+}
+
+/**
+ * Calculate the vertices of a hex tile
+ * @param {GridTile} tile - The tile to get the vertices of
+ * @returns {Array<{x: number, y: number}>} - The six vertices
+ */
+function hexVertices(tile) {
+  const grid = canvas.grid.grid;
+  const [i, j] = grid.getGridPositionFromPixels(
+    tile.centerPt.x,
+    tile.centerPt.y,
+  );
+  const scaleX = grid.w / 4;
+  const scaleY = grid.h / 4;
+  if (grid.columnar) {
+    const x = 3 * j;
+    const x0 = x * scaleX;
+    const x1 = (x + 1) * scaleX;
+    const x2 = (x + 3) * scaleX;
+    const x3 = (x + 4) * scaleX;
+    const even = (j + 1) % 2 === 0;
+    const y = 4 * i - (grid.even === even ? 2 : 0);
+    const y0 = y * scaleY;
+    const y1 = (y + 2) * scaleY;
+    const y2 = (y + 4) * scaleY;
+    return [
+      { x: x0, y: y1 },
+      { x: x1, y: y0 },
+      { x: x2, y: y0 },
+      { x: x3, y: y1 },
+      { x: x2, y: y2 },
+      { x: x1, y: y2 },
+    ];
+  } else {
+    const y = 3 * i;
+    const y0 = y * scaleY;
+    const y1 = (y + 1) * scaleY;
+    const y2 = (y + 3) * scaleY;
+    const y3 = (y + 4) * scaleY;
+    const even = (i + 1) % 2 === 0;
+    const x = 4 * j - (grid.even === even ? 2 : 0);
+    const x0 = x * scaleX;
+    const x1 = (x + 2) * scaleX;
+    const x2 = (x + 4) * scaleX;
+    return [
+      { x: x1, y: y0 },
+      { x: x2, y: y1 },
+      { x: x2, y: y2 },
+      { x: x1, y: y3 },
+      { x: x0, y: y2 },
+      { x: x0, y: y1 },
+    ];
+  }
+}
+
+/**
  * GridTile class
  */
 export class GridTile {
@@ -84,10 +161,7 @@ export class GridTile {
    * @type {number}
    */
   get cost() {
-    if (
-      TokenInfo.current.isIgnoreDifficultTerrain ||
-      !cro.terrainProvider
-    ) {
+    if (TokenInfo.current.isIgnoreDifficultTerrain || !cro.terrainProvider) {
       return 1;
     } else {
       // noinspection JSUnresolvedVariable
@@ -180,12 +254,7 @@ export class GridTile {
           { x: 0, y: 0 },
           { x: 50, y: 50 },
         );
-        if (
-          foundry.utils.isNewerVersion(
-            cro.terrainProvider?.version,
-            "0.1.1",
-          )
-        )
+        if (foundry.utils.isNewerVersion(cro.terrainProvider?.version, "0.1.1"))
           return 1 / noTerrain;
         else return noTerrain;
       }
@@ -301,5 +370,23 @@ export class GridTile {
    */
   isDiagonal(neighbor) {
     return this.gx !== neighbor.gx && this.gy !== neighbor.gy;
+  }
+
+  get vertices() {
+    let points;
+    const grid = parseInt(game.version) > 11 ? canvas.grid : canvas.grid.grid;
+    const square =
+      parseInt(game.version) > 11
+        ? !canvas.grid.isHexagonal
+        : !canvas.grid.isHex;
+    if (square)
+      points = grid.getVertices
+        ? grid.getVertices(this.centerPt)
+        : squareVertices(this);
+    else
+      points = grid.getVertices
+        ? grid.getVertices(this.centerPt)
+        : hexVertices(this);
+    return points;
   }
 }

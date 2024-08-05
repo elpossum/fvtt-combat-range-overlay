@@ -1,6 +1,7 @@
 {
   "combat-range-overlay": {
     "no-good-tiles": "No tiles are within movement range AND attack range",
+    "no-good-area": "Nowhere is within movement range AND attack range",
     "controlButton": "Toggle combat range overlay",
     "is-active": "Active?",
     "is-active-hint": "Is the overlay active?",
@@ -56,6 +57,10 @@
     "default-weapon-range-hint": "What is the default weapon range?",
     "supported-actors": "Actors to support",
     "supported-actors-hint": "Comma separated list of actor types for which the overlay should show",
+    "recursions": "Max Recursion Level",
+    "recursions-hint": "How deeply should the overlay recurse in gridless mode? Higher is more accurate but might cause performance issues",
+    "recursion-limited": "Limited recursion",
+    "recursion-limited-hint": "Should the recursion depth be limited? This should be fine to leave off, but could cause performance issues on less powerful machines",
     "quick-settings": {
       "title": "Combat Range Overlay Quick Settings",
       "weapon-range-header": "Weapon Range:",

@@ -8,13 +8,16 @@ CONST,
 game,
 Token,
 MeasuredTemplateDocument,
-DrawingDocument
+DrawingDocument,
+HexagonalGrid
 */
 
 import {
   calculateGridDistance,
+  calculateTokenShape,
   canvasGridSize,
   canvasTokensGet,
+  cubeToPoint,
   getCombatantToken,
   getCombatantTokenDisposition,
   getCurrentToken,
@@ -25,11 +28,22 @@ import {
 
 import { GridTile } from "./gridTile.js";
 import {
+  BASE_GRID_SIZE,
   FUDGE,
+  highlightLineWidth,
   MAX_DIST,
   MODULE_ID,
+  movementCostStyle,
+  pathLineColor,
+  pathLineWidth,
+  potentialTargetLineWidth,
   PRESSED_KEYS,
   SOCKET_TYPES,
+  TEXT_MARGIN,
+  turnOrderStyle,
+  wallLineColor,
+  wallLineWidth,
+  weaponRangeStyle,
 } from "./constants.js";
 import { TokenInfo } from "./tokenInfo.js";
 import * as Settings from "./settings.js";
@@ -37,45 +51,6 @@ import { mouse } from "./mouse.js";
 import { debugLog } from "./debug.js";
 import { TerrainHelper } from "./terrainHelper.js";
 import { cro } from "./main.js";
-
-// Colors
-const pathLineColor = 0x0000ff; // blue
-const wallLineColor = 0x40e0d0; // turquoise
-
-// Line widths
-const wallLineWidth = 3;
-const pathLineWidth = 1;
-const highlightLineWidth = 3;
-const potentialTargetLineWidth = 3;
-
-const TEXT_MARGIN = 2;
-
-const BASE_GRID_SIZE = 70; // For scaling fonts
-
-// Fonts
-const movementCostStyle = {
-  fontFamily: "Arial",
-  fontSize: 30,
-  fill: 0x0000ff, // blue
-  stroke: 0xffffff, // white
-  strokeThickness: 1,
-};
-
-const turnOrderStyle = {
-  fontFamily: "Arial",
-  fontSize: 25,
-  fill: 0xffffff, // white
-  stroke: 0x000000, // black
-  strokeThickness: 5,
-};
-
-const weaponRangeStyle = {
-  fontFamily: "Arial",
-  fontSize: 20,
-  fill: 0xffffff, // white
-  stroke: 0x000000, // black
-  strokeThickness: 4,
-};
 
 /**
  * Determine how diagonal distances should be treated
@@ -135,12 +110,11 @@ export class Overlay {
 
   /**
    * Use Dijkstra's shortest path algorithm
-   * @returns {Promise<Map<string, GridTile>>} - Map of GridTiles, now with costs, and their location keys
+   * @returns {Map<string, GridTile>} - Map of GridTiles, now with costs, and their location keys
    */
-  async calculateMovementCosts() {
+  calculateMovementCosts() {
     // TODO Fix caching
-    const tilesPerAction =
-      (await TokenInfo.current.speed) / this.DISTANCE_PER_TILE;
+    const tilesPerAction = TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     const maxTiles = tilesPerAction * cro.actionsToShow;
 
     const currentToken = getCurrentToken();
@@ -285,13 +259,9 @@ export class Overlay {
       return;
     }
 
-    const tilesMovedPerActionPromise =
+    const tilesMovedPerAction =
       TokenInfo.current.speed / this.DISTANCE_PER_TILE;
-    const currentWeaponRangePromise = TokenInfo.current.weaponRangeColor;
-    const [tilesMovedPerAction, currentWeaponRange] = await Promise.all([
-      tilesMovedPerActionPromise,
-      currentWeaponRangePromise,
-    ]);
+    const currentWeaponRange = await TokenInfo.current.weaponRangeColor;
 
     const weaponRangeInTiles = currentWeaponRange.map((i) => ({
       ...i,
@@ -333,20 +303,16 @@ export class Overlay {
             Math.ceil(diagonalDistance(bestCost) / tilesMovedPerAction),
             colorByActions.length - 1,
           );
-          let color =
-            parseInt(game.version) > 11
-              ? colorByActions[colorIndex]
-              : parseInt(colorByActions[colorIndex].replace("#", "0x"), 16);
+          const color = colorByActions[colorIndex];
 
           const tokenOverlay = new PIXI.Graphics();
           tokenOverlay.lineStyle(potentialTargetLineWidth, color);
           tokenOverlay.drawCircle(
-            combatantToken.hitArea.width / 2,
-            combatantToken.hitArea.height / 2,
-            Math.pow(
-              Math.pow(combatantToken.hitArea.width / 2, 2) +
-                Math.pow(combatantToken.hitArea.height / 2, 2),
-              0.5,
+            combatantToken.hitArea.getBounds().width / 2,
+            combatantToken.hitArea.getBounds().height / 2,
+            Math.hypot(
+              combatantToken.hitArea.getBounds().width / 2,
+              combatantToken.hitArea.getBounds().height / 2,
             ),
           );
           combatantToken.addChild(tokenOverlay);
@@ -360,17 +326,13 @@ export class Overlay {
    * Draw all overlays
    */
   async drawAll() {
-    const movementCostsPromise = this.calculateMovementCosts();
-    const targetRangeMapPromise = this.calculateTargetRangeMap();
-    const [movementCosts, targetRangeMap] = await Promise.all([
-      movementCostsPromise,
-      targetRangeMapPromise,
-    ]);
+    const movementCosts = this.calculateMovementCosts();
+    const targetRangeMap = await this.calculateTargetRangeMap();
 
     this.initializePersistentVariables();
 
+    this.drawCosts(movementCosts, targetRangeMap);
     const promises = [];
-    promises.push(this.drawCosts(movementCosts, targetRangeMap));
 
     if (game.user.targets.size === 0) {
       if (Settings.isShowTurnOrder()) {
@@ -563,14 +525,21 @@ export class Overlay {
 
   /**
    * Update overlay when the scene is updated
+   * @param {object} update - The scene update data
    */
-  sceneUpdateHook() {
+  sceneUpdateHook(update) {
     this.canvasReadyHook();
     const token = getCurrentToken();
     if (token) {
       token.release();
-      Hooks.once("refreshToken", () => {
+      this.hookIDs.sceneUpdateRefresh = Hooks.once("refreshToken", () => {
         canvas.tokens.get(token.id).control();
+      });
+    }
+    // If token vision is enabled or disabled refresh once initialized
+    if (update.tokenVision !== undefined) {
+      Hooks.once("initializeVisionSources", () => {
+        cro.fullRefresh();
       });
     }
   }
@@ -726,8 +695,8 @@ export class Overlay {
     this.hookIDs.canvasReady = Hooks.on("canvasReady", () =>
       this.canvasReadyHook(),
     );
-    this.hookIDs.sceneUpdate = Hooks.on("updateScene", () =>
-      this.sceneUpdateHook(),
+    this.hookIDs.sceneUpdate = Hooks.on("updateScene", (_scene, update) =>
+      this.sceneUpdateHook(update),
     );
     this.hookIDs.activateTokenLayer = Hooks.on(
       "activateTokenLayer",
@@ -913,8 +882,10 @@ export class Overlay {
     style.fontSize = style.fontSize * (canvasGridSize() / BASE_GRID_SIZE);
 
     const text = new PIXI.Text(`» ${range}`, style);
-    text.position.x = currentToken.hitArea.width - text.width - TEXT_MARGIN;
-    text.position.y = currentToken.hitArea.height - text.height - TEXT_MARGIN;
+    text.position.x =
+      currentToken.hitArea.getBounds().width - text.width - TEXT_MARGIN;
+    text.position.y =
+      currentToken.hitArea.getBounds().height - text.height - TEXT_MARGIN;
     currentToken.addChild(text);
     this.overlays.turnOrderTexts.push(text);
   }
@@ -963,9 +934,13 @@ export class Overlay {
           if (turnOrder > 0 && combatantToken.visible) {
             const text = new PIXI.Text(turnOrder, style);
             text.position.x =
-              combatantToken.hitArea.width - text.width - TEXT_MARGIN;
+              combatantToken.hitArea.getBounds().width -
+              text.width -
+              TEXT_MARGIN;
             text.position.y =
-              combatantToken.hitArea.height - text.height - TEXT_MARGIN;
+              combatantToken.hitArea.getBounds().height -
+              text.height -
+              TEXT_MARGIN;
             combatantToken.addChild(text);
             this.overlays.turnOrderTexts.push(text);
           }
@@ -980,7 +955,7 @@ export class Overlay {
    * @param {Map<string, GridTile>} movementCostMap - A map of reachable tiles
    * @param {Map<string, Set<GridTile>>} targetRangeMap - A map of tiles that can reach the targets
    */
-  async drawCosts(movementCostMap, targetRangeMap) {
+  drawCosts(movementCostMap, targetRangeMap) {
     const los = getCurrentToken().vision?.los?.clone();
     if (
       Settings.getVisionMaskType() === Settings.visionMaskingTypes.MASK &&
@@ -1010,7 +985,7 @@ export class Overlay {
     }
 
     const tilesMovedPerAction =
-      (await TokenInfo.current.speed) / this.DISTANCE_PER_TILE;
+      TokenInfo.current.speed / this.DISTANCE_PER_TILE;
     this.overlays.distanceTexts = [];
     this.overlays.pathOverlay.lineStyle(pathLineWidth, pathLineColor);
 
@@ -1027,6 +1002,7 @@ export class Overlay {
         }
       }
       if (drawTile) {
+        /* Currently unimplemented as settings*/
         if (cro.showNumericMovementCost) {
           const style = Object.assign({}, movementCostStyle);
           style.fontSize = style.fontSize * (canvasGridSize() / BASE_GRID_SIZE);
@@ -1065,50 +1041,28 @@ export class Overlay {
                 ),
                 colorByActions.length - 1,
               );
-        let color = colorByActions[colorIndex];
-        let cornerPt = tile.pt;
+        const color = colorByActions[colorIndex];
         if (idealTileMap.has(tile.key)) {
           this.overlays.distanceOverlay.lineStyle(
             highlightLineWidth,
-            parseInt(game.version) > 10
-              ? idealTileMap.get(tile.key).color
-              : parseInt(
-                  idealTileMap.get(tile.key).color.replace("#", "0x"),
-                  16,
-                ),
+            idealTileMap.get(tile.key).color,
           );
         } else {
           this.overlays.distanceOverlay.lineStyle(0, 0);
         }
-        const rect = new PIXI.Polygon(
-          cornerPt.x,
-          cornerPt.y,
-          cornerPt.x + canvasGridSize(),
-          cornerPt.y,
-          cornerPt.x + canvasGridSize(),
-          cornerPt.y + canvasGridSize(),
-          cornerPt.x,
-          cornerPt.y + canvasGridSize(),
-        );
-        const intersect = los?.intersectPolygon(rect);
+        const poly = new PIXI.Polygon(tile.vertices);
+        const intersect = los?.intersectPolygon(poly);
         if (
-          intersect?.area / rect.area >= Settings.getVisionMaskPercent() ||
+          intersect?.area / poly.area >= Settings.getVisionMaskPercent() ||
           Settings.getVisionMaskType() !==
             Settings.visionMaskingTypes.INDIVIDUAL ||
           !los
         ) {
-          if (parseInt(game.version) < 11)
-            color = parseInt(color.replace("#", "0x"), 16);
           this.overlays.distanceOverlay.beginFill(
             color,
             Settings.getMovementAlpha(),
           );
-          this.overlays.distanceOverlay.drawRect(
-            cornerPt.x,
-            cornerPt.y,
-            canvasGridSize(),
-            canvasGridSize(),
-          );
+          this.overlays.distanceOverlay.drawPolygon(poly);
           this.overlays.distanceOverlay.endFill();
         }
       }
@@ -1127,10 +1081,30 @@ export class Overlay {
    */
   drawWalls() {
     this.overlays.wallsOverlay.lineStyle(wallLineWidth, wallLineColor);
-    for (const obj of canvas.walls.quadtree.objects) {
-      const wall = obj.t;
+    const los = getCurrentToken().vision?.los?.clone();
+    for (const wall of canvas.walls.placeables) {
       if (wall.document.door || !wall.document.move) {
         continue;
+      }
+      if (los) {
+        let aVis = false;
+        let bVis = false;
+        const edge = parseInt(game.version > 11) ? wall.edge : wall.vertices;
+        los?.points.forEach((point, index) => {
+          if (
+            edge.a.x === point &&
+            edge.a.y === los.points[index + 1]
+          )
+            aVis = true;
+        });
+        los?.points.forEach((point, index) => {
+          if (
+            edge.b.x === point &&
+            edge.b.y === los.points[index + 1]
+          )
+            bVis = true;
+        });
+        if (!aVis || !bVis) continue;
       }
       const c = wall.document.c;
       this.overlays.wallsOverlay.moveTo(c[0], c[1]);
@@ -1143,7 +1117,7 @@ export class Overlay {
 /**
  * Calculate how many targets can be reached from each tile in a map
  * @param {Map<string, Set<GridTile>>} targetMap - A map of tiles that can reach targets
- * @returns {Map<string, {count: number, color: number}>} - A map of tiles, their color, and how many targets can be reached from them
+ * @returns {Map<string, {count: number, color: string|number}>} - A map of tiles, their color, and how many targets can be reached from them
  */
 function buildRangeMap(targetMap) {
   const rangeMap = new Map();
@@ -1162,8 +1136,8 @@ function buildRangeMap(targetMap) {
  * Calculate all tiles within movement range and can reach all targets
  * @param {Map<string, GridTile>} movementTileMap - All tiles in movement range
  * @param {Map<string, Set<GridTile>>} targetMap - All tiles in range of a target
- * @param {Map<string, {count: number, color: number}>} rangeMap - How many targets a tile can reach and their color
- * @returns {Map<string, {tile: GridTile, color: number}>} - All tiles that are in range of all targets and within movement range and their colors
+ * @param {Map<string, {count: number, color: string|number}>} rangeMap - How many targets a tile can reach and their color
+ * @returns {Map<string, {tile: GridTile, color: string|number}>} - All tiles that are in range of all targets and within movement range and their colors
  */
 function calculateIdealTileMap(movementTileMap, targetMap, rangeMap) {
   const idealTileMap = new Map();
@@ -1189,11 +1163,26 @@ function calculateIdealTileMap(movementTileMap, targetMap, rangeMap) {
  */
 /**
  * Calculate tiles in range of a specific target
- * @param {Array<Weapon>} rangeInTiles - An array of weapons, theer ranges and their colors
+ * @param {Array<Weapon>} rangeInTiles - An array of weapons, their ranges and their colors
  * @param {Token} targetToken - The target token
  * @returns {Set<GridTile>} - A set of tiles that can a specific target is in range from
  */
 function calculateTilesInRange(rangeInTiles, targetToken) {
+  const square =
+    parseInt(game.version) > 11 ? !canvas.grid.isHexagonal : !canvas.grid.isHex;
+  const tileSet = square
+    ? calculateTilesInRangeSquare(rangeInTiles, targetToken)
+    : calculateTilesInRangeHex(rangeInTiles, targetToken);
+  return tileSet;
+}
+
+/**
+ * Calculate tiles in range of a specific target for square tiles
+ * @param {Array<Weapon>} rangeInTiles - An array of weapons, their ranges and their colors
+ * @param {Token} targetToken - The target token
+ * @returns {Set<GridTile>} - A set of tiles that can a specific target is in range from
+ */
+function calculateTilesInRangeSquare(rangeInTiles, targetToken) {
   const tokenInfo = TokenInfo.getById(targetToken.id);
   const targetTile = GridTile.fromPixels(
     tokenInfo.location.x,
@@ -1243,7 +1232,6 @@ function calculateTilesInRange(rangeInTiles, targetToken) {
           for (const testGridX of gridXSet) {
             for (const testGridY of gridYSet) {
               const testTile = new GridTile(testGridX, testGridY, weaponColor);
-              //const testTilePoint = testTile.pt;
               let isDupe = false;
               for (const entry of tileSet) {
                 if (entry.key === testTile.key) {
@@ -1257,6 +1245,204 @@ function calculateTilesInRange(rangeInTiles, targetToken) {
                 tileSet.add(testTile);
               }
             }
+          }
+        }
+      }
+    }
+  }
+  return tileSet;
+}
+
+/**
+ * Calculate tiles in range of a specific target for hex tiles
+ * @param {Array<Weapon>} rangeInTiles - An array of weapons, their ranges and their colors
+ * @param {Token} targetToken - The target token
+ * @returns {Set<GridTile>} - A set of tiles that can a specific target is in range from
+ */
+function calculateTilesInRangeHex(rangeInTiles, targetToken) {
+  const tokenInfo = TokenInfo.getById(targetToken.id);
+  const targetTile = GridTile.fromPixels(
+    tokenInfo.location.x,
+    tokenInfo.location.y,
+  );
+  const grid = parseInt(game.version) > 11 ? canvas.grid : canvas.grid.grid;
+  const tileSet = new Set();
+  let targetTileCube;
+  switch (parseInt(game.version)) {
+    case 12:
+      targetTileCube = grid.offsetToCube({
+        i: targetTile.gx,
+        j: targetTile.gy,
+      });
+      break;
+    case 11:
+      targetTileCube = HexagonalGrid.offsetToCube(
+        { row: targetTile.gx, col: targetTile.gy },
+        { columns: grid.columnar, even: grid.even },
+      );
+      break;
+    case 10:
+      targetTileCube = grid.offsetToCube({
+        row: targetTile.gx,
+        col: targetTile.gy,
+      });
+      break;
+  }
+  const targetGridHeight = Math.floor(
+    targetToken.hitArea.getBounds().height / canvasGridSize(),
+  );
+  const targetGridWidth = Math.floor(
+    targetToken.hitArea.getBounds().width / canvasGridSize(),
+  );
+  const targetTiles = new Set();
+
+  // Find tiles that the target occupies
+  for (
+    let gridQDelta = -targetGridWidth;
+    gridQDelta <= targetGridWidth;
+    gridQDelta++
+  ) {
+    for (
+      let gridRDelta = Math.max(
+        -targetGridHeight,
+        -gridQDelta - targetGridHeight,
+      );
+      gridRDelta <= Math.min(targetGridHeight, -gridQDelta + targetGridHeight);
+      gridRDelta++
+    ) {
+      const testTile = {
+        q: targetTileCube.q + gridQDelta,
+        r: targetTileCube.r + gridRDelta,
+      };
+      const testTilePoint = grid.cubeToPoint
+        ? grid.cubeToPoint(testTile)
+        : cubeToPoint(testTile);
+      const hitArea =
+        parseInt(game.version) > 11
+          ? targetToken.hitArea
+          : calculateTokenShape(targetToken);
+      const points = [];
+      // Translate to target's postion
+      if (hitArea.points) {
+        // Hit area is a polygon
+        hitArea.points.forEach((point, index) => {
+          if (index % 2 === 0) points.push(point + targetToken.x);
+          else points.push(point + targetToken.y);
+        });
+      } else {
+        // Hit area is a rectangle
+        const rectPoints = [
+          hitArea.x,
+          hitArea.y,
+          hitArea.x + hitArea.width + FUDGE,
+          hitArea.y,
+          hitArea.x + hitArea.width + FUDGE,
+          hitArea.y + hitArea.height + FUDGE,
+          hitArea.x,
+          hitArea.y + hitArea.height + FUDGE,
+        ];
+        rectPoints.forEach((point, index) => {
+          if (index % 2 === 0) points.push(point + targetToken.x);
+          else points.push(point + targetToken.y);
+        });
+      }
+      const testArea = new PIXI.Polygon(points);
+      if (testArea.contains(testTilePoint.x, testTilePoint.y))
+        targetTiles.add(testTile);
+    }
+  }
+
+  for (const rangeInTilesElement of rangeInTiles) {
+    const weaponColor = rangeInTilesElement.color;
+    // Loop over Q and R deltas, computing distance for only a single quadrant
+    for (const targetTile of targetTiles) {
+      const targetGridQ = targetTile.q;
+      const targetGridR = targetTile.r;
+      for (
+        let gridQDelta = -rangeInTilesElement.range;
+        gridQDelta <= rangeInTilesElement.range;
+        gridQDelta++
+      ) {
+        for (
+          let gridRDelta = Math.max(
+            -rangeInTilesElement.range,
+            -gridQDelta - rangeInTilesElement.range,
+          );
+          gridRDelta <=
+          Math.min(
+            rangeInTilesElement.range,
+            -gridQDelta + rangeInTilesElement.range,
+          );
+          gridRDelta++
+        ) {
+          if (gridQDelta === 0 && gridRDelta === 0) {
+            continue;
+          }
+
+          const testGridQ = targetGridQ + gridQDelta;
+          const testGridR = targetGridR + gridRDelta;
+          let offset;
+          switch (parseInt(game.version)) {
+            case 12:
+              offset = grid.cubeToOffset({ q: testGridQ, r: testGridR });
+              break;
+            case 11:
+              offset = HexagonalGrid.cubeToOffset(
+                { q: testGridQ, r: testGridR },
+                { columns: grid.columnar, even: grid.even },
+              );
+              break;
+            case 10:
+              offset = grid.cubeToOffset({ q: testGridQ, r: testGridR });
+          }
+          const testTile =
+            parseInt(game.version) > 11
+              ? new GridTile(offset.i, offset.j, weaponColor)
+              : new GridTile(offset.row, offset.col, weaponColor);
+          let testTileCube;
+          switch (parseInt(game.version)) {
+            case 12:
+              testTileCube = grid.offsetToCube({
+                i: testTile.gx,
+                j: testTile.gy,
+              });
+              break;
+            case 11:
+              testTileCube = HexagonalGrid.offsetToCube(
+                { row: testTile.gx, col: testTile.gy },
+                { columns: grid.columnar, even: grid.even },
+              );
+              break;
+            case 10:
+              testTileCube = grid.offsetToCube({
+                row: testTile.gx,
+                col: testTile.gy,
+              });
+              break;
+          }
+
+          // Don't include tiles the target occupies
+          let isTargetTile = false;
+          targetTiles.forEach((tile) => {
+            if (tile.q === testTileCube.q && tile.r === testTileCube.r)
+              isTargetTile = true;
+          });
+          if (isTargetTile) {
+            continue;
+          }
+
+          // Don't include tiles that are already added by another weapon
+          let isDupe = false;
+          for (const entry of tileSet) {
+            if (entry.key === testTile.key) {
+              isDupe = true;
+              break;
+            }
+          }
+
+          let clearShot = checkTileToTokenVisibility(testTile, targetToken);
+          if (clearShot && !isDupe) {
+            tileSet.add(testTile);
           }
         }
       }
@@ -1298,7 +1484,7 @@ function combatantComparator(a, b) {
 
 /**
  * Check if a token is visible from a tile
- * @param {GridTile|{centerPt: {x: number, y: number}}} tile - The source tile
+ * @param {GridTile|{centerPt: {x: number, y: number}}} tile - The source tile or tile-like object
  * @param {Token} token - The token to be checked
  * @returns {boolean} - Returns true if the token is visible
  */
