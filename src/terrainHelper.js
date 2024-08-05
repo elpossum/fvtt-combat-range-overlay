@@ -2,14 +2,15 @@
 canvas,
 PIXI,
 FullCanvasObjectMixin,
+FullCanvasContainer,
 game,
 Token
 */
 
-import {TokenInfo} from "./tokenInfo.js";
-import {cro} from "./main.js";
-import {TerrainLayerShader} from "./terrainMapper/glsl/TerrainLayerShader.js";
-import {TerrainQuadMesh} from "./terrainMapper/glsl/TerrainQuadMesh.js";
+import { TokenInfo } from "./tokenInfo.js";
+import { cro } from "./main.js";
+import { TerrainLayerShader } from "./terrainMapper/glsl/TerrainLayerShader.js";
+import { TerrainQuadMesh } from "./terrainMapper/glsl/TerrainQuadMesh.js";
 
 export let TerrainHelper;
 
@@ -65,9 +66,11 @@ export async function setup() {
 
   /* Make a canvas sized PIXI Container */
   cro.terrainGraphics =
-    new (class FullCanvasContainer extends FullCanvasObjectMixin(
-      PIXI.Container,
-    ) {})();
+    parseInt(game.version) > 10
+      ? new (class FullCanvasContainer extends FullCanvasObjectMixin(
+          PIXI.Container,
+        ) {})()
+      : new FullCanvasContainer();
   const timeout = setTimeout(() => {
     TerrainHelper.sceneUpdate();
     clearTimeout(timeout);

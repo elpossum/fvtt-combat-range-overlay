@@ -2,6 +2,7 @@
 PIXI,
 game,
 FullCanvasObjectMixin,
+FullCanvasContainer,
 canvas,
 Token
 */
@@ -40,13 +41,17 @@ export class GridlessOverlay extends Overlay {
   initializePersistentVariables() {
     super.initializePersistentVariables();
     this.overlays.distanceOverlay =
-      new (class FullCanvasContainer extends FullCanvasObjectMixin(
-        PIXI.Container,
-      ) {})();
+      parseInt(game.version) > 10
+        ? new (class FullCanvasContainer extends FullCanvasObjectMixin(
+            PIXI.Container,
+          ) {})()
+        : new FullCanvasContainer();
     this.overlays.targetOverlay =
-      new (class FullCanvasContainer extends FullCanvasObjectMixin(
-        PIXI.Container,
-      ) {})();
+      parseInt(game.version) > 10
+        ? new (class FullCanvasContainer extends FullCanvasObjectMixin(
+            PIXI.Container,
+          ) {})()
+        : new FullCanvasContainer();
     this.overlays.distanceOverlay.alpha = Settings.getMovementAlpha();
   }
 
