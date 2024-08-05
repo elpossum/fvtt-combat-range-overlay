@@ -465,18 +465,38 @@ Hooks.once("init", () => {
 // Only add recursions and vision mask percent if they would have an effect
 Hooks.on("renderSettingsConfig", (_app, html) => {
   const tab = html[0].querySelector(`.tab[data-tab="${MODULE_ID}"]`);
-  const recursionCheck = tab.querySelector(
-    `.form-group[data-setting-id="${MODULE_ID}.${settingNames.RECURSION_LIMITED}"]`,
-  );
-  const visionMaskInput = tab.querySelector(
-    `.form-group[data-setting-id="${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}"]`,
-  );
-  const recursionSlider = tab.querySelector(
-    `.form-group[data-setting-id="${MODULE_ID}.${settingNames.RECURSIONS}"]`,
-  );
-  const visionMaskSlider = tab.querySelector(
-    `.form-group[data-setting-id="${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}"]`,
-  );
+  const recursionCheck =
+    parseInt(game.version) > 10
+      ? tab.querySelector(
+          `.form-group[data-setting-id="${MODULE_ID}.${settingNames.RECURSION_LIMITED}"]`,
+        )
+      : tab.querySelector(
+          `.form-group:has( input[name="${MODULE_ID}.${settingNames.RECURSION_LIMITED}"] )`,
+        );
+  const visionMaskInput =
+    parseInt(game.version) > 10
+      ? tab.querySelector(
+          `.form-group[data-setting-id="${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}"]`,
+        )
+      : tab.querySelector(
+          `.form-group:has( select[name="${MODULE_ID}.${settingNames.VISION_MASKING_TYPE}"] )`,
+        );
+  const recursionSlider =
+    parseInt(game.version) > 10
+      ? tab.querySelector(
+          `.form-group[data-setting-id="${MODULE_ID}.${settingNames.RECURSIONS}"]`,
+        )
+      : tab.querySelector(
+          `.form-group:has( input[name="${MODULE_ID}.${settingNames.RECURSIONS}"] )`,
+        );
+  const visionMaskSlider =
+    parseInt(game.version) > 10
+      ? tab.querySelector(
+          `.form-group[data-setting-id="${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}"]`,
+        )
+      : tab.querySelector(
+          `.form-group:has( input[name="${MODULE_ID}.${settingNames.VISION_MASKING_PERCENTAGE}"] )`,
+        );
   recursionCheck.addEventListener("input", (e) => {
     if (e.target.checked) recursionCheck.after(recursionSlider);
     else recursionSlider.remove();
