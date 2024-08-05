@@ -532,7 +532,7 @@ export class Overlay {
     const token = getCurrentToken();
     if (token) {
       token.release();
-      Hooks.once("refreshToken", () => {
+      this.hookIDs.sceneUpdateRefresh = Hooks.once("refreshToken", () => {
         canvas.tokens.get(token.id).control();
       });
     }
@@ -1483,7 +1483,7 @@ function combatantComparator(a, b) {
 
 /**
  * Check if a token is visible from a tile
- * @param {GridTile|{centerPt: {x: number, y: number}}} tile - The source tile
+ * @param {GridTile|{centerPt: {x: number, y: number}}} tile - The source tile or tile-like object
  * @param {Token} token - The token to be checked
  * @returns {boolean} - Returns true if the token is visible
  */
