@@ -14,7 +14,7 @@ import { DEFAULT_WEAPON_RANGES } from "./constants.js";
  * @returns {Token|undefined} - The current token or undefined if no token is controlled
  */
 export function getCurrentToken() {
-  if (canvasTokensControlled().length === 1) {
+  if (canvasTokensControlled()?.length === 1) {
     return canvasTokensControlled()[0];
   } else {
     const activeTokens = game.user?.character?.getActiveTokens();
@@ -113,7 +113,7 @@ export function canvasTokensGet(tokenId) {
  * @returns {Array<Token>} - All tokens controlled by the user
  */
 export function canvasTokensControlled() {
-  return canvas.tokens.controlled;
+  return canvas.tokens?.controlled;
 }
 
 /**
