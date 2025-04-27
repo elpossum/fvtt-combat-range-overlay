@@ -368,11 +368,16 @@ export class GridlessOverlay extends Overlay {
   calculateTargetShape(weapons, targetToken) {
     const tokenInfo = TokenInfo.getById(targetToken.id);
     const location = { x: tokenInfo.location.x, y: tokenInfo.location.y };
+    const unblockedShape = new foundry.canvas.geometry.ClockwiseSweepPolygon();
+    unblockedShape.initialize(location, {
+      type: "move",
+    });
+    unblockedShape.compute();
     const targetShapes = new Map();
 
     for (const weapon of weapons) {
       const weaponColor = weapon.color;
-      const shape = this.calculateMovementShape(
+      let shape = this.calculateMovementShape(
         location,
         weapon.range +
           Math.hypot(
@@ -381,6 +386,7 @@ export class GridlessOverlay extends Overlay {
           ),
         weaponColor,
       );
+      shape = shape.intersectPolygon(unblockedShape);
       targetShapes.set(weapon, shape);
     }
     return targetShapes;
