@@ -1142,7 +1142,13 @@ function buildRangeMap(targetMap) {
       const tileKey = tile.key;
       let count = rangeMap.get(tileKey)?.count ?? 0;
       count++;
-      rangeMap.set(tileKey, { count: count, color: tile.color });
+      const currentColor = rangeMap.get(tileKey)?.color;
+      const color =
+        currentColor &&
+        cro.colors.indexOf(currentColor) > cro.colors.indexOf(tile.color)
+          ? currentColor
+          : tile.color;
+      rangeMap.set(tileKey, { count: count, color: color });
     }
   }
   return rangeMap;
