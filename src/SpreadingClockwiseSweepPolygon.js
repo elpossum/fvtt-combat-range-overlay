@@ -76,7 +76,7 @@ export class SpreadingClockwiseSweepPolygon extends ClockwiseSweepPolygon {
     // if ( (x === this.points[l-2]) && (y === this.points[l-1]) ) return this;
     if (point.isEndpoint)
       this.cornersEncountered.add(keyFromPoint(point.x, point.y));
-    point.edges.forEach((edge) => this.edgesEncountered.add(edge));
+    point.edges && point.edges.forEach((edge) => this.edgesEncountered.add(edge));
   }
 
   /**
