@@ -1,7 +1,7 @@
 /* globals
 PIXI,
 game,
-FullCanvasObjectMixin,
+foundry,
 FullCanvasContainer,
 canvas,
 Token
@@ -31,6 +31,8 @@ import {
   intersect,
   SpreadingClockwiseSweepPolygon,
 } from "./SpreadingClockwiseSweepPolygon.js";
+
+const FullCanvasObjectMixin = foundry.canvas.containers.FullCanvasObjectMixin;
 
 export class GridlessOverlay extends Overlay {
   constructor() {
