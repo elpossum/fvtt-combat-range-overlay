@@ -166,7 +166,10 @@ export class Overlay {
           continue;
         }
 
-        const ray = new Ray(neighbor.centerPt, current.centerPt);
+        const ray = new foundry.canvas.geometry.Ray(
+          neighbor.centerPt,
+          current.centerPt,
+        );
         if (
           checkCollision(ray, {
             type: "move",
