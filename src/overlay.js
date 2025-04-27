@@ -8,7 +8,8 @@ CONST,
 game,
 Token,
 MeasuredTemplateDocument,
-DrawingDocument
+DrawingDocument,
+foundry
 */
 
 import {
@@ -1438,7 +1439,7 @@ export function checkTileToTokenVisibility(tile, token) {
   const tileCenterPt = tile.centerPt;
 
   for (const point of points) {
-    const ray = new Ray(tileCenterPt, point);
+    const ray = new foundry.canvas.geometry.Ray(tileCenterPt, point);
     if (!checkCollision(ray, { type: "sight", mode: "any" })) {
       return true;
     }
