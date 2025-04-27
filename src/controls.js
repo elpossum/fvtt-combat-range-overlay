@@ -140,9 +140,7 @@ async function _toggleButtonClick(toggled, controls) {
 
   // Ensure button matches active state
   // We _must_ set .active _before_ using await or the button will be drawn and we'll be too late
-  controls
-    .find((group) => group.name === "token")
-    .tools.find((t) => t.name === TOGGLE_BUTTON).active = isActive;
+  controls.tokens.tools[TOGGLE_BUTTON].active = isActive;
   await Settings.setActive(isActive);
 
   if (
@@ -175,11 +173,11 @@ Hooks.on("getSceneControlButtons", (controls) => {
       icon: "fas fa-people-arrows",
       toggle: true,
       active: Settings.isActive(),
-      onClick: (toggled) => _toggleButtonClick(toggled, controls),
+      onChange: (toggled) => _toggleButtonClick(toggled, controls),
       visible: true, // TODO: Figure out how to disable this from Settings
     };
   }
 
-  const tokenControls = controls.find((group) => group.name === "token").tools;
-  tokenControls.push(toggleButton);
+  const tokenControls = controls.tokens.tools;
+  tokenControls[TOGGLE_BUTTON] = toggleButton;
 });
