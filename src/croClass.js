@@ -107,10 +107,8 @@ export class CombatRangeOverlay {
    */
   setColorByActions() {
     for (let i = 0; i < 5; i++) {
-      const color = game.settings.get(MODULE_ID, colorSettingNames[i])
-      this.colorByActions.push(
-        parseInt(game.version) > 10 ? color : parseInt(color.replace("#", "0x"), 16),
-      );
+      const color = game.settings.get(MODULE_ID, colorSettingNames[i]);
+      this.colorByActions.push(color);
     }
   }
 
@@ -119,10 +117,8 @@ export class CombatRangeOverlay {
    */
   setColors() {
     for (let i = 5; i < 8; i++) {
-      const color = game.settings.get(MODULE_ID, colorSettingNames[i])
-      this.colors.push(
-        parseInt(game.version) > 10 ? color : parseInt(color.replace("#", "0x"), 16),
-      );
+      const color = game.settings.get(MODULE_ID, colorSettingNames[i]);
+      this.colors.push(color);
     }
   }
 

@@ -8,13 +8,11 @@ CONST,
 game,
 Token,
 MeasuredTemplateDocument,
-DrawingDocument,
-HexagonalGrid
+DrawingDocument
 */
 
 import {
   calculateGridDistance,
-  calculateTokenShape,
   canvasGridSize,
   canvasTokensGet,
   cubeToPoint,
@@ -152,13 +150,9 @@ export class Overlay {
       current.visited = true;
 
       let neighborGridXYs;
-      if (parseInt(game.version) > 11) {
-        neighborGridXYs = canvas.grid
-          .getAdjacentOffsets({ i: current.gx, j: current.gy })
-          .map(({ i, j }) => [i, j]);
-      } else {
-        neighborGridXYs = canvas.grid.grid.getNeighbors(current.gx, current.gy);
-      }
+      neighborGridXYs = canvas.grid
+        .getAdjacentOffsets({ i: current.gx, j: current.gy })
+        .map(({ i, j }) => [i, j]);
       for (const neighborGridXY of neighborGridXYs) {
         let neighbor = new GridTile(neighborGridXY[0], neighborGridXY[1]);
         if (tileMap.has(neighbor.key)) {
@@ -626,31 +620,9 @@ export class Overlay {
     } else if (
       Settings.getVisionMaskType() !== Settings.visionMaskingTypes.NONE &&
       this.tokenRefreshTracker === 0 &&
-      this.tokenPositionChanged &&
-      parseInt(game.version) !== 11
-    ) {
-      parseInt(game.version) > 11
-        ? this.refreshTokenHookv12()
-        : this.refreshTokenHookv11();
-    }
-  }
-
-  /**
-   * Handle Foundry v11 vision updates
-   */
-  refreshTokenHookv11() {
-    if (
-      Settings.getVisionMaskType() !== Settings.visionMaskingTypes.NONE &&
       this.tokenPositionChanged
     ) {
-      this.tokenPositionChanged = false;
-      const hookId = Hooks.on("refreshToken", (token) => {
-        this.clearAll();
-        if (!token._animation) {
-          Hooks.off("refreshToken", hookId);
-          Hooks.once("sightRefresh", async () => cro.fullRefresh());
-        }
-      });
+      this.refreshTokenHookv12();
     }
   }
 
@@ -753,11 +725,6 @@ export class Overlay {
       "sightRefresh",
       async () => await this.visibilityRefreshHook(),
     );
-    if (parseInt(game.version) < 12)
-      this.hookIDs.initializeVisionSources = Hooks.on(
-        "initializeVisionSources",
-        () => this.refreshTokenHookv11(),
-      );
     this.hookIDs.deleteCombat = Hooks.on("deleteCombat", async () =>
       cro.fullRefresh(),
     );
@@ -1105,19 +1072,13 @@ export class Overlay {
       if (los) {
         let aVis = false;
         let bVis = false;
-        const edge = parseInt(game.version > 11) ? wall.edge : wall.vertices;
+        const edge = wall.edge;
         los?.points.forEach((point, index) => {
-          if (
-            edge.a.x === point &&
-            edge.a.y === los.points[index + 1]
-          )
+          if (edge.a.x === point && edge.a.y === los.points[index + 1])
             aVis = true;
         });
         los?.points.forEach((point, index) => {
-          if (
-            edge.b.x === point &&
-            edge.b.y === los.points[index + 1]
-          )
+          if (edge.b.x === point && edge.b.y === los.points[index + 1])
             bVis = true;
         });
         if (!aVis || !bVis) continue;
@@ -1190,8 +1151,7 @@ function calculateIdealTileMap(movementTileMap, targetMap, rangeMap) {
  * @returns {Set<GridTile>} - A set of tiles that can a specific target is in range from
  */
 function calculateTilesInRange(rangeInTiles, targetToken) {
-  const square =
-    parseInt(game.version) > 11 ? !canvas.grid.isHexagonal : !canvas.grid.isHex;
+  const square = !canvas.grid.isHexagonal;
   const tileSet = square
     ? calculateTilesInRangeSquare(rangeInTiles, targetToken)
     : calculateTilesInRangeHex(rangeInTiles, targetToken);
@@ -1287,29 +1247,13 @@ function calculateTilesInRangeHex(rangeInTiles, targetToken) {
     tokenInfo.location.x,
     tokenInfo.location.y,
   );
-  const grid = parseInt(game.version) > 11 ? canvas.grid : canvas.grid.grid;
+  const grid = canvas.grid;
   const tileSet = new Set();
   let targetTileCube;
-  switch (parseInt(game.version)) {
-    case 12:
-      targetTileCube = grid.offsetToCube({
-        i: targetTile.gx,
-        j: targetTile.gy,
-      });
-      break;
-    case 11:
-      targetTileCube = HexagonalGrid.offsetToCube(
-        { row: targetTile.gx, col: targetTile.gy },
-        { columns: grid.columnar, even: grid.even },
-      );
-      break;
-    case 10:
-      targetTileCube = grid.offsetToCube({
-        row: targetTile.gx,
-        col: targetTile.gy,
-      });
-      break;
-  }
+  targetTileCube = grid.offsetToCube({
+    i: targetTile.gx,
+    j: targetTile.gy,
+  });
   const targetGridHeight = Math.floor(
     targetToken.hitArea.getBounds().height / canvasGridSize(),
   );
@@ -1339,10 +1283,7 @@ function calculateTilesInRangeHex(rangeInTiles, targetToken) {
       const testTilePoint = grid.cubeToPoint
         ? grid.cubeToPoint(testTile)
         : cubeToPoint(testTile);
-      const hitArea =
-        parseInt(game.version) > 11
-          ? targetToken.hitArea
-          : calculateTokenShape(targetToken);
+      const hitArea = targetToken.hitArea;
       const points = [];
       // Translate to target's postion
       if (hitArea.points) {
@@ -1404,44 +1345,13 @@ function calculateTilesInRangeHex(rangeInTiles, targetToken) {
           const testGridQ = targetGridQ + gridQDelta;
           const testGridR = targetGridR + gridRDelta;
           let offset;
-          switch (parseInt(game.version)) {
-            case 12:
-              offset = grid.cubeToOffset({ q: testGridQ, r: testGridR });
-              break;
-            case 11:
-              offset = HexagonalGrid.cubeToOffset(
-                { q: testGridQ, r: testGridR },
-                { columns: grid.columnar, even: grid.even },
-              );
-              break;
-            case 10:
-              offset = grid.cubeToOffset({ q: testGridQ, r: testGridR });
-          }
-          const testTile =
-            parseInt(game.version) > 11
-              ? new GridTile(offset.i, offset.j, weaponColor)
-              : new GridTile(offset.row, offset.col, weaponColor);
+          offset = grid.cubeToOffset({ q: testGridQ, r: testGridR });
+          const testTile = new GridTile(offset.i, offset.j, weaponColor);
           let testTileCube;
-          switch (parseInt(game.version)) {
-            case 12:
-              testTileCube = grid.offsetToCube({
-                i: testTile.gx,
-                j: testTile.gy,
-              });
-              break;
-            case 11:
-              testTileCube = HexagonalGrid.offsetToCube(
-                { row: testTile.gx, col: testTile.gy },
-                { columns: grid.columnar, even: grid.even },
-              );
-              break;
-            case 10:
-              testTileCube = grid.offsetToCube({
-                row: testTile.gx,
-                col: testTile.gy,
-              });
-              break;
-          }
+          testTileCube = grid.offsetToCube({
+            i: testTile.gx,
+            j: testTile.gy,
+          });
 
           // Don't include tiles the target occupies
           let isTargetTile = false;
@@ -1480,15 +1390,11 @@ function calculateTilesInRangeHex(rangeInTiles, targetToken) {
  * @returns {boolean} - Returns true if there is a collision
  */
 function checkCollision(ray, opts) {
-  if (parseInt(game.version) < 11) {
-    return canvas.walls.checkCollision(ray, opts);
-  } else {
-    return CONFIG.Canvas.polygonBackends[opts.type].testCollision(
-      ray.A,
-      ray.B,
-      opts,
-    );
-  }
+  return CONFIG.Canvas.polygonBackends[opts.type].testCollision(
+    ray.A,
+    ray.B,
+    opts,
+  );
 }
 
 // Copied straight from foundry.js (_sortCombatants)

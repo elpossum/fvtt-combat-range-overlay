@@ -116,15 +116,9 @@ export class GridTile {
    * @type {{x: number, y: number}}
    */
   get centerPt() {
-    let pixels;
-    if (parseInt(game.version) > 11) {
-      pixels = Object.values(
-        canvas.grid.getTopLeftPoint({ i: this.gx, j: this.gy }),
-      );
-    } else {
-      pixels = canvas.grid.grid.getPixelsFromGridPosition(this.gx, this.gy);
-    }
-    // noinspection JSUnresolvedVariable
+    const pixels = Object.values(
+      canvas.grid.getTopLeftPoint({ i: this.gx, j: this.gy }),
+    );
     return {
       x: pixels[0] + canvas.grid.size / 2,
       y: pixels[1] + canvas.grid.size / 2,
@@ -136,14 +130,9 @@ export class GridTile {
    * @type {{x: number, y: number}}
    */
   get pt() {
-    let pixels;
-    if (parseInt(game.version) > 11) {
-      pixels = Object.values(
-        canvas.grid.getTopLeftPoint({ i: this.gx, j: this.gy }),
-      );
-    } else {
-      pixels = canvas.grid.grid.getPixelsFromGridPosition(this.gx, this.gy);
-    }
+    const pixels = Object.values(
+      canvas.grid.getTopLeftPoint({ i: this.gx, j: this.gy }),
+    );
     return { x: pixels[0], y: pixels[1] };
   }
 
@@ -164,7 +153,6 @@ export class GridTile {
     if (TokenInfo.current.isIgnoreDifficultTerrain || !cro.terrainProvider) {
       return 1;
     } else {
-      // noinspection JSUnresolvedVariable
       return canvas.terrain?.cost({ x: this.gy, y: this.gx }) ?? 1;
     }
   }
@@ -345,12 +333,7 @@ export class GridTile {
    * @returns {GridTile} - A new GridTile at this point
    */
   static fromPixels(x, y) {
-    let [gx, gy] = [undefined, undefined];
-    if (parseInt(game.version) > 11) {
-      [gx, gy] = Object.values(canvas.grid.getOffset({ x: x, y: y }));
-    } else {
-      [gx, gy] = canvas.grid.grid.getGridPositionFromPixels(x, y);
-    }
+    const [gx, gy] = Object.values(canvas.grid.getOffset({ x: x, y: y }));
     return new GridTile(gx, gy);
   }
 
@@ -374,11 +357,8 @@ export class GridTile {
 
   get vertices() {
     let points;
-    const grid = parseInt(game.version) > 11 ? canvas.grid : canvas.grid.grid;
-    const square =
-      parseInt(game.version) > 11
-        ? !canvas.grid.isHexagonal
-        : !canvas.grid.isHex;
+    const grid = canvas.grid;
+    const square = !canvas.grid.isHexagonal;
     if (square)
       points = grid.getVertices
         ? grid.getVertices(this.centerPt)

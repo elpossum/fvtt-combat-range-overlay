@@ -6,8 +6,7 @@ Hooks,
 Dialog,
 Token,
 Item,
-ActiveEffect,
-CONST
+ActiveEffect
 */
 
 import { FLAG_NAMES, MODULE_ID } from "./constants.js";
@@ -67,26 +66,14 @@ export class TokenInfo {
    * @param {LocationUpdate} [updateData] - The updated coords
    */
   updateLocation(updateData) {
-    if (parseInt(game.version) > 11) {
-      this.location = {
-        x: updateData?.x
-          ? this.token.center.x + updateData.x - this.token.x
-          : this.token.center.x,
-        y: updateData?.y
-          ? this.token.center.y + updateData.y - this.token.y
-          : this.token.center.y,
-      };
-    } else if (canvas.grid.type === CONST.GRID_TYPES.GRIDLESS) {
-      this.location = {
-        x: this.token.center.x,
-        y: this.token.center.y,
-      };
-    } else {
-      this.location = {
-        x: updateData?.x ? updateData.x : this.token.x,
-        y: updateData?.y ? updateData.y : this.token.y,
-      };
-    }
+    this.location = {
+      x: updateData?.x
+        ? this.token.center.x + updateData.x - this.token.x
+        : this.token.center.x,
+      y: updateData?.y
+        ? this.token.center.y + updateData.y - this.token.y
+        : this.token.center.y,
+    };
   }
 
   /**
@@ -94,26 +81,14 @@ export class TokenInfo {
    * @param {LocationUpdate} [updateData] - The updated coords
    */
   updateMeasureFrom(updateData) {
-    if (parseInt(game.version) > 11) {
-      this.measureFrom = {
-        x: updateData?.x
-          ? this.token.center.x + updateData.x - this.token.x
-          : this.token.center.x,
-        y: updateData?.y
-          ? this.token.center.y + updateData.y - this.token.y
-          : this.token.center.y,
-      };
-    } else if (canvas.grid.type === CONST.GRID_TYPES.GRIDLESS) {
-      this.measureFrom = {
-        x: this.token.center.x,
-        y: this.token.center.y,
-      };
-    } else {
-      this.measureFrom = {
-        x: updateData?.x ? updateData.x : this.token.x,
-        y: updateData?.y ? updateData.y : this.token.y,
-      };
-    }
+    this.measureFrom = {
+      x: updateData?.x
+        ? this.token.center.x + updateData.x - this.token.x
+        : this.token.center.x,
+      y: updateData?.y
+        ? this.token.center.y + updateData.y - this.token.y
+        : this.token.center.y,
+    };
   }
 
   /**
@@ -802,17 +777,14 @@ Hooks.on("updateToken", async (tokenDocument, updateData, opts) => {
   if (translation && game.user.targets.size) {
     const targetBlocked = new Map();
     const newCenter = {
-      centerPt:
-        parseInt(game.version) > 11
-          ? {
-              x: updateData.x
-                ? realToken.center.x + updateData.x - realToken.x
-                : realToken.center.x,
-              y: updateData.y
-                ? realToken.center.y + updateData.y - realToken.y
-                : realToken.center.y,
-            }
-          : realToken.center,
+      centerPt: {
+        x: updateData.x
+          ? realToken.center.x + updateData.x - realToken.x
+          : realToken.center.x,
+        y: updateData.y
+          ? realToken.center.y + updateData.y - realToken.y
+          : realToken.center.y,
+      },
     };
     game.user.targets.forEach((target) => {
       const blocked = !checkTileToTokenVisibility(newCenter, target);

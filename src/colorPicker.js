@@ -45,15 +45,11 @@ function updateSettings() {
   cro.colorByActions = [];
   cro.colors = [];
   for (let i = 0; i < 5; i++) {
-    let color = game.settings.get(MODULE_ID, colorSettingNames[i])
-    if (parseInt(game.version) < 11)
-      color = parseInt(color.replace("#", "0x"), 16);
+    const color = game.settings.get(MODULE_ID, colorSettingNames[i]);
     cro.colorByActions.push(color);
   }
   for (let i = 5; i < 8; i++) {
-    let color = game.settings.get(MODULE_ID, colorSettingNames[i])
-    if (parseInt(game.version) < 11)
-      color = parseInt(color.replace("#", "0x"), 16);
+    const color = game.settings.get(MODULE_ID, colorSettingNames[i]);
     cro.colors.push(color);
   }
 }
@@ -87,7 +83,7 @@ class ColorPickerApp extends FormApplication {
    */
   getData() {
     const o = {
-      useHelper: parseInt(game.version) < 12,
+      useHelper: false,
       buttons: {
         save: `${MODULE_ID}.color-picker.save`,
         reset: `${MODULE_ID}.color-picker.reset`,

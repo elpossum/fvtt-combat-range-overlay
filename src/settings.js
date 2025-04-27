@@ -568,8 +568,7 @@ export function getMovementAlpha() {
  * @returns {diagonals} - @see {diagonals}
  */
 export function getDiagonals() {
-  const square =
-    parseInt(game.version) > 11 ? !canvas.grid.isHexagonal : !canvas.grid.isHex;
+  const square = !canvas.grid.isHexagonal;
   if (square) return game.settings.get(MODULE_ID, settingNames.DIAGONALS);
   else return diagonals.FIVE;
 }

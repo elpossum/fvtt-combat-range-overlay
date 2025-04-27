@@ -2,7 +2,6 @@
 PIXI,
 game,
 foundry,
-FullCanvasContainer,
 canvas,
 Token
 */
@@ -43,17 +42,13 @@ export class GridlessOverlay extends Overlay {
   initializePersistentVariables() {
     super.initializePersistentVariables();
     this.overlays.distanceOverlay =
-      parseInt(game.version) > 10
-        ? new (class FullCanvasContainer extends FullCanvasObjectMixin(
-            PIXI.Container,
-          ) {})()
-        : new FullCanvasContainer();
+      new (class FullCanvasContainer extends FullCanvasObjectMixin(
+        PIXI.Container,
+      ) {})();
     this.overlays.targetOverlay =
-      parseInt(game.version) > 10
-        ? new (class FullCanvasContainer extends FullCanvasObjectMixin(
-            PIXI.Container,
-          ) {})()
-        : new FullCanvasContainer();
+      new (class FullCanvasContainer extends FullCanvasObjectMixin(
+        PIXI.Container,
+      ) {})();
     this.overlays.distanceOverlay.alpha = Settings.getMovementAlpha();
   }
 

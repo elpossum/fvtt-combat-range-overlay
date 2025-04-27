@@ -2,8 +2,6 @@
 canvas,
 PIXI,
 FullCanvasObjectMixin,
-FullCanvasContainer,
-game,
 Token
 */
 
@@ -52,25 +50,22 @@ export async function setup() {
     static sceneUpdate() {
       cro.terrainGraphics.removeChildren();
       const nLayers = canvas.terrain.constructor.MAX_LAYERS;
-      const blendMode = game.version < 12 ? 2 : 1;
       for (let i = 0; i < nLayers; i += 1) {
         const shader = TerrainLayerShader.create();
         const m = cro.terrainGraphics.addChild(
           new TerrainQuadMesh(canvas.dimensions.sceneRect, shader),
         );
         m.shader.uniforms.uTerrainLayer = i;
-        m.blendMode = blendMode;
+        m.blendMode = 1;
       }
     }
   };
 
   /* Make a canvas sized PIXI Container */
   cro.terrainGraphics =
-    parseInt(game.version) > 10
-      ? new (class FullCanvasContainer extends FullCanvasObjectMixin(
-          PIXI.Container,
-        ) {})()
-      : new FullCanvasContainer();
+    new (class FullCanvasContainer extends FullCanvasObjectMixin(
+      PIXI.Container,
+    ) {})();
   const timeout = setTimeout(() => {
     TerrainHelper.sceneUpdate();
     clearTimeout(timeout);

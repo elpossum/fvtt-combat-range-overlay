@@ -2,8 +2,7 @@
 canvas,
 ui,
 game,
-Token,
-PIXI
+Token
 */
 
 import * as Settings from "./settings.js";
@@ -139,7 +138,7 @@ export function uiNotificationsInfo(msg) {
  * @returns {{x: number, y: number}} - The point coordinates
  */
 export function cubeToPoint({ q, r }) {
-  const grid = canvas.grid.grid
+  const grid = canvas.grid.grid;
   let x;
   let y;
 
@@ -156,23 +155,4 @@ export function cubeToPoint({ q, r }) {
   y *= size;
 
   return { x, y };
-}
-
-/**
- * From Foundry
- * Theoretical token shape at 0,0 origin.
- * @param {Token} token - The token to calculate
- * @returns {PIXI.Polygon|PIXI.Rectangle} - The token shape
- */
-export function calculateTokenShape(token) {
-  // TODO: Use RegularPolygon shapes for use with WeilerAtherton
-  // Hexagon (for width .5 or 1)
-  // Square (for width === height)
-  let shape;
-  if ( canvas.grid.isHex ) {
-    const pts = canvas.grid.grid.getBorderPolygon(token.document.width, token.document.height, 0);
-    if ( pts ) shape = new PIXI.Polygon(pts);
-  }
-
-  return shape || new PIXI.Rectangle(0, 0, token.w, token.h);
 }
