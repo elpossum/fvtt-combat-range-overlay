@@ -1,5 +1,4 @@
 /* globals
-ClockwiseSweepPolygon,
 ClipperLib,
 PIXI,
 foundry,
@@ -31,6 +30,8 @@ game
  */
 
 import * as Settings from "./settings.js";
+
+const ClockwiseSweepPolygon = foundry.canvas.geometry.ClockwiseSweepPolygon;
 
 /**
  * @typedef {object} Point
