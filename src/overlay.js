@@ -1178,10 +1178,10 @@ function calculateTilesInRangeSquare(rangeInTiles, targetToken) {
   const targetGridX = targetTile.gx;
   const targetGridY = targetTile.gy;
   const targetGridHeight = Math.floor(
-    targetToken.hitArea.height / canvasGridSize(),
+    targetToken.hitArea.getBounds().height / canvasGridSize(),
   );
   const targetGridWidth = Math.floor(
-    targetToken.hitArea.width / canvasGridSize(),
+    targetToken.hitArea.getBounds().width / canvasGridSize(),
   );
 
   for (const rangeInTilesElement of rangeInTiles) {
@@ -1287,7 +1287,7 @@ function calculateTilesInRangeHex(rangeInTiles, targetToken) {
       const testTilePoint = grid.cubeToPoint
         ? grid.cubeToPoint(testTile)
         : cubeToPoint(testTile);
-      const hitArea = targetToken.hitArea;
+      const hitArea = targetToken.hitArea.getBounds();
       const points = [];
       // Translate to target's postion
       if (hitArea.points) {
