@@ -183,10 +183,10 @@ export class TokenInfo {
             );
             const baseReach = this.token.actor.system.attributes.reach.base;
             let range = [];
-            for (const [index, weapon] of weapons.entries()) {
+            for (const [, weapon] of weapons.entries()) {
               let weaponObject = {
                 range: DEFAULT_WEAPON_RANGE,
-                color: colors[index],
+                color: undefined,
                 weapon: weapon.id,
               };
               const hasReach = weapon.system.traits.value.includes("reach");
@@ -197,7 +197,7 @@ export class TokenInfo {
                 range.push(weaponObject);
                 range.push({
                   range: weapon.rangeIncrement || weapon.system.range,
-                  color: colors[index],
+                  color: undefined,
                   weapon: weapon.id,
                 });
               } else if (weapon.isRanged || weapon.isThrown) {
@@ -211,9 +211,13 @@ export class TokenInfo {
                 range.push(weaponObject);
               }
             }
-            return range.sort((a, b) => {
+            range.sort((a, b) => {
               return a.range - b.range;
             });
+            range.forEach((weapon, index) => {
+              weapon.color = colors[index % colors.length];
+            });
+            return range;
           }
           case "dnd5e": {
             const weapons = this.token.actor.items.filter(
@@ -221,10 +225,10 @@ export class TokenInfo {
             );
             const baseReach = 5;
             let range = [];
-            for (const [index, weapon] of weapons.entries()) {
+            for (const [, weapon] of weapons.entries()) {
               let weaponObject = {
                 range: DEFAULT_WEAPON_RANGE,
-                color: colors[index],
+                color: undefined,
                 weapon: weapon.id,
               };
               const hasReach = weapon.system.properties.rch;
@@ -238,9 +242,13 @@ export class TokenInfo {
                 range.push(weaponObject);
               }
             }
-            return range.sort((a, b) => {
+            range.sort((a, b) => {
               return a.range - b.range;
             });
+            range.forEach((weapon, index) => {
+              weapon.color = colors[index % colors.length];
+            });
+            return range;
           }
           case "D35E": {
             const weapons = this.token.actor.items.filter(
@@ -248,10 +256,10 @@ export class TokenInfo {
             );
             const baseReach = 5;
             let range = [];
-            for (const [index, weapon] of weapons.entries()) {
+            for (const [, weapon] of weapons.entries()) {
               let weaponObject = {
                 range: DEFAULT_WEAPON_RANGE,
-                color: colors[index],
+                color: undefined,
                 weapon: weapon.id,
               };
               const hasReach = weapon.system.properties.rch;
@@ -265,9 +273,13 @@ export class TokenInfo {
                 range.push(weaponObject);
               }
             }
-            return range.sort((a, b) => {
+            range.sort((a, b) => {
               return a.range - b.range;
             });
+            range.forEach((weapon, index) => {
+              weapon.color = colors[index % colors.length];
+            });
+            return range;
           }
           case "pf1": {
             const weapons = this.token.actor.items.filter(
@@ -275,10 +287,10 @@ export class TokenInfo {
             );
             const baseReach = 5;
             let range = [];
-            for (const [index, weapon] of weapons.entries()) {
+            for (const [, weapon] of weapons.entries()) {
               let weaponObject = {
                 range: DEFAULT_WEAPON_RANGE,
-                color: colors[index],
+                color: undefined,
                 weapon: weapon.id,
               };
               const hasReach = weapon.system.properties.rch;
@@ -297,19 +309,23 @@ export class TokenInfo {
                 range.push(weaponObject);
               }
             }
-            return range.sort((a, b) => {
+            range.sort((a, b) => {
               return a.range - b.range;
             });
+            range.forEach((weapon, index) => {
+              weapon.color = colors[index % colors.length];
+            });
+            return range;
           }
           case "wfrp4e": {
             const weapons = this.token.actor.itemCategories.weapon.filter(
               (i) => i.system.equipped == true,
             );
             let range = [];
-            for (const [index, weapon] of weapons.entries()) {
+            for (const [, weapon] of weapons.entries()) {
               let weaponObject = {
                 range: DEFAULT_WEAPON_RANGE,
-                color: colors[index],
+                color: undefined,
                 weapon: weapon.id,
               };
               if (weapon.system.range.value) {
@@ -319,19 +335,23 @@ export class TokenInfo {
                 range.push(weaponObject);
               }
             }
-            return range.sort((a, b) => {
+            range.sort((a, b) => {
               return a.range - b.range;
             });
+            range.forEach((weapon, index) => {
+              weapon.color = colors[index % colors.length];
+            });
+            return range;
           }
           case "swade": {
             const weapons = this.token.actor.items.filter(
               (i) => i.type == "weapon" && i.system.equipStatus > 1,
             );
             let range = [];
-            for (const [index, weapon] of weapons.entries()) {
+            for (const [, weapon] of weapons.entries()) {
               let weaponObject = {
                 range: DEFAULT_WEAPON_RANGE,
-                color: colors[index],
+                color: undefined,
                 weapon: weapon.id,
               };
               let reach;
@@ -352,9 +372,13 @@ export class TokenInfo {
                 range.push(weaponObject);
               }
             }
-            return range.sort((a, b) => {
+            range.sort((a, b) => {
               return a.range - b.range;
             });
+            range.forEach((weapon, index) => {
+              weapon.color = colors[index % colors.length];
+            });
+            return range;
           }
           default: {
             const buttons = Object.fromEntries(

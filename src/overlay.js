@@ -989,6 +989,8 @@ export class Overlay {
     this.overlays.distanceTexts = [];
     this.overlays.pathOverlay.lineStyle(pathLineWidth, pathLineColor);
 
+    const tilesToDraw = [];
+
     for (const tile of movementCostMap.values()) {
       let drawTile = false;
       if (!showOnlyTargetPath || idealTileMap.has(tile.key)) {
@@ -1001,7 +1003,25 @@ export class Overlay {
           }
         }
       }
-      if (drawTile) {
+      if (drawTile) tilesToDraw.push(tile);
+    }
+
+    // Create a map so the tiles are drawn in the correct order (shortest range last)
+    const orderedTilesToDraw = new Map([["path", []]]);
+    cro.colors.toReversed().forEach((color) => {
+      orderedTilesToDraw.set(color, []);
+    });
+
+    // Add the tiles to the map by their color
+    for (const tile of tilesToDraw) {
+      if (!idealTileMap.has(tile.key))
+        orderedTilesToDraw.get("path").push(tile);
+      else orderedTilesToDraw.get(idealTileMap.get(tile.key).color).push(tile);
+    }
+
+    // Draw the tiles in the correct order
+    orderedTilesToDraw.forEach((tiles, key) => {
+      tiles.forEach((tile) => {
         /* Currently unimplemented as settings*/
         if (cro.showNumericMovementCost) {
           const style = Object.assign({}, movementCostStyle);
@@ -1042,13 +1062,9 @@ export class Overlay {
                 colorByActions.length - 1,
               );
         const color = colorByActions[colorIndex];
-        if (idealTileMap.has(tile.key)) {
-          this.overlays.distanceOverlay.lineStyle(
-            highlightLineWidth,
-            idealTileMap.get(tile.key).color,
-          );
-        } else {
-          this.overlays.distanceOverlay.lineStyle(0, 0);
+        if (key === "path") this.overlays.distanceOverlay.lineStyle(0, 0);
+        else {
+          this.overlays.distanceOverlay.lineStyle(highlightLineWidth, key);
         }
         const poly = new PIXI.Polygon(tile.vertices);
         const intersect = los?.intersectPolygon(poly);
@@ -1065,8 +1081,8 @@ export class Overlay {
           this.overlays.distanceOverlay.drawPolygon(poly);
           this.overlays.distanceOverlay.endFill();
         }
-      }
-    }
+      });
+    });
 
     canvas.drawings.addChild(this.overlays.distanceOverlay);
     canvas.drawings.addChild(this.overlays.pathOverlay);
@@ -1126,7 +1142,13 @@ function buildRangeMap(targetMap) {
       const tileKey = tile.key;
       let count = rangeMap.get(tileKey)?.count ?? 0;
       count++;
-      rangeMap.set(tileKey, { count: count, color: tile.color });
+      const currentColor = rangeMap.get(tileKey)?.color;
+      const color =
+        currentColor &&
+        cro.colors.indexOf(currentColor) > cro.colors.indexOf(tile.color)
+          ? currentColor
+          : tile.color;
+      rangeMap.set(tileKey, { count: count, color: color });
     }
   }
   return rangeMap;
