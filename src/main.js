@@ -18,6 +18,7 @@ import "./controls.js";
 import "./tokenInfo.js";
 import "./terrainHelperV2.js";
 import "./geometryLibShim.js";
+import "./hmr.js";
 
 export let cro;
 

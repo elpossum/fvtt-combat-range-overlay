@@ -1,5 +1,6 @@
 import { viteStaticCopy } from "vite-plugin-static-copy";
 import { defineConfig, transformWithEsbuild } from "vite";
+import fs from "fs-extra";
 
 const config = defineConfig(({ command }) => {
   const plugins = [];
@@ -43,28 +44,30 @@ const config = defineConfig(({ command }) => {
         {
           name: "handlebars-json-hmr",
           apply: "serve",
-          handleHotUpdate({file, server}) {
+          handleHotUpdate({ file, server }) {
             if (file.startsWith("dist")) return;
 
             if (file.includes("lang/") && file.endsWith(".json")) {
-              const basePath = file.slice(
-                file.indexOf("lang/"),
-              );
-              server.hot.send({
-                type: "custom",
-                event: "lang-update",
-                data: { path: `modules/combat-range-overlay/${basePath}` },
+              const basePath = file.slice(file.indexOf("lang/"));
+              console.debug(`Updating language file: ${basePath}`);
+              fs.promises.copyFile(file, `dist/${basePath}`).then(() => {
+                server.hot.send({
+                  type: "custom",
+                  event: "lang-update",
+                  data: { path: `modules/combat-range-overlay/${basePath}` },
+                });
               });
             }
 
             if (file.includes("templates/") && file.endsWith(".hbs")) {
-              const basePath = file.slice(
-                file.indexOf("templates/"),
-              );
-              server.hot.send({
-                type: "custom",
-                event: "template-update",
-                data: { path: `modules/combat-range-overlay/${basePath}` },
+              const basePath = file.slice(file.indexOf("templates/"));
+              console.debug(`Updating template file: ${basePath}`);
+              fs.promises.copyFile(file, `dist/${basePath}`).then(() => {
+                server.hot.send({
+                  type: "custom",
+                  event: "template-update",
+                  data: { path: `modules/combat-range-overlay/${basePath}` },
+                });
               });
             }
           },
