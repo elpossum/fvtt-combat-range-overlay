@@ -1,10 +1,3 @@
-/* globals
-ClipperLib,
-PIXI,
-foundry,
-Edge
-*/
-
 /**
  * Derived from https://github.com/caewok/fvtt-walled-templates
  * @license MIT

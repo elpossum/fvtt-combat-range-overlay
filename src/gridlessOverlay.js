@@ -1,11 +1,3 @@
-/* globals
-PIXI,
-game,
-foundry,
-canvas,
-Token
-*/
-
 import {
   canvasGridSize,
   getCurrentToken,

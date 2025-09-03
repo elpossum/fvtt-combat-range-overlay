@@ -1,8 +1,3 @@
-/* globals
-Hooks,
-game
-*/
-
 import { mouse } from "./mouse.js";
 import { MODULE_ID } from "./constants.js";
 import { CombatRangeOverlay } from "./croClass.js";
@@ -18,6 +13,7 @@ import "./controls.js";
 import "./tokenInfo.js";
 import "./terrainHelperV2.js";
 import "./geometryLibShim.js";
+import "./hmr.js";
 
 export let cro;
 

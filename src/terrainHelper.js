@@ -1,10 +1,3 @@
-/* globals
-canvas,
-PIXI,
-FullCanvasObjectMixin,
-Token
-*/
-
 import { TokenInfo } from "./tokenInfo.js";
 import { cro } from "./main.js";
 import { TerrainLayerShader } from "./terrainMapper/glsl/TerrainLayerShader.js";

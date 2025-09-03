@@ -1,14 +1,3 @@
-/* globals
-canvas,
-foundry,
-game,
-Hooks,
-Dialog,
-Token,
-Item,
-ActiveEffect
-*/
-
 import { FLAG_NAMES, MODULE_ID } from "./constants.js";
 import {
   canvasTokensGet,

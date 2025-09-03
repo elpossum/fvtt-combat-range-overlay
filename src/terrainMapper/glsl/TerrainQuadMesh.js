@@ -1,7 +1,3 @@
-/* globals
-PIXI
-*/
-
 /**
  * Mesh that takes a rectangular frame instead of a geometry.
  * @param {PIXI.Rectangle} rect
@@ -31,23 +27,33 @@ export class TerrainQuadMesh extends PIXI.Mesh {
   static aVertexPosition(rect) {
     const { left, right, top, bottom } = rect;
     return [
-      left, top,      // TL
-      right, top,   // TR
-      right, bottom, // BR
-      left, bottom  // BL
+      left,
+      top, // TL
+      right,
+      top, // TR
+      right,
+      bottom, // BR
+      left,
+      bottom, // BL
     ];
   }
 
   static aTextureCoord = [
-    0, 0, // TL
-    1, 0, // TR
-    1, 1, // BR
-    0, 1 // BL
+    0,
+    0, // TL
+    1,
+    0, // TR
+    1,
+    1, // BR
+    0,
+    1, // BL
   ];
 
   get aVertexPosition() {
     return this.constructor.aVertexPosition(this.rect);
   }
 
-  updateGeometry() { return; }
+  updateGeometry() {
+    return;
+  }
 }

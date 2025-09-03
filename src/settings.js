@@ -1,9 +1,3 @@
-/* globals
-Hooks,
-game,
-canvas
-*/
-
 import {
   DEFAULT_WEAPON_RANGES,
   MODULE_ID,

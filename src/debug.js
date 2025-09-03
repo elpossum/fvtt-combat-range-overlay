@@ -1,8 +1,3 @@
-/* globals
-Hooks,
-game
-*/
-
 import { MODULE_ID } from "./constants.js";
 
 /* Register module with Dev Mode */

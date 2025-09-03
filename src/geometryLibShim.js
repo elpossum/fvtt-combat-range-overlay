@@ -1,9 +1,3 @@
-/* globals
-CONFIG,
-Hooks,
-PIXI
-*/
-
 /**
  * @typedef {object} Point - A point-like object
  * @property {number} x - The x coord

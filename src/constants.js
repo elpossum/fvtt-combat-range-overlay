@@ -1,7 +1,3 @@
-/* globals
-CONST
-*/
-
 /**
  * The module id
  * @type {string}
