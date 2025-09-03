@@ -10,8 +10,7 @@ export class TerrainLayerShader extends AbstractTerrainShader {
    * Vertex shader constructs a quad and calculates the canvas coordinate and texture coordinate varyings.
    * @type {string}
    */
-  static vertexShader =
-`
+  static vertexShader = `
 #version 300 es
 precision ${PIXI.settings.PRECISION_VERTEX} float;
 
@@ -28,8 +27,7 @@ void main() {
   gl_Position = vec4((projectionMatrix * translationMatrix * vec3(aVertexPosition, 1.0)).xy, 0.0, 1.0);
 }`;
 
-  static fragmentShader =
-`#version 300 es
+  static fragmentShader = `#version 300 es
 precision ${PIXI.settings.PRECISION_FRAGMENT} float;
 precision ${PIXI.settings.PRECISION_FRAGMENT} usampler2D;
 
@@ -133,7 +131,7 @@ void main() {
     // Unused: uTerrainColors: new Uint8Array(MAX_TERRAINS * 4).fill(0)
     uTerrainColors: new Array(MAX_TERRAINS * 4).fill(0),
     uTerrainIcon: 0,
-    uTerrainLayer: 0
+    uTerrainLayer: 0,
   };
 
   static create(defaultUniforms = {}) {
@@ -152,8 +150,8 @@ void main() {
    */
   updateTerrainIcons() {
     // TODO: Handle multiple icons.
-    for ( const terrain of canvas.terrain.sceneMap.values()) {
-      if ( !terrain.img ) continue;
+    for (const terrain of canvas.terrain.sceneMap.values()) {
+      if (!terrain.img) continue;
       this.uniforms.uTerrainIcon = PIXI.Texture.from(terrain.img);
       break;
     }
@@ -165,7 +163,7 @@ void main() {
   updateAllTerrainColors() {
     const colors = this.uniforms.uTerrainColors;
     colors.fill(0);
-    canvas.terrain.sceneMap.forEach(t => this.updateTerrainColor(t));
+    canvas.terrain.sceneMap.forEach((t) => this.updateTerrainColor(t));
   }
 
   /**
@@ -176,7 +174,7 @@ void main() {
     const colors = this.uniforms.uTerrainColors;
     const i = t.pixelValue;
     const idx = i * 4;
-    const rgba = [...t.color.rgb, 1]
+    const rgba = [...t.color.rgb, 1];
     colors.splice(idx, 4, ...rgba);
   }
 
@@ -184,7 +182,9 @@ void main() {
    * Update the terrain layer currently represented in the scene.
    */
   updateTerrainLayer() {
-    this.uniforms.uTerrainLayer = canvas.terrain?.toolbar?.currentLayer
-      ?? game.modules.get("terrainmapper", "current-layer") ?? 0;
+    this.uniforms.uTerrainLayer =
+      canvas.terrain?.toolbar?.currentLayer ??
+      game.modules.get("terrainmapper", "current-layer") ??
+      0;
   }
 }

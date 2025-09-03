@@ -233,7 +233,9 @@ function extendCornerFromWalls(cornerKey, edgeSet, origin) {
     cornerPt = new PIXI.Point(cornerPt.x, cornerPt.y);
     otherPt = new PIXI.Point(otherPt.x, otherPt.y);
     const dist = PIXI.Point.distanceBetween(cornerPt, otherPt);
-    return parseInt(game.version) > 10 ? cornerPt : otherPt.towardsPoint(cornerPt, dist + CORNER_SPACER);
+    return parseInt(game.version) > 10
+      ? cornerPt
+      : otherPt.towardsPoint(cornerPt, dist + CORNER_SPACER);
   }
 
   // Segment with the smallest (incl. negative) orientation is ccw to the point

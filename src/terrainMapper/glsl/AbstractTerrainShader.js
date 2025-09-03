@@ -41,7 +41,11 @@ export class AbstractTerrainShader extends PIXI.Shader {
    */
   static create(defaultUniforms) {
     const program = PIXI.Program.from(this.vertexShader, this.fragmentShader);
-    const uniforms = foundry.utils.mergeObject(this.defaultUniforms, defaultUniforms, {inplace: false, insertKeys: false});
+    const uniforms = foundry.utils.mergeObject(
+      this.defaultUniforms,
+      defaultUniforms,
+      { inplace: false, insertKeys: false },
+    );
     return new this(program, uniforms);
   }
 

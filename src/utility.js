@@ -131,7 +131,7 @@ export function uiNotificationsInfo(msg) {
  * @returns {{x: number, y: number}} - The point coordinates
  */
 export function cubeToPoint({ q, r }) {
-  const grid = canvas.grid.grid
+  const grid = canvas.grid.grid;
   let x;
   let y;
 
@@ -161,9 +161,13 @@ export function calculateTokenShape(token) {
   // Hexagon (for width .5 or 1)
   // Square (for width === height)
   let shape;
-  if ( canvas.grid.isHex ) {
-    const pts = canvas.grid.grid.getBorderPolygon(token.document.width, token.document.height, 0);
-    if ( pts ) shape = new PIXI.Polygon(pts);
+  if (canvas.grid.isHex) {
+    const pts = canvas.grid.grid.getBorderPolygon(
+      token.document.width,
+      token.document.height,
+      0,
+    );
+    if (pts) shape = new PIXI.Polygon(pts);
   }
 
   return shape || new PIXI.Rectangle(0, 0, token.w, token.h);

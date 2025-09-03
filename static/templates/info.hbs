@@ -18,7 +18,7 @@
       {{#with (concat base "legend.") as |legend|}}
         <h2>{{localize (concat legend "heading")}}</h2>
         <img
-          alt="{{localize (concat legend "alt")}}"
+          alt="{{localize (concat legend 'alt')}}"
           src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/ee2e8018-4bb2-44b8-b9f9-025c44d68342"
           title={{localize (concat legend "title")}}
         /><br />
@@ -36,7 +36,7 @@
       {{/with}}
       {{#with (concat base "targeting.") as |target|}}
         <img
-          alt="{{localize (concat target "alt")}}"
+          alt="{{localize (concat target 'alt')}}"
           src="https://github.com/elpossum/fvtt-combat-range-overlay/assets/136785378/900a2659-5eca-4ae1-9aa6-3bd8c1d91251"
           title={{localize (concat target "title")}}
         /><br />

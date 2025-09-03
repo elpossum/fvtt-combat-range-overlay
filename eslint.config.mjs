@@ -37,7 +37,7 @@ export default defineConfig([
         Item: "readonly",
         ActiveEffect: "readonly",
         AbstractBaseShader: "readonly",
-        Terrain: "readonly"
+        Terrain: "readonly",
       },
     },
   },

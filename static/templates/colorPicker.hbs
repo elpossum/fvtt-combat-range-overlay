@@ -3,13 +3,9 @@
     <div class="form-group">
       <label for="{{@key}}">{{localize setting.name}}</label>
       <div class="form-fields">
-        {{!-- colorPicker helper deprecated in v12 in favour of custom html element --}}
+        {{! colorPicker helper deprecated in v12 in favour of custom html element }}
         {{#if @root.useHelper}}
-          {{colorPicker
-            name=@key
-            value=setting.value
-            default=setting.default
-          }}
+          {{colorPicker name=@key value=setting.value default=setting.default}}
         {{else}}
           <color-picker
             name="{{@key}}"

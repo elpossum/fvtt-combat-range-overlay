@@ -38,13 +38,13 @@ function updateSettings() {
   cro.colorByActions = [];
   cro.colors = [];
   for (let i = 0; i < 5; i++) {
-    let color = game.settings.get(MODULE_ID, colorSettingNames[i])
+    let color = game.settings.get(MODULE_ID, colorSettingNames[i]);
     if (parseInt(game.version) < 11)
       color = parseInt(color.replace("#", "0x"), 16);
     cro.colorByActions.push(color);
   }
   for (let i = 5; i < 8; i++) {
-    let color = game.settings.get(MODULE_ID, colorSettingNames[i])
+    let color = game.settings.get(MODULE_ID, colorSettingNames[i]);
     if (parseInt(game.version) < 11)
       color = parseInt(color.replace("#", "0x"), 16);
     cro.colors.push(color);
