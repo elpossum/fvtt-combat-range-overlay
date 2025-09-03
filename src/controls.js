@@ -1,9 +1,3 @@
-/* globals
-game,
-Hooks,
-Dialog
-*/
-
 import {
   getCurrentToken,
   getWeaponRanges,

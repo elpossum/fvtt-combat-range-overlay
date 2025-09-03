@@ -1,9 +1,3 @@
-/* globals
-game,
-FormApplication,
-foundry
-*/
-
 import { MODULE_ID } from "./constants.js";
 
 export default class ModuleInfoApp extends FormApplication {

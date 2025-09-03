@@ -1,12 +1,3 @@
-/* globals
-CONFIG,
-Hooks,
-PIXI,
-game,
-ClipperLib,
-ClipperPoint
-*/
-
 /**
  * @typedef {object} Point - A point-like object
  * @property {number} x - The x coord

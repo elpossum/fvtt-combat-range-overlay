@@ -1,11 +1,3 @@
-/* globals
-canvas,
-ui,
-game,
-Token,
-PIXI
-*/
-
 import * as Settings from "./settings.js";
 import { DEFAULT_WEAPON_RANGES } from "./constants.js";
 

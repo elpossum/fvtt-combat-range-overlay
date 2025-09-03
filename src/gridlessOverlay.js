@@ -1,12 +1,3 @@
-/* globals
-PIXI,
-game,
-FullCanvasObjectMixin,
-FullCanvasContainer,
-canvas,
-Token
-*/
-
 import {
   canvasGridSize,
   getCurrentToken,

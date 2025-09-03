@@ -1,12 +1,3 @@
-/* globals
-game,
-Hooks,
-foundry,
-ui,
-canvas,
-CONST
-*/
-
 import { colorSettingNames } from "./colorPicker.js";
 import { MODULE_ID, SOCKET_TYPES } from "./constants.js";
 import { GridlessOverlay } from "./gridlessOverlay.js";

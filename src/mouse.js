@@ -1,8 +1,3 @@
-/* globals
-Hooks,
-libWrapper
-*/
-
 import { MODULE_ID } from "./constants.js";
 import { debugLog } from "./debug.js";
 

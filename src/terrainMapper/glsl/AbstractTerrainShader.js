@@ -1,9 +1,3 @@
-/* globals
-foundry,
-PIXI,
-AbstractBaseShader
-*/
-
 export class AbstractTerrainShader extends PIXI.Shader {
   constructor(program, uniforms) {
     super(program, foundry.utils.deepClone(uniforms));

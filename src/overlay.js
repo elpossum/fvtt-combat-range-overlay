@@ -1,17 +1,3 @@
-/* globals
-Hooks,
-canvas,
-CONFIG,
-PIXI,
-Ray,
-CONST,
-game,
-Token,
-MeasuredTemplateDocument,
-DrawingDocument,
-HexagonalGrid
-*/
-
 import {
   calculateGridDistance,
   calculateTokenShape,

@@ -1,14 +1,3 @@
-/* globals
-Hooks,
-game,
-foundry,
-CONFIG,
-canvas,
-Region,
-Token,
-NestedObject
-*/
-
 import { TokenInfo } from "./tokenInfo.js";
 import { ENTRY_EVENTS, ENTRY_EVENTS_COMBAT } from "./constants.js";
 

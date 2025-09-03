@@ -1,11 +1,3 @@
-/* globals
-canvas,
-foundry,
-game,
-PIXI,
-Token
-*/
-
 import { MAX_DIST, FUDGE } from "./constants.js";
 import { TokenInfo } from "./tokenInfo.js";
 import { TerrainHelper } from "./terrainHelper.js";

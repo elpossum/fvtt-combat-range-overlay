@@ -1,10 +1,3 @@
-/* globals
-canvas,
-game,
-PIXI,
-Terrain
-*/
-
 import { AbstractTerrainShader } from "./AbstractTerrainShader.js";
 
 const MAX_TERRAINS = 16; // Including 0 as no terrain.

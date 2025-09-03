@@ -1,7 +1,3 @@
-/* globals
-PIXI
-*/
-
 /**
  * Mesh that takes a rectangular frame instead of a geometry.
  * @param {PIXI.Rectangle} rect

@@ -1,12 +1,3 @@
-/* globals
-ClockwiseSweepPolygon,
-ClipperLib,
-PIXI,
-foundry,
-Edge,
-game
-*/
-
 /**
  * Derived from https://github.com/caewok/fvtt-walled-templates
  * @license MIT
