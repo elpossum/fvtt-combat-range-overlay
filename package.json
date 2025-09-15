@@ -19,7 +19,7 @@
     "eslint-config-prettier": "^9.1.0",
     "eslint-plugin-jsdoc": "^48.5.2",
     "fs-extra": "^11.3.1",
-    "globals": "^15.8.0",
+    "globals": "^16.4.0",
     "jsdoc": "^4.0.3",
     "prettier": "^3.6.2",
     "vite": "^6.3.2",
